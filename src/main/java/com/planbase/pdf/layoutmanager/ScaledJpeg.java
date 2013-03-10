@@ -18,7 +18,7 @@ import java.awt.image.BufferedImage;
 
 /**
  Represents a Jpeg image and the document units it should be scaled to.  When a ScaledJpeg is added
- to a PdfPageMgr, its underlying bufferedImage is compared to the images already embedded in that
+ to a PdfLayoutMgr, its underlying bufferedImage is compared to the images already embedded in that
  PDF file.  If an equivalent bufferedImage object is found, the underlying image is not added to
  the document twice.  Only the additional position and scaling of that image is added.  This
  significantly decreases the file size of the resulting PDF when images are reused within that
@@ -26,7 +26,7 @@ import java.awt.image.BufferedImage;
  */
 public class ScaledJpeg {
     public static final float ASSUMED_IMAGE_DPI = 300f;
-    public static final float IMAGE_SCALE = 1f / ASSUMED_IMAGE_DPI * PdfPageMgr.DOC_UNITS_PER_INCH;
+    public static final float IMAGE_SCALE = 1f / ASSUMED_IMAGE_DPI * PdfLayoutMgr.DOC_UNITS_PER_INCH;
 
     private final BufferedImage bufferedImage;
     private final float width;

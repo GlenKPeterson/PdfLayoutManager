@@ -82,7 +82,7 @@ public class Cell {
      @param mgr the page manager this Cell belongs to.  Probably should be set at creation
      time.
      */
-    float processRows(final float x, final float origY, boolean allPages, PdfPageMgr mgr) {
+    float processRows(final float x, final float origY, boolean allPages, PdfLayoutMgr mgr) {
         // Note: Always used as: y = origY - TextStyle.BREADCRUMB.height,
         if ( (rows == null) || (rows.length < 1) ) {
             return 0;
@@ -97,7 +97,7 @@ public class Cell {
                 continue;
             }
             if (rowObj instanceof String) {
-                String row = PdfPageMgr.convertJavaStringToWinAnsi((String) rowObj);
+                String row = PdfLayoutMgr.convertJavaStringToWinAnsi((String) rowObj);
 
                 String text = substrNoLeadingWhitespace(row, 0);
                 int charWidthGuess = avgCharsForWidth;
@@ -164,7 +164,7 @@ public class Cell {
                     if (allPages) {
                         mgr.borderStyledText(xVal, y, substr, textStyle);
                     } else {
-                        PdfPageMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+                        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
                         pby.pb.drawStyledText(xVal, pby.y, substr, textStyle);
                     }
                     y -= textStyle.descent();
@@ -185,7 +185,7 @@ public class Cell {
                 // use bottom of image for page-breaking calculation.
                 y -= jpg.height();
                 // Calculate what page image should start on
-                PdfPageMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+                PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
                 // draw image based on baseline and decrement y appropriately for image.
                 pby.pb.drawJpeg(xVal, pby.y, jpg, mgr);
             } else {

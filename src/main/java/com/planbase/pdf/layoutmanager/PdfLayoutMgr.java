@@ -42,9 +42,9 @@ import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
  through.  Because this class buffers and writes to an underlying stream, it is mutable, has side
  effects, and is NOT thread-safe!
  */
-public class PdfPageMgr {
+public class PdfLayoutMgr {
 
-    // private Logger logger = Logger.getLogger(PdfPageMgr.class);
+    // private Logger logger = Logger.getLogger(PdfLayoutMgr.class);
 
 //        logger.info("Ascent: " + PDType1Font.HELVETICA.getFontDescriptor().getAscent());
 //        logger.info("StemH: " + PDType1Font.HELVETICA.getFontDescriptor().getStemH());
@@ -99,7 +99,7 @@ public class PdfPageMgr {
     // hash map keeps track of the few underlying images, even as intances of DrawJpeg
     // represent all the places where these images are used.
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
-    // document!  Thus, a private final field on the PdfPageMgr instead of DrawJpeg, and DrawJpeg
+    // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawJpeg, and DrawJpeg
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDJpeg> jpegMap = new HashMap<BufferedImage,PDJpeg>();
 
@@ -176,7 +176,7 @@ public class PdfPageMgr {
         // private Log logger = LogFactory.getLog(DrawJpeg.class);
 
         private DrawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                         final PdfPageMgr mgr,
+                         final PdfLayoutMgr mgr,
                          final long ord, final float z) {
             super(ord, z);
             x = xVal; y = yVal;
@@ -195,7 +195,7 @@ public class PdfPageMgr {
             scaledJpeg = sj;
         }
         public static DrawJpeg valueOf(final float xVal, final float yVal, final ScaledJpeg sj,
-                                       final PdfPageMgr mgr,
+                                       final PdfLayoutMgr mgr,
                                        final long ord, final float z) {
             return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
         }
@@ -225,12 +225,12 @@ public class PdfPageMgr {
 //        }
 //
 //        public void drawJpeg(final float xVal, final float yVal, final BufferedImage bi,
-//                             final PdfPageMgr mgr, final float z) {
+//                             final PdfLayoutMgr mgr, final float z) {
 //            items.add(DrawJpeg.valueOf(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
         public void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                             final PdfPageMgr mgr) {
+                             final PdfLayoutMgr mgr) {
             items.add(DrawJpeg.valueOf(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
@@ -275,29 +275,29 @@ public class PdfPageMgr {
 
     private final PDColorSpace colorSpace;
 
-    private PdfPageMgr(PDColorSpace cs) throws IOException {
+    private PdfLayoutMgr(PDColorSpace cs) throws IOException {
         doc = new PDDocument();
         colorSpace = cs;
     }
 
     /**
-     Returns a new PdfPageMgr with the given color space.
+     Returns a new PdfLayoutMgr with the given color space.
      @param cs the color-space.
-     @return a new PdfPageMgr
+     @return a new PdfLayoutMgr
      @throws IOException
      */
-    public static PdfPageMgr valueOf(PDColorSpace cs) throws IOException {
-        return new PdfPageMgr(cs);
+    public static PdfLayoutMgr valueOf(PDColorSpace cs) throws IOException {
+        return new PdfLayoutMgr(cs);
     }
 
     /**
-     Creates a new PdfPageMgr with the PDDeviceRGB color space.
+     Creates a new PdfLayoutMgr with the PDDeviceRGB color space.
      @return a new Page Manager with an RGB color space
      @throws IOException
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static PdfPageMgr newRgbPageMgr() throws IOException {
-        return new PdfPageMgr(PDDeviceRGB.INSTANCE);
+    public static PdfLayoutMgr newRgbPageMgr() throws IOException {
+        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE);
     }
 
     private void commitBorderItems(PDPageContentStream stream) throws IOException {
@@ -356,7 +356,7 @@ public class PdfPageMgr {
 
     // TODO: Add feature for different paper size or orientation for each group of logical pages.
     /**
-     Tells this PdfPageMgr that you want to start a new logical page (which may be broken across
+     Tells this PdfLayoutMgr that you want to start a new logical page (which may be broken across
      two or more physical pages).
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
@@ -368,7 +368,7 @@ public class PdfPageMgr {
     /**
      Call this when you are through with your current set of pages to commit all pending text and
      drawing operations.  This is the only method that throws an IOException because the purpose of
-     PdfPageMgr is to buffer all operations until a page is complete so that it can safely be
+     PdfLayoutMgr is to buffer all operations until a page is complete so that it can safely be
      written to the underlying stream.  This method turns the potential pages into real output.
      Call when you need a page break, or your document is done and you need to write it out.
 
@@ -413,9 +413,9 @@ public class PdfPageMgr {
         // First, the obvious...
         if (this == other) { return true; }
         if (other == null) { return false; }
-        if (!(other instanceof PdfPageMgr)) { return false; }
+        if (!(other instanceof PdfLayoutMgr)) { return false; }
         // Details...
-        final PdfPageMgr that = (PdfPageMgr) other;
+        final PdfLayoutMgr that = (PdfLayoutMgr) other;
         return this.doc.equals(that.doc) && (this.pages.equals(that.pages));
     }
 
@@ -979,7 +979,7 @@ public class PdfPageMgr {
      alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and
      'Shch' for Щ.</p>
      
-     <p>The PdfPageMgr calls this method internally whenever it renders text (transliteration has
+     <p>The PdfLayoutMgr calls this method internally whenever it renders text (transliteration has
      to happen before line breaking), but is available externally in case you wish to use it
      directly with PDFBox.</p>
 
