@@ -15,7 +15,7 @@
 package com.planbase.pdf.layoutmanager;
 
 /**
- Represents padding for PDF Page Items.=
+ Represents minimum spacing of the top, right, bottom, and left sides of PDF Page Items.
  */
 public class Padding {
 

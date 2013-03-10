@@ -17,11 +17,12 @@ package com.planbase.pdf.layoutmanager;
 import java.awt.Color;
 
 /**
- Represents the style of a cell including: horizontal alignment, padding, background color, and
- border style.  Immutable.
+ The style of a cell including: horizontal alignment, padding, background color, and border style.
+ Immutable.
  */
 public class CellStyle {
 
+    /** Horizontal allignment options for cell contents */
     public enum HorizAlign { LEFT, CENTER, RIGHT; }
 
     private final HorizAlign align;

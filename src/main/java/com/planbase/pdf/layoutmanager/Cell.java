@@ -15,9 +15,8 @@
 package com.planbase.pdf.layoutmanager;
 
 /**
- Represents both a table cell or any block that can have a borderStyle, background, text, or images.
- Horizontal width is set manually, but vertical height is calculated based on how the content is
- rendered.
+ A styled table cell or layout block with a pre-set horizontal width.  Vertical height is calculated 
+ based on how the content is rendered with regards to line-breaks and page-breaks.
  */
 public class Cell {
 

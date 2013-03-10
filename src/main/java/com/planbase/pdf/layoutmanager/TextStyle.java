@@ -21,7 +21,7 @@ import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 /**
- Immutable text-style object.  Specifies font, font-size, color, and padding.
+Specifies font, font-size, color, and padding.  Immutable.
  */
 public class TextStyle {
 

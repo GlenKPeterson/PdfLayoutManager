@@ -17,7 +17,8 @@ package com.planbase.pdf.layoutmanager;
 import java.awt.Color;
 
 /**
- Represents a solid border.  For an equal border on all sides, use:
+ Holds the LineStyles for the top, right, bottom, and left borders of a PdfItem.  For an equal
+  border on all sides, use:
  <pre><code>BorderStyle b = BorderStyle.valueOf(color, width);</code></pre>
  For an unequal border, Java doesn't have named parameters, so this classes uses a builder pattern
  instead.  This class works just like styles in CSS in terms of specifying one style, then
@@ -38,6 +39,7 @@ public class BorderStyle {
     private final LineStyle bottom;
     private final LineStyle left;
 
+    /** Factory for constructing immutable BorderStyle instances. */
     public static class Builder {
         private Color tColor;
         private Color rColor;

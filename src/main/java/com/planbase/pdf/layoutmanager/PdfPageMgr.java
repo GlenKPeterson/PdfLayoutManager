@@ -277,7 +277,7 @@ public class PdfPageMgr {
     /**
      Returns a new PdfPageMgr with the given color space.
      @param cs the color-space.
-     @return
+     @return a new PdfPageMgr
      @throws IOException
      */
     public static PdfPageMgr valueOf(PDColorSpace cs) throws IOException {
