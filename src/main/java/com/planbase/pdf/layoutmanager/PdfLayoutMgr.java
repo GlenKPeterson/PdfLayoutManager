@@ -38,9 +38,33 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
 
 /**
- The main class in this package; it handles page and line breaks.  Call commitPendingPages when all 
- through.  Because this class buffers and writes to an underlying stream, it is mutable, has side
- effects, and is NOT thread-safe!
+ <p>The main class in this package; it handles page and line breaks.</p>
+
+<h3>Usage:</h3>
+<pre><code>// The file to write to
+OutputStream os = new FileOutputStream("test.pdf");
+
+// Create a new manager
+PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
+
+pageMgr.logicalPageStart();
+// call various put...() methods here.
+// They will page-break and create extra physical pages as needed.
+// ...
+pageMgr.logicalPageEnd();
+
+pageMgr.logicalPageStart();
+// put things on next page
+// ...
+pageMgr.logicalPageEnd();
+
+// Commit all pages to output stream.
+pageMgr.save(OutputStream os);</code></pre>
+
+ <br />
+<h3>Note:</h3>
+<p>Because this class buffers and writes to an underlying stream, it is mutable, has side effects,
+ and is NOT thread-safe!</p>
  */
 public class PdfLayoutMgr {
 
@@ -354,6 +378,7 @@ public class PdfLayoutMgr {
         doc.save(os);
     }
 
+    // TODO: Add logicalPage() method and call pages.add() lazily for the first item actually shown on a page, and logicalPageEnd called before a save.
     // TODO: Add feature for different paper size or orientation for each group of logical pages.
     /**
      Tells this PdfLayoutMgr that you want to start a new logical page (which may be broken across
