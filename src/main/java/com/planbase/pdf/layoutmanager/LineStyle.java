@@ -17,8 +17,8 @@ package com.planbase.pdf.layoutmanager;
 import java.awt.Color;
 
 /**
- Represents line style.  Currently only supports color and width, but capStyle, joinStyle, or 
- dashStyle could be added later.  Immutable.
+ Represents the color and width of a line.  DashStyle (and maybe capStyle or joinStyle?) could be
+ added later.  Immutable.
  */
 public class LineStyle {
     public static final float DEFAULT_WIDTH = 1;

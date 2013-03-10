@@ -1,3 +1,21 @@
 <html>
-<body>The layoutmanager package extends org.apache.PdfBox with tools for line-breaking, page-breaking, tables, and styles.  Where practical all classes are immutable (except for builder helper classes), but the underlying PDFContentStream that they act upon is mutable and has side effects (it writes output).</body>
+<body><p>The layoutmanager package extends org.apache.PdfBox with tools for line-breaking,
+page-breaking, tables, and styles.  It provides an abstraction that lets lines and shaded
+backgrounds cross physical pages (vertically) to produce a larger logical page.  This allows text,
+table cells, and images flow naturally from one page to the next.</p>
+
+<p>Unlike the PDF spec and PDFBox, all measurements are specified in positive document units and all
+positioning is specified from the top-left corner of the item being positioned.  Like PDFBox,
+positive y-values are toward the top of the page, so you have to *decrement* y every time you move
+down a line.</p>
+
+<p>Items are given a Z-index internally to determine which overwrites which when there is overlap.  If
+two items overlap and have the same Z-index, the last one specified overwrites the first (they are
+simply rendered in order).</p>
+
+<p>Classes representing page objects are designed to minimize mutability and side-effects, but
+PdfPageMgr and the underlying PDFContentStream it acts upon are mutable, have side effects (they
+write output), and are NOT thread-safe.</p>
+
+<p>PdfPageMgr is the main class that the others all define and serve in various ways.</p></body>
 </html>

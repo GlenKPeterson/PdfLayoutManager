@@ -16,6 +16,8 @@ package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
 
+// TODO: This class should at least allow the user to provide LineStyles instead of colors and widths directly.
+
 /**
  Holds the LineStyles for the top, right, bottom, and left borders of a PdfItem.  For an equal
   border on all sides, use:
@@ -25,11 +27,12 @@ import java.awt.Color;
  overwriting it with another.  This example sets all borders except to black and the default width,
  then removes the top border:
  <pre><code>BorderStyle topBorderStyle = BorderStyle.builder().color(Color.BLACK)
-                                                   .width(DEFAULT_WIDTH)
-                                                   .top(null, 0).build();</code></pre>
+                                                  .width(LineStyle.DEFAULT_WIDTH)
+                                                  .top(null, 0).build();</code></pre>
  If neighboring cells in a cell-row have the same border, only one will be printed.  If different,
  the left-border of the right cell will override.  You have to manage your own top borders
  manually.
+ 
  */
 public class BorderStyle {
 
@@ -39,7 +42,7 @@ public class BorderStyle {
     private final LineStyle bottom;
     private final LineStyle left;
 
-    /** Factory for constructing immutable BorderStyle instances. */
+    /** Factory helper-class for constructing immutable BorderStyle instances. */
     public static class Builder {
         private Color tColor;
         private Color rColor;
@@ -130,7 +133,7 @@ public class BorderStyle {
         return new BorderStyle(c, LineStyle.DEFAULT_WIDTH);
     }
 
-    /** Returns a mutable helper class for building and immutable BorderStyle object. */
+    /** Returns a mutable helper class for building an immutable BorderStyle object. */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static Builder builder() { return new Builder(); }
 

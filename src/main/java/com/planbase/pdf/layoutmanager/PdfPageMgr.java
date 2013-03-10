@@ -38,8 +38,9 @@ import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
 
 /**
- Handles paging and page breaking.  You just tell it when you want a hard new page break and
- it does the rest.  Call commitPendingPages when all through.  This class is NOT thread-safe!
+ The main class in this package; it handles page and line breaks.  Call commitPendingPages when all 
+ through.  Because this class buffers and writes to an underlying stream, it is mutable, has side
+ effects, and is NOT thread-safe!
  */
 public class PdfPageMgr {
 
@@ -68,6 +69,11 @@ public class PdfPageMgr {
     // I think ascent and descent are compatible with this.  I'm going to make Leading be
     // -descent/2
 
+    /**
+     If there is no scaling in the output PDF, my tests show that PDFBox shows approximately 72 
+     Document-Units per inch which is nice because many computer monitors have this same resolution.
+     This is a useful constant for page layout math.
+     */
     public static final float DOC_UNITS_PER_INCH = 72f;
 
     // TODO: Get this from document measurements:
@@ -285,7 +291,7 @@ public class PdfPageMgr {
     }
 
     /**
-     Returns a new PdfPageMgr with the given color space.
+     Creates a new PdfPageMgr with the PDDeviceRGB color space.
      @return a new Page Manager with an RGB color space
      @throws IOException
      */
@@ -294,18 +300,18 @@ public class PdfPageMgr {
         return new PdfPageMgr(PDDeviceRGB.INSTANCE);
     }
 
-    public void commitBorderItems(PDPageContentStream stream) throws IOException {
+    private void commitBorderItems(PDPageContentStream stream) throws IOException {
         // Since items are z-ordered, then sub-ordered by entry-order, we will draw
         // everything in the correct order.
         for (PdfItem item : borderItems) { item.commit(stream); }
     }
 
-    public void borderStyledText(final float xCoord, final float yCoord, final String text,
+    private void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s, final float z) {
         borderItems.add(Text.valueOf(xCoord, yCoord, text, s, borderOrd++, z));
     }
 
-    public void borderStyledText(final float xCoord, final float yCoord, final String text,
+    private void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s) {
         borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
     }
@@ -337,7 +343,7 @@ public class PdfPageMgr {
     }
 
     /**
-    Call this when PDF is completely built.
+    Call this to commit the PDF information to the underlying stream after it is completely built.
     */
     public void save(OutputStream os) throws IOException, COSVisitorException {
         doc.save(os);
@@ -356,11 +362,10 @@ public class PdfPageMgr {
 
     /**
      Call this when you are through with your current set of pages to commit all pending text and
-     drawing operations.  This is the only method that throws an IOException becausethe purpose of
+     drawing operations.  This is the only method that throws an IOException because the purpose of
      PdfPageMgr is to buffer all operations until a page is complete so that it can safely be
-     written to the underlying stream.  This is the method that performs that right, turns the
-     potential pages into real output.  Call when you need a page break, or your document is done
-     and you need to write it out.
+     written to the underlying stream.  This method turns the potential pages into real output.
+     Call when you need a page break, or your document is done and you need to write it out.
 
      @throws IOException - if there is a failure writing to the underlying stream.
      */
@@ -952,28 +957,35 @@ public class PdfPageMgr {
     private static final Pattern nonAsciiPattern = Pattern.compile("[^\u0000-\u00ff]");
 
     /**
-     PDF files are limited to the 217 characters of Windows-1252.  These characters cover
-     the modern alphabets of the following languages: Afrikaans (af), Albanian (sq), Basque (eu),
-     Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo), Finnish (fi), French (fr),
-     Galician (gl), German (de), Icelandic (is), Irish (ga), Italian (it), Norwegian (no),
-     Portuguese (pt), Scottish (gd), Spanish (es), Swedish (sv).  Other Unicode characters are
-     transliterated to equivalent Windows-1252 characters when an exact match is available.
-     Romanized substitutions are used for the Cyrillic characters of the modern Russian (ru)
-     alphabet using ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and 'Shch'
-     for Щ.  Other alphabets like Kanji cannot be mapped to Windows-1252, so they are not
-     supported.  Any unsupported character will display as a bullet (round dot).
+     <p>PDF files are limited to the 217 characters of Windows-1252 which the PDF spec calls WinAnsi
+     and Java calls ISO-8859-1.  This method transliterates the standard Java UTF-16 character
+     representations to their Windows-1252 equivalents where such translation is possible.  Any
+     character (e.g. Kanji) which does not have an appropriate substitute in Windows-1252 will be
+     mapped to the bullet character (a round dot).</p>
+     
+     <p>This transliteration covers the modern alphabets of the following languages:<br />
+     
+     Afrikaans (af),
+     Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo),
+     Finnish (fi), French (fr), Galician (gl), German (de), Icelandic (is), Irish (ga), 
+     Italian (it), Norwegian (no), Portuguese (pt), Scottish (gd), Spanish (es), Swedish (sv).</p>
+     
+     <p>Romanized substitutions are used for the Cyrillic characters of the modern Russian (ru)
+     alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and
+     'Shch' for Щ.</p>
+     
+     <p>The PdfPageMgr calls this method internally whenever it renders text (transliteration has
+     to happen before line breaking), but is available externally in case you wish to use it
+     directly with PDFBox.</p>
 
      @param in a string in the standard Java UTF-16 encoding
-     @return a string in Windows-1252 (informally called ISO-8859-1)
+     @return a string in Windows-1252 (informally called ISO-8859-1 or WinAnsi)
      */
     public static String convertJavaStringToWinAnsi(String in) {
-        // return in;
-
 //        ByteBuffer bb = StandardCharsets.UTF_16.encode(CharBuffer.wrap(in));
 //        // then decode those bytes as US-ASCII
 //        return StandardCharsets.ISO_8859_1.decode(bb).toString();
         // return java.nio.charset.StandardCharsets.ISO_8859_1.encode(in);
-
 
         Matcher m = nonAsciiPattern.matcher(in);
 

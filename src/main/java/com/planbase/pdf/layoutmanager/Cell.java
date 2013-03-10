@@ -16,7 +16,7 @@ package com.planbase.pdf.layoutmanager;
 
 /**
  A styled table cell or layout block with a pre-set horizontal width.  Vertical height is calculated 
- based on how the content is rendered with regards to line-breaks and page-breaks.
+ based on how the content is rendered with regard to line-breaks and page-breaks.
  */
 public class Cell {
 
