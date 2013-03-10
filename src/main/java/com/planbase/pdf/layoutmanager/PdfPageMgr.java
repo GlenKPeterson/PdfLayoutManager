@@ -70,9 +70,9 @@ public class PdfPageMgr {
     // -descent/2
 
     /**
-     If there is no scaling in the output PDF, my tests show that PDFBox shows approximately 72 
-     Document-Units per inch which is nice because many computer monitors have this same resolution.
-     This is a useful constant for page layout math.
+     If you use no scaling when printing the output PDF, PDFBox shows approximately 72 
+     Document-Units Per Inch.  This makes one pixel on an average desktop monitor correspond to
+     roughly one document unit.  This is a useful constant for page layout math.
      */
     public static final float DOC_UNITS_PER_INCH = 72f;
 
@@ -311,7 +311,12 @@ public class PdfPageMgr {
         borderItems.add(Text.valueOf(xCoord, yCoord, text, s, borderOrd++, z));
     }
 
-    private void borderStyledText(final float xCoord, final float yCoord, final String text,
+    /**
+     Adds items to every page in page grouping.  You should not need to use this directly.  It only
+     has package scope so that Cell can access it for one thing.  It may become private in the
+     future.
+      */
+    void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s) {
         borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
     }
