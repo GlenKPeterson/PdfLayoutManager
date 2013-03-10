@@ -1,7 +1,7 @@
 PdfLayoutManager
 ================
 
-A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables.  Uses a box-model for styles.  Someday, there may be a download site, but right now, you have to build the latest sources and javadocs with Maven 3.
+A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables.  Uses a box-model for styles.  Someday, there may be a download site, but right now, you have to build the latest sources and javadocs with Maven 3 and Java JDK 1.5 or greater.
 
 To build (Jar file ends up in target/ sub-folder):
 
