@@ -9,6 +9,12 @@ http://organicdesign.org/PdfLayoutManager/apidocs/
 A jar file can be downloaded here:
 http://organicdesign.org/PdfLayoutManager/
 
+Recent Changes
+==============
+Version 0.1.1: Added run-time check for appropriate data types used to create a Cell to provide fail-fast behavior for client code - if you pass an invalid object type, it throws an exception immediately instead of waiting to purge the cache.
+
+Version 0.1: Initial working and documented version
+
 Building from Source
 ====================
 Requires Maven 3 and Java JDK 1.5 or greater.  Jar file ends up in the target/ sub-folder.
