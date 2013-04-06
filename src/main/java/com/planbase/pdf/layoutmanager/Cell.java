@@ -20,6 +20,8 @@ package com.planbase.pdf.layoutmanager;
  */
 public class Cell {
 
+    private static final String INVALID_ROW_TYPE_STR = "Found a row that wasn't a String, BufferedImage, or null - no other types allowed!";
+
     private final TextStyle textStyle;
     private final float width;
     private final CellStyle cellStyle;
@@ -30,6 +32,13 @@ public class Cell {
                   final Object... r) {
         if (w < 0) {
             throw new IllegalArgumentException("A cell cannot have a negative width");
+        }
+        if (r != null) {
+            for (Object o : r) {
+                if ( (o != null) && !(o instanceof String) && !(o instanceof ScaledJpeg) ) {
+                    throw new IllegalArgumentException(INVALID_ROW_TYPE_STR);
+                }
+            }
         }
         textStyle = ts; width = w; cellStyle = cs; rows = r;
         avgCharsForWidth = (int) ((width * 1220) / textStyle.avgCharWidth());
@@ -189,7 +198,7 @@ public class Cell {
                 // draw image based on baseline and decrement y appropriately for image.
                 pby.pb.drawJpeg(xVal, pby.y, jpg, mgr);
             } else {
-                throw new IllegalStateException("Found a row that wasn't a String, BufferedImage, or null - no other types allowed!");
+                throw new IllegalStateException(INVALID_ROW_TYPE_STR);
             }
         } // end for each row
 
