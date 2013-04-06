@@ -1,19 +1,19 @@
 PdfLayoutManager
 ================
 
-A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables.  Uses a box-model for styles.  Someday, there may be a download site, but right now, you have to build the latest sources and javadocs with Maven 3 and Java JDK 1.5 or greater.
+A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables.  Uses a box-model for styles.  Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
-To build (Jar file ends up in target/ sub-folder):
+API documentation is available here:
+http://organicdesign.org/PdfLayoutManager/apidocs/
+
+A jar file can be downloaded here:
+http://organicdesign.org/PdfLayoutManager/
+
+Building from Source
+====================
+Requires Maven 3 and Java JDK 1.5 or greater.  Jar file ends up in the target/ sub-folder.
 
 mvn clean install
-
-Documentation is currently all in the javadocs.  Build them:
-
-mvn javadoc:javadoc
-
-View the generated docs in a web browser from this generated sub-folder:
-
-target/site/apidocs/index.html
 
 License
 =======
