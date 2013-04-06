@@ -6,7 +6,7 @@ A page-layout manager for PDFBox to do things like line-breaking, page-breaking,
 API documentation is available here:
 http://organicdesign.org/PdfLayoutManager/apidocs/
 
-A jar file can be downloaded here:
+A jar file (and separate sample PDF) can be downloaded here:
 http://organicdesign.org/PdfLayoutManager/
 
 Recent Changes
