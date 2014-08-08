@@ -59,7 +59,7 @@ pageMgr.logicalPageStart();
 pageMgr.logicalPageEnd();
 
 // Commit all pages to output stream.
-pageMgr.save(OutputStream os);</code></pre>
+pageMgr.save(os);</code></pre>
 
  <br />
 <h3>Note:</h3>
