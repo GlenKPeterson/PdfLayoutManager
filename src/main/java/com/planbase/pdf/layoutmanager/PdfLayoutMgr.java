@@ -218,9 +218,9 @@ public class PdfLayoutMgr {
             jpeg = temp;
             scaledJpeg = sj;
         }
-        public static DrawJpeg valueOf(final float xVal, final float yVal, final ScaledJpeg sj,
-                                       final PdfLayoutMgr mgr,
-                                       final long ord, final float z) {
+        public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
+                                  final PdfLayoutMgr mgr,
+                                  final long ord, final float z) {
             return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
         }
         @Override
@@ -250,12 +250,12 @@ public class PdfLayoutMgr {
 //
 //        public void drawJpeg(final float xVal, final float yVal, final BufferedImage bi,
 //                             final PdfLayoutMgr mgr, final float z) {
-//            items.add(DrawJpeg.valueOf(xVal, yVal, bi, mgr, lastOrd++, z));
+//            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
         public void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
                              final PdfLayoutMgr mgr) {
-            items.add(DrawJpeg.valueOf(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+            items.add(DrawJpeg.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
         public void drawLine(final float xa, final float ya, final float xb,
@@ -640,23 +640,23 @@ public class PdfLayoutMgr {
 //                prevRightLineStyle = null;
             } else {
                 // Like CSS it's listed Top, Right, Bottom, left
-                if (border.topLineStyle() != null) {
-                    putLine(x, origY, rightX, origY, border.topLineStyle());
+                if (border.top() != null) {
+                    putLine(x, origY, rightX, origY, border.top());
                 }
-                if (border.rightLineStyle() != null) {
-                    putLine(rightX, origY, rightX, bottomY, border.rightLineStyle());
-//                    prevRightLineStyle = border.rightLineStyle();
+                if (border.right() != null) {
+                    putLine(rightX, origY, rightX, bottomY, border.right());
+//                    prevRightLineStyle = border.right();
                 }
-                if (border.bottomLineStyle() != null) {
-                    putLine(x, bottomY, rightX, bottomY, border.bottomLineStyle());
+                if (border.bottom() != null) {
+                    putLine(x, bottomY, rightX, bottomY, border.bottom());
                 }
-                if (border.leftLineStyle() != null) {
-                    putLine(x, origY, x, bottomY, border.leftLineStyle());
+                if (border.left() != null) {
+                    putLine(x, origY, x, bottomY, border.left());
 //                    // Only draw a left-hand line if it won't be the same as the right-hand line
 //                    // of the previous cell (don't draw double-lines).
 //                    if ( (prevRightLineStyle == null) ||
-//                         !prevRightLineStyle.equals(border.leftLineStyle()) ) {
-//                        putLine(x, origY, x, bottomY, border.leftLineStyle());
+//                         !prevRightLineStyle.equals(border.left()) ) {
+//                        putLine(x, origY, x, bottomY, border.left());
 //                    }
                 }
             }

@@ -22,14 +22,20 @@ public class Cell {
 
     private static final String INVALID_ROW_TYPE_STR = "Found a row that wasn't a String, BufferedImage, or null - no other types allowed!";
 
-    private final TextStyle textStyle;
+    // These are limits of the cell, not the contents.
     private final float width;
     private final CellStyle cellStyle;
-    private final Object[] rows;
+
+    // These are inherited by all of the text contents of this cell.  Really each text item should
+    // be able to override these.
+    private final TextStyle textStyle;
     private final int avgCharsForWidth;
 
-    private Cell( final TextStyle ts, final float w, CellStyle cs,
-                  final Object... r) {
+    // A list of the contents.  It's pretty limiting to have one item per row.
+    private final Object[] rows;
+
+    private Cell(final TextStyle ts, final float w, CellStyle cs,
+                 final Object... r) {
         if (w < 0) {
             throw new IllegalArgumentException("A cell cannot have a negative width");
         }
@@ -56,7 +62,7 @@ public class Cell {
      adds a little vertical space, like a half-line between paragraphs.
      @return a cell suitable for rendering.
      */
-    public static Cell valueOf(final TextStyle s, final float w, CellStyle cs, final Object... r) {
+    public static Cell of(final TextStyle s, final float w, CellStyle cs, final Object... r) {
         return new Cell(s, w, cs, r);
     }
 
@@ -204,4 +210,73 @@ public class Cell {
 
         return origY - y - cellStyle.padding().bottom(); // numLines * height;
     } // end processRows();
+
+    /*
+    public static Builder builder(float width, CellStyle cellStyle) {
+        return new Builder(width, cellStyle);
+    }
+
+    public static class Builder {
+        private final float width; // Both require this.
+        private final CellStyle cellStyle; // Both require this.
+        private final List<Object> rows = new ArrayList<Object>();
+
+        private TextStyle textStyle; // Required for Strings.  Unnecessary for Images.
+        private int avgCharsForWidth; // Required for Strings.  Unnecessary for Images.
+
+        private Builder(final float w, final CellStyle cs) { width = w; cellStyle = cs; }
+
+        public Builder textStyle(TextStyle ts) {
+            textStyle = ts;
+            return this;
+        }
+    }
+*/
+
+    /*
+    These are limits of the cell, not the contents.
+
+    float width is a limit of the cell, not of the contents.
+    CellStyle cellStyle is the over-all style of the cell, inherited by all contents for which
+    it is relevant.
+
+     */
+
+    public static interface CellContents {
+        // This is just some junk to indicate that this method will handle anything of this type.
+        // Don't go implementing your own stuff and passing it to this method.
+
+    }
+
+    public static class CellText implements CellContents {
+        private final float width; // Both require this.
+        private final CellStyle cellStyle; // Both require this.
+        private final TextStyle textStyle; // Required for Strings.  Unnecessary for Images.
+        private final int avgCharsForWidth; // Required for Strings.  Unnecessary for Images.
+
+        private CellText(final TextStyle ts, final float w, CellStyle cs) {
+            if (w < 0) {
+                throw new IllegalArgumentException("A cell cannot have a negative width");
+            }
+            textStyle = ts; width = w; cellStyle = cs;
+            avgCharsForWidth = (int) ((width * 1220) / textStyle.avgCharWidth());
+        }
+
+        public float width() { return width; }
+        public CellStyle cellStyle() { return cellStyle; }
+    }
+
+    public static class CellImage implements CellContents {
+        private final float width; // Both require this.
+        private final CellStyle cellStyle; // Both require this.
+
+        private CellImage(final float w, CellStyle cs) {
+            if (w < 0) {
+                throw new IllegalArgumentException("A cell cannot have a negative width");
+            }
+            width = w; cellStyle = cs;
+        }
+        public float width() { return width; }
+        public CellStyle cellStyle() { return cellStyle; }
+    }
 }

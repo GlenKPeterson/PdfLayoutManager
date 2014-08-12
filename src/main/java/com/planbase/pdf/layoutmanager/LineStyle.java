@@ -34,7 +34,9 @@ public class LineStyle {
         color = c; width = w;
     }
     /** Factory method */
-    public static LineStyle valueOf(Color c, float w) { return new LineStyle(c, w); }
+    public static LineStyle of(Color c, float w) { return new LineStyle(c, w); }
+
+    public static LineStyle of(Color c) { return new LineStyle(c, DEFAULT_WIDTH); }
 
     public Color color() { return color; }
     public float width() { return width; }

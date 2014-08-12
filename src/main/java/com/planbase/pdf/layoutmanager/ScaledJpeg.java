@@ -46,7 +46,7 @@ public class ScaledJpeg {
      @param h the width in document units
      @return a ScaledJpeg with the given width and height for that image.
      */
-    public static ScaledJpeg valueOf(BufferedImage bi, float w, float h) {
+    public static ScaledJpeg of(BufferedImage bi, float w, float h) {
         return new ScaledJpeg(bi, w, h);
     }
 
@@ -57,7 +57,7 @@ public class ScaledJpeg {
      @param bi the source BufferedImage
      @return a ScaledJpeg holding the width and height for that image.
      */
-    public static ScaledJpeg valueOf(BufferedImage bi) {
+    public static ScaledJpeg of(BufferedImage bi) {
         return new ScaledJpeg(bi, 0, 0);
     }
 

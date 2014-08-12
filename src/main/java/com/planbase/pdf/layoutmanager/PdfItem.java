@@ -34,7 +34,7 @@ public abstract class PdfItem implements Comparable<PdfItem> {
     private final float z;
 
     PdfItem(final long ord, final float zIndex) { z = zIndex; serialNumber = ord; }
-//    public static PdfItem valueOf(final long ord, final float zIndex) {
+//    public static PdfItem of(final long ord, final float zIndex) {
 //        return new PdfItem(ord, zIndex);
 //    }
 

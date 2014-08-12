@@ -22,6 +22,9 @@ import java.awt.Color;
  */
 public class CellStyle {
 
+    public static final CellStyle DEFAULT = new CellStyle(HorizAlign.LEFT, Padding.DEFAULT_PADDING,
+                                                          null, BorderStyle.NO_BORDERS);
+
     /** Horizontal allignment options for cell contents */
     public enum HorizAlign { LEFT, CENTER, RIGHT; }
 
@@ -31,13 +34,12 @@ public class CellStyle {
     private final BorderStyle borderStyle; // Only for cell-style
 
     private CellStyle(HorizAlign a, Padding p, Color bg, BorderStyle b) {
-        if (a == null) { a = HorizAlign.LEFT; }
-        if (p == null) { p = Padding.DEFAULT_PADDING; }
-        align = a; padding = p; bgColor = bg; borderStyle = b;
+        align = a; padding = p; bgColor = bg; // I think it's OK if this is null.
+        borderStyle = b;
     }
 
-    public static CellStyle valueOf(HorizAlign a, Padding p, Color bg, BorderStyle b) {
-        return new CellStyle(a, p, bg, b);
+    public static CellStyle of(HorizAlign a, Padding p, Color bg, BorderStyle b) {
+        return builder().align(a).padding(p).bgColor(bg).borderStyle(b).build();
     }
 
     public Padding padding() { return padding; }
@@ -49,5 +51,52 @@ public class CellStyle {
                HorizAlign.CENTER == align ? x + (spareRoom / 2) :
                HorizAlign.RIGHT == align ? x + spareRoom - padding.right() :
                x;
+    }
+
+    public CellStyle align(HorizAlign ha) { return new Builder(this).align(ha).build(); }
+    public CellStyle padding(Padding p) { return new Builder(this).padding(p).build(); }
+    public CellStyle bgColor(Color c) { return new Builder(this).bgColor(c).build(); }
+    public CellStyle borderStyle(BorderStyle bs) {
+        return new Builder(this).borderStyle(bs).build();
+    }
+
+    public static Builder builder() { return new Builder(); }
+
+    public static class Builder {
+        private HorizAlign align;
+        private Padding padding;
+        private Color bgColor;
+        private BorderStyle borderStyle; // Only for cell-style
+
+        private Builder() {}
+
+        private Builder(CellStyle cs) {
+            align = cs.align; padding = cs.padding; bgColor = cs.bgColor;
+            borderStyle = cs.borderStyle;
+        }
+
+        public CellStyle build() {
+            if (align == null) { align = HorizAlign.LEFT; }
+            if (padding == null) { padding = Padding.DEFAULT_PADDING; }
+            if (borderStyle == null) { borderStyle = BorderStyle.NO_BORDERS; }
+
+            if ( (align == HorizAlign.LEFT) &&
+                 (padding == Padding.DEFAULT_PADDING) &&
+                 ((bgColor == null) || bgColor.equals(Color.WHITE)) &&
+                 (borderStyle == BorderStyle.NO_BORDERS) ) {
+                return DEFAULT;
+            }
+            return new CellStyle(align, padding, bgColor, borderStyle);
+        }
+
+        public Builder align(HorizAlign h) { align = h; return this; }
+
+        public Builder alignLeft() { align = HorizAlign.LEFT; return this; }
+        public Builder alignCenter() { align = HorizAlign.CENTER; return this; }
+        public Builder alignRight() { align = HorizAlign.RIGHT; return this; }
+
+        public Builder padding(Padding p) { padding = p; return this; }
+        public Builder bgColor(Color c) { bgColor = c; return this; }
+        public Builder borderStyle(BorderStyle bs) { borderStyle = bs; return this; }
     }
 }

@@ -15,13 +15,14 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
+import java.util.Objects;
 
 // TODO: This class should at least allow the user to provide LineStyles instead of colors and widths directly.
 
 /**
  Holds the LineStyles for the top, right, bottom, and left borders of a PdfItem.  For an equal
   border on all sides, use:
- <pre><code>BorderStyle b = BorderStyle.valueOf(color, width);</code></pre>
+ <pre><code>BorderStyle b = BorderStyle.of(color, width);</code></pre>
  For an unequal border, Java doesn't have named parameters, so this classes uses a builder pattern
  instead.  This class works just like styles in CSS in terms of specifying one style, then
  overwriting it with another.  This example sets all borders except to black and the default width,
@@ -42,39 +43,59 @@ public class BorderStyle {
     private final LineStyle bottom;
     private final LineStyle left;
 
+    public static final BorderStyle NO_BORDERS = builder().build();
+
     /** Factory helper-class for constructing immutable BorderStyle instances. */
     public static class Builder {
-        private Color tColor;
-        private Color rColor;
-        private Color bColor;
-        private Color lColor;
+        private LineStyle top;
+        private LineStyle right;
+        private LineStyle bottom;
+        private LineStyle left;
 
-        private float tWidth;
-        private float rWidth;
-        private float bWidth;
-        private float lWidth;
+        private Builder(BorderStyle bs) {
+            if (bs != null) { top = bs.top; right = bs.right; bottom = bs.bottom; left = bs.left; }
+        }
 
         @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        public Builder top(Color c, float w) { tColor = c; tWidth = w; return this; }
-        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        public Builder right(Color c, float w) { rColor = c; rWidth = w; return this; }
-        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        public Builder bottom(Color c, float w) { bColor = c; bWidth = w; return this; }
-        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        public Builder left(Color c, float w) { lColor = c; lWidth = w; return this; }
+        public Builder top(LineStyle ls) { top = ls; return this; }
+        public Builder right(LineStyle ls) { right = ls; return this; }
+        public Builder bottom(LineStyle ls) { bottom = ls; return this; }
+        public Builder left(LineStyle ls) { left = ls; return this; }
 
         /** Sets top, right, bottom, and left color */
         @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
         private Builder color(Color c) {
-            tColor = c; rColor = c; bColor = c; lColor = c;
+            if (top == null) {
+                top = LineStyle.of(c);
+            } else if (!Objects.equals(top.color(), c)) {
+                top = LineStyle.of(c, top.width());
+            }
+
+            if (right == null) {
+                right = LineStyle.of(c);
+            } else if (!Objects.equals(right.color(), c)) {
+                right = LineStyle.of(c, right.width());
+            }
+
+            if (bottom == null) {
+                bottom = LineStyle.of(c);
+            } else if (!Objects.equals(bottom.color(), c)) {
+                bottom = LineStyle.of(c, bottom.width());
+            }
+
+            if (left == null) {
+                left = LineStyle.of(c);
+            } else if (!Objects.equals(left.color(), c)) {
+                left = LineStyle.of(c, left.width());
+            }
             return this;
         }
-        /** Sets top, right, bottom, and left width */
-        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        public Builder width(float w) {
-            tWidth = w; rWidth = w; bWidth = w; lWidth = w;
-            return this;
-        }
+//        /** Sets top, right, bottom, and left width */
+//        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+//        public Builder width(float w) {
+//            tWidth = w; rWidth = w; bWidth = w; lWidth = w;
+//            return this;
+//        }
 
         /** Call this to make an immutable BorderStyle object based on your settings. */
         @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
@@ -84,30 +105,14 @@ public class BorderStyle {
     }
 
     private BorderStyle(Builder b) {
-        if ((b.tWidth > 0) && (b.tColor != null)) {
-            top = LineStyle.valueOf(b.tColor, b.tWidth);
-        } else {
-            top = null;
-        }
-        if ((b.rWidth > 0) && (b.rColor != null)) {
-            right = LineStyle.valueOf(b.rColor, b.rWidth);
-        } else {
-            right = null;
-        }
-        if ((b.bWidth > 0) && (b.bColor != null)) {
-            bottom = LineStyle.valueOf(b.bColor, b.bWidth);
-        } else {
-            bottom = null;
-        }
-        if ((b.lWidth > 0) && (b.lColor != null)) {
-            left = LineStyle.valueOf(b.lColor, b.lWidth);
-        } else {
-            left = null;
-        }
+        top = b.top;
+        right = b.right;
+        bottom = b.bottom;
+        left = b.left;
     }
 
     private BorderStyle(Color c, float w) {
-        LineStyle style = LineStyle.valueOf(c, w);
+        LineStyle style = LineStyle.of(c, w);
         top = style;
         right = style;
         bottom = style;
@@ -120,7 +125,7 @@ public class BorderStyle {
      @param w the width of the border.
      @return a new immutable border object
      */
-    public static BorderStyle valueOf(Color c, float w) {
+    public static BorderStyle of(Color c, float w) {
         return new BorderStyle(c, w);
     }
 
@@ -129,16 +134,21 @@ public class BorderStyle {
      @param c the border color
      @return a new immutable border object with default width
      */
-    public static BorderStyle valueOf(Color c) {
+    public static BorderStyle of(Color c) {
         return new BorderStyle(c, LineStyle.DEFAULT_WIDTH);
     }
 
     /** Returns a mutable helper class for building an immutable BorderStyle object. */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static Builder builder() { return new Builder(); }
+    public static Builder builder() { return new Builder(null); }
 
-    public LineStyle topLineStyle() { return top; }
-    public LineStyle rightLineStyle() { return right; }
-    public LineStyle bottomLineStyle() { return bottom; }
-    public LineStyle leftLineStyle() { return left; }
+    public LineStyle top() { return top; }
+    public LineStyle right() { return right; }
+    public LineStyle bottom() { return bottom; }
+    public LineStyle left() { return left; }
+
+    public BorderStyle top(LineStyle ls) { return new Builder(this).top(ls).build(); }
+    public BorderStyle right(LineStyle ls) { return new Builder(this).right(ls).build(); }
+    public BorderStyle bottom(LineStyle ls) { return new Builder(this).bottom(ls).build(); }
+    public BorderStyle left(LineStyle ls) { return new Builder(this).left(ls).build(); }
 }

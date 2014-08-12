@@ -66,7 +66,7 @@ public class TextStyle {
         avgCharWidth = avgFontWidth * fontSize;
     }
 
-    public static TextStyle valueOf(PDType1Font f, float sz, Color tc) {
+    public static TextStyle of(PDType1Font f, float sz, Color tc) {
         return new TextStyle(f, sz, tc);
     }
 
