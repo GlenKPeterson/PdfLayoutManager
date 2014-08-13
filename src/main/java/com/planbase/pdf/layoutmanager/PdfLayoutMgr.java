@@ -136,9 +136,9 @@ public class PdfLayoutMgr {
             super(ord, z);
             x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
         }
-        public static DrawLine valueOf(final float xa, final float ya, final float xb,
-                                       final float yb, LineStyle s,
-                                       final long ord, final float z) {
+        public static DrawLine of(final float xa, final float ya, final float xb,
+                                  final float yb, LineStyle s,
+                                  final long ord, final float z) {
             return new DrawLine(xa, ya, xb, yb, s, ord, z);
         }
         @Override
@@ -157,8 +157,8 @@ public class PdfLayoutMgr {
             super(ord, z);
             x = xVal; y = yVal; width = w; height = h; color = c;
         }
-        public static FillRect valueOf(final float xVal, final float yVal, final float w,
-                                        final float h, final Color c, final long ord, final float z) {
+        public static FillRect of(final float xVal, final float yVal, final float w,
+                                  final float h, final Color c, final long ord, final float z) {
             return new FillRect(xVal, yVal, w, h, c, ord, z);
         }
         @Override
@@ -177,8 +177,8 @@ public class PdfLayoutMgr {
             super(ord, z);
             x = xCoord; y = yCoord; t = text; style = s;
         }
-        public static Text valueOf(final float xCoord, final float yCoord, final String text,
-                                   TextStyle s, final long ord, final float z) {
+        public static Text of(final float xCoord, final float yCoord, final String text,
+                              TextStyle s, final long ord, final float z) {
             return new Text(xCoord, yCoord, text, s, ord, z);
         }
         @Override
@@ -240,7 +240,7 @@ public class PdfLayoutMgr {
 
         public void fillRect(final float xVal, final float yVal, final float w, final float h,
                              final Color c, final float z) {
-            items.add(FillRect.valueOf(xVal, yVal, w, h, c, lastOrd++, z));
+            items.add(FillRect.of(xVal, yVal, w, h, c, lastOrd++, z));
         }
 
 //        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
@@ -260,7 +260,7 @@ public class PdfLayoutMgr {
 
         public void drawLine(final float xa, final float ya, final float xb,
                              final float yb, final LineStyle ls, final float z) {
-            items.add(DrawLine.valueOf(xa, ya, xb, yb, ls, lastOrd++, z));
+            items.add(DrawLine.of(xa, ya, xb, yb, ls, lastOrd++, z));
         }
         public void drawLine(final float xa, final float ya, final float xb, final float yb,
                              final LineStyle ls) {
@@ -269,7 +269,7 @@ public class PdfLayoutMgr {
 
         public void drawStyledText(final float xCoord, final float yCoord, final String text,
                                    TextStyle s, final float z) {
-            items.add(Text.valueOf(xCoord, yCoord, text, s, lastOrd++, z));
+            items.add(Text.of(xCoord, yCoord, text, s, lastOrd++, z));
         }
         public void drawStyledText(final float xCoord, final float yCoord, final String text,
                                    TextStyle s) {
@@ -310,7 +310,7 @@ public class PdfLayoutMgr {
      @return a new PdfLayoutMgr
      @throws IOException
      */
-    public static PdfLayoutMgr valueOf(PDColorSpace cs) throws IOException {
+    public static PdfLayoutMgr of(PDColorSpace cs) throws IOException {
         return new PdfLayoutMgr(cs);
     }
 
@@ -332,7 +332,7 @@ public class PdfLayoutMgr {
 
     private void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s, final float z) {
-        borderItems.add(Text.valueOf(xCoord, yCoord, text, s, borderOrd++, z));
+        borderItems.add(Text.of(xCoord, yCoord, text, s, borderOrd++, z));
     }
 
     /**
