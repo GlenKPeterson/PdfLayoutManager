@@ -14,6 +14,10 @@
 
 package com.planbase.pdf.layoutmanager;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  A styled table cell or layout block with a pre-set horizontal width.  Vertical height is calculated 
  based on how the content is rendered with regard to line-breaks and page-breaks.
@@ -23,47 +27,50 @@ public class Cell {
     private static final String INVALID_ROW_TYPE_STR = "Found a row that wasn't a String, BufferedImage, or null - no other types allowed!";
 
     // These are limits of the cell, not the contents.
-    private final float width;
     private final CellStyle cellStyle;
-
-    // These are inherited by all of the text contents of this cell.  Really each text item should
-    // be able to override these.
-    private final TextStyle textStyle;
-    private final int avgCharsForWidth;
+    private final float width;
 
     // A list of the contents.  It's pretty limiting to have one item per row.
-    private final Object[] rows;
+    private final List<?> rows;
 
-    private Cell(final TextStyle ts, final float w, CellStyle cs,
-                 final Object... r) {
+    private Cell(CellStyle cs, float w, List<?> r) {
         if (w < 0) {
             throw new IllegalArgumentException("A cell cannot have a negative width");
         }
-        if (r != null) {
-            for (Object o : r) {
-                if ( (o != null) && !(o instanceof String) && !(o instanceof ScaledJpeg) ) {
-                    throw new IllegalArgumentException(INVALID_ROW_TYPE_STR);
-                }
-            }
-        }
-        textStyle = ts; width = w; cellStyle = cs; rows = r;
-        avgCharsForWidth = (int) ((width * 1220) / textStyle.avgCharWidth());
+        cellStyle = cs; width = w; rows = r;
     }
 
     /**
      Creates a new cell.
 
-     @param s the style to show any text objects in.
      @param w the width (height will be calculated based on how objects can be rendered within this
          width).
      @param cs the cell style
-     @param r the text (String) and/or pictures (Jpegs as BufferedImages) to render in this cell.
-     Pictures are assumed to print 300DPI with 72 document units per inch.  A null in this list
-     adds a little vertical space, like a half-line between paragraphs.
      @return a cell suitable for rendering.
      */
-    public static Cell of(final TextStyle s, final float w, CellStyle cs, final Object... r) {
-        return new Cell(s, w, cs, r);
+
+//    @param s the style to show any text objects in.
+    //      @param r the text (String) and/or pictures (Jpegs as BufferedImages) to render in this cell.
+//         Pictures are assumed to print 300DPI with 72 document units per inch.  A null in this list
+//         adds a little vertical space, like a half-line between paragraphs.
+
+    public static Cell of(CellStyle cs, float w) { //, final Object... r) {
+        return new Cell(cs, w, Collections.emptyList());
+//                        (r == null) ? Collections.emptyList()
+//                                    : Arrays.asList(r));
+    }
+
+    // Simple case of a single styled String
+    public static Cell of(CellStyle cs, float w, TextStyle ts, String s) {
+        List<Text> ls = new ArrayList<Text>();
+        ls.add(Text.of(ts, s));
+        return new Cell(cs, w, ls);
+    }
+
+    public static Cell of(CellStyle cs, float w, ScaledJpeg j) {
+        List<ScaledJpeg> ls = new ArrayList<ScaledJpeg>();
+        ls.add(j);
+        return new Cell(cs, w, ls);
     }
 
     public CellStyle cellStyle() { return cellStyle; }
@@ -99,7 +106,7 @@ public class Cell {
      */
     float processRows(final float x, final float origY, boolean allPages, PdfLayoutMgr mgr) {
         // Note: Always used as: y = origY - TextStyle.BREADCRUMB.height,
-        if ( (rows == null) || (rows.length < 1) ) {
+        if ( (rows == null) || (rows.size() < 1) ) {
             return 0;
         }
         // Text is displayed based on its baseline, but this method takes a top-left corner of the
@@ -111,11 +118,13 @@ public class Cell {
                 y -= 4;
                 continue;
             }
-            if (rowObj instanceof String) {
-                String row = PdfLayoutMgr.convertJavaStringToWinAnsi((String) rowObj);
+            if (rowObj instanceof Text) {
+                Text txt = (Text) rowObj;
+                TextStyle textStyle = txt.style();
+                String row = PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
 
                 String text = substrNoLeadingWhitespace(row, 0);
-                int charWidthGuess = avgCharsForWidth;
+                int charWidthGuess = txt.avgCharsForWidth(width);
 
                 while (text.length() > 0) {
                     int textLen = text.length();
@@ -211,9 +220,8 @@ public class Cell {
         return origY - y - cellStyle.padding().bottom(); // numLines * height;
     } // end processRows();
 
-    /*
-    public static Builder builder(float width, CellStyle cellStyle) {
-        return new Builder(width, cellStyle);
+    public static Builder builder(CellStyle cellStyle, float width) {
+        return new Builder(cellStyle, width);
     }
 
     public static class Builder {
@@ -221,17 +229,26 @@ public class Cell {
         private final CellStyle cellStyle; // Both require this.
         private final List<Object> rows = new ArrayList<Object>();
 
-        private TextStyle textStyle; // Required for Strings.  Unnecessary for Images.
-        private int avgCharsForWidth; // Required for Strings.  Unnecessary for Images.
+        private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }
 
-        private Builder(final float w, final CellStyle cs) { width = w; cellStyle = cs; }
-
-        public Builder textStyle(TextStyle ts) {
-            textStyle = ts;
+        public Builder add(Text t) { rows.add(t); return this; }
+        public Builder addAll(TextStyle ts, List<String> ls) {
+            if (ls != null) {
+                for (String s : ls) {
+                    rows.add(Text.of(ts, s));
+                }
+            }
             return this;
         }
+
+        public Builder add(ScaledJpeg j) { rows.add(j); return this; }
+        public Builder addAll(List<ScaledJpeg> js) {
+            if (js != null) { rows.addAll(js); }
+            return this;
+        }
+
+        public Cell build() { return new Cell(cellStyle, width, rows); }
     }
-*/
 
     /*
     These are limits of the cell, not the contents.
@@ -239,8 +256,6 @@ public class Cell {
     float width is a limit of the cell, not of the contents.
     CellStyle cellStyle is the over-all style of the cell, inherited by all contents for which
     it is relevant.
-
-     */
 
     public static interface CellContents {
         // This is just some junk to indicate that this method will handle anything of this type.
@@ -279,4 +294,5 @@ public class Cell {
         public float width() { return width; }
         public CellStyle cellStyle() { return cellStyle; }
     }
+     */
 }
