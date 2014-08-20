@@ -30,33 +30,33 @@ public class CellStyle {
     public enum Align {
         TOP_LEFT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 return Padding.of(0, outer.x() - inner.x(), outer.y() - inner.y(), 0);
             }
         },
         TOP_CENTER {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
                 return Padding.of(0, dx, outer.y() - inner.y(), dx);
             }
         },
         TOP_RIGHT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 return Padding.of(0, 0, outer.y() - inner.y(), outer.x() - inner.x());
             }
         },
         MIDDLE_LEFT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, outer.x() - inner.x(), dy, 0);
             }
         },
         MIDDLE_CENTER {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, dx, dy, dx);
@@ -64,27 +64,28 @@ public class CellStyle {
         },
         MIDDLE_RIGHT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, 0, dy, outer.x() - inner.x());
             }
         },
         BOTTOM_LEFT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), outer.x() - inner.x(), 0, 0);
             }
         },
         BOTTOM_CENTER {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
+                // Like HTML it's top, right, bottom, left
                 return Padding.of(outer.y() - inner.y(), dx, 0, dx);
             }
         },
         BOTTOM_RIGHT {
             @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
-                if (outer.lte(inner)) { return Padding.NO_PADDING; }
+                if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), 0, 0, outer.x() - inner.x());
             }
         };

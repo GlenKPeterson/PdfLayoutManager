@@ -133,24 +133,23 @@ public class Cell implements Renderable {
 //    } // end processRows();
 
     public XyDimension calcDimensions(float maxWidth) {
-        XyDimension maxWidthHeight = XyDimension.ORIGIN;
-        if (cellStyle.padding() != null) {
-            maxWidth -= (cellStyle.padding().left() + cellStyle.padding().right());
-            maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().left())
-                                           .y(maxWidthHeight.y() + cellStyle.padding().top());
+        XyDimension actualDim = XyDimension.ORIGIN;
+        Padding padding = cellStyle.padding();
+        if (padding != null) {
+            maxWidth -= (padding.left() + padding.right());
+            actualDim = padding.topLeftPadDim();
         }
         for (Renderable row : rows) {
             XyDimension rowDim = row.calcDimensions(maxWidth);
-            maxWidthHeight = maxWidthHeight.plus(rowDim);
+            actualDim = actualDim.plus(rowDim);
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
-//            System.out.println("\tmaxWidthHeight = " + maxWidthHeight);
+//            System.out.println("\tactualDim = " + actualDim);
         }
-        if (cellStyle.padding() != null) {
-            maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().right())
-                                           .y(maxWidthHeight.y() + cellStyle.padding().bottom());
+        if (padding != null) {
+            actualDim = actualDim.plus(padding.botRightPadDim());
         }
-        return maxWidthHeight;
+        return actualDim;
     }
 
     /*
@@ -165,21 +164,27 @@ public class Cell implements Renderable {
             mgr.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
         }
 
+        // Draw contents over background, but under border
         XyOffset innerTopLeft = outerTopLeft;
         XyDimension innerDimensions = outerDimensions;
-        if (cellStyle.padding() != null) {
-            innerTopLeft = XyOffset.of((outerTopLeft.x() + cellStyle.padding().left()),
-                                       (outerTopLeft.y() - cellStyle.padding().top()));
+        Padding padding = cellStyle.padding();
+        if (padding != null) {
+            innerTopLeft = XyOffset.of((outerTopLeft.x() + padding.left()),
+                                       (outerTopLeft.y() - padding.top()));
             innerDimensions = XyDimension.of(
-                    (outerDimensions.x() - cellStyle.padding().left() - cellStyle.padding().right()),
-                    (outerDimensions.y() - cellStyle.padding().top() - cellStyle.padding().bottom()));
+                    (outerDimensions.x() - padding.left() - padding.right()),
+                    (outerDimensions.y() - padding.top() - padding.bottom()));
         }
-        XyDimension wrappedBlockDim = calcDimensions(innerDimensions.x());
+        XyDimension wrappedBlockDim = calcDimensions(outerDimensions.x());
         Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
+        if (alignPad != null) {
+            innerTopLeft = XyOffset.of(innerTopLeft.x() + alignPad.left(),
+                                       innerTopLeft.y() - alignPad.top());
+        }
 
         XyOffset outerLowerRight = innerTopLeft;
         for (Renderable row : rows) {
-            outerLowerRight = row.render(mgr, innerTopLeft, innerDimensions, allPages);
+            outerLowerRight = row.render(mgr, innerTopLeft, innerDimensions.y(row.calcDimensions(innerDimensions.x()).y()), allPages);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 

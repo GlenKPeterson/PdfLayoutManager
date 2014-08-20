@@ -164,7 +164,7 @@ public class Text implements Renderable {
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
         if (innerPadding != null) {
             x += innerPadding.left();
-            y -= innerPadding.top();
+            //y -= innerPadding.top();
         }
 
         for (WrappedRow wr : wb.rows) {

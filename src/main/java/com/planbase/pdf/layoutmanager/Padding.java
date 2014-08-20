@@ -46,6 +46,12 @@ public class Padding {
         return new Padding(a,a,a,a);
     }
 
+    public XyDimension topLeftPadDim() { return XyDimension.of(left, top); }
+    public XyDimension botRightPadDim() { return XyDimension.of(right, bottom); }
+
+//    public XyOffset topLeftPadOffset() { return XyOffset.of(left, -top); }
+//    public XyOffset botRightPadOffset() { return XyOffset.of(right, -bottom); }
+
     @Override
     public boolean equals(Object other) {
         // Cheapest operation first...
