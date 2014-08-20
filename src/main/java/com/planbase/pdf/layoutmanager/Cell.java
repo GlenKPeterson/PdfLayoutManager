@@ -138,10 +138,9 @@ public class Cell implements Renderable {
         for (Renderable row : rows) {
             XyPair rowDim = row.calcDimensions(maxWidth);
             maxWidthHeight = maxWidthHeight.maxXandY(rowDim);
-            System.out.println("\trowDim = " + rowDim);
             System.out.println("\trow = " + row);
+            System.out.println("\trowDim = " + rowDim);
             System.out.println("\tmaxWidthHeight = " + maxWidthHeight);
-
         }
         return maxWidthHeight;
     }
@@ -158,17 +157,15 @@ public class Cell implements Renderable {
             mgr.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
         }
 
-        XyPair innerTopLeft = XyPair.of((outerTopLeft.x() + cellStyle.padding().left()),
-                                        (outerTopLeft.y() - cellStyle.padding().top()));
-
-        XyPair innerDimensions = XyPair.of(
-                (outerDimensions.x() - cellStyle.padding().left() - cellStyle.padding().right()),
-                (outerDimensions.y() - cellStyle.padding().top() - cellStyle.padding().bottom()));
-
-//        float x = outerTopLeft.x() + cellStyle.padding().left();
-//        float y = outerTopLeft.y() - cellStyle.padding().top();
-//        y -= this.processRows(x, y, allPages, mgr);
-//        return XyPair.of(x + width + cellStyle.padding().right(), y - cellStyle.padding().bottom());
+        XyPair innerTopLeft = outerTopLeft;
+        XyPair innerDimensions = outerDimensions;
+        if (cellStyle.padding() != null) {
+            innerTopLeft = XyPair.of((outerTopLeft.x() + cellStyle.padding().left()),
+                                     (outerTopLeft.y() - cellStyle.padding().top()));
+            innerDimensions = XyPair.of(
+                    (outerDimensions.x() - cellStyle.padding().left() - cellStyle.padding().right()),
+                    (outerDimensions.y() - cellStyle.padding().top() - cellStyle.padding().bottom()));
+        }
 
         XyPair outerLowerRight = outerTopLeft;
         for (Renderable row : rows) {
@@ -200,15 +197,6 @@ public class Cell implements Renderable {
 
         return outerLowerRight;
     }
-
-
-//    public XyPair render(XyPair p, boolean allPages, PdfLayoutMgr mgr, float maxWidth) {
-//        // TODO: This shouldn't ignore the internal cellstyle.
-//        float x = p.x() + cellStyle.padding().left();
-//        float y = p.y() - cellStyle.padding().top();
-//        y -= this.processRows(x, y, allPages, mgr);
-//        return XyPair.of(x + width + cellStyle.padding().right(), y - cellStyle.padding().bottom());
-//    }
 
     public static Builder builder(CellStyle cellStyle, float width) {
         return new Builder(cellStyle, width);

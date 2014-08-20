@@ -16,6 +16,9 @@ public class XyPair {
 
     public XyPair minus(XyPair that) { return of(this.x - that.x(), this.y - that.y()); }
     public XyPair plus(XyPair that) { return of(this.x + that.x(), this.y + that.y()); }
+
+//    public XyPair plusXMinusY(XyPair that) { return of(this.x + that.x(), this.y - that.y()); }
+
     public XyPair maxXandY(XyPair that) {
         if ((this.x >= that.x()) && (this.y >= that.y())) { return this; }
         if ((this.x <= that.x()) && (this.y <= that.y())) { return that; }
@@ -28,6 +31,9 @@ public class XyPair {
         return of((this.x > that.x()) ? this.x : that.x(),
                   (this.y < that.y()) ? this.y : that.y());
     }
+
+    /** Compares dimensions */
+    public boolean lte(XyPair that) { return (this.x <= that.x()) && (this.y <= that.y()); }
 
     @Override
     public String toString() {

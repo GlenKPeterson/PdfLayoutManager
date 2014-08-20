@@ -139,6 +139,11 @@ public class Text implements Renderable {
             text = substrNoLeadingWhitespace(text, substr.length());
             if (strWidth > maxX) { maxX = strWidth; }
         }
+//        // Not sure what to do if passed "".  This used to mean to insert a blank line, but I'd
+//        // really like to make that "\n" instead, but don't have the time.  *sigh*
+//        if (y == 0) {
+//            y -= textStyle.lineHeight();
+//        }
         wb.blockDim = XyPair.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
         return wb.blockDim;
@@ -154,24 +159,24 @@ public class Text implements Renderable {
             wb = dims.get(maxWidth);
         }
 
+        float x = outerTopLeft.x();
+        float y = outerTopLeft.y();
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
-
-        XyPair blockTopLeft = outerTopLeft.plus(XyPair.of(innerPadding.left(),
-                                                          innerPadding.top()));
-
-        float x = blockTopLeft.x();
-        float y = blockTopLeft.y();
+        if (innerPadding != null) {
+            x += innerPadding.left();
+            y -= innerPadding.top();
+        }
 
         for (WrappedRow wr : wb.rows) {
             // Here we're done whether it fits or not.
-            final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
+            //final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
 
             y -= textStyle.ascent();
             if (allPages) {
-                mgr.borderStyledText(xVal, y, wr.string, textStyle);
+                mgr.borderStyledText(x, y, wr.string, textStyle);
             } else {
                 PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
-                pby.pb.drawStyledText(xVal, pby.y, wr.string, textStyle);
+                pby.pb.drawStyledText(x, pby.y, wr.string, textStyle);
             }
             y -= textStyle.descent();
             y -= textStyle.leading();
@@ -193,6 +198,8 @@ public class Text implements Renderable {
 
     @Override
     public String toString() {
-        return "Text(" + text + ")";
+        return "Text(\"" + ((text.length() > 50) ? text.substring(0,47) + "..."
+                                                 : text) +
+               "\")";
     }
 }
