@@ -152,11 +152,11 @@ public class CellStyle {
 
         public CellStyle build() {
             if (align == null) { align = DEFAULT_ALIGN; }
-            if (padding == null) { padding = Padding.DEFAULT_PADDING; }
+            if (padding == null) { padding = Padding.DEFAULT_TEXT_PADDING; }
             if (borderStyle == null) { borderStyle = BorderStyle.NO_BORDERS; }
 
             if ( (align == DEFAULT_ALIGN) &&
-                 (padding == Padding.DEFAULT_PADDING) &&
+                 (padding == Padding.DEFAULT_TEXT_PADDING) &&
                  ((bgColor == null) || bgColor.equals(Color.WHITE)) &&
                  (borderStyle == BorderStyle.NO_BORDERS) ) {
                 return DEFAULT;

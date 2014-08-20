@@ -22,7 +22,7 @@ public class Padding {
     /**
      Default padding of 1.5, 1.5, 2. 1.5 (top, right, bottom, left)
      */
-    public static final Padding DEFAULT_PADDING = Padding.of(1.5f, 1.5f, 2f, 1.5f);
+    public static final Padding DEFAULT_TEXT_PADDING = Padding.of(1.5f, 1.5f, 2f, 1.5f);
     public static final Padding NO_PADDING = Padding.of(0f, 0f, 0f, 0f);
 
     private final float top;
@@ -34,8 +34,10 @@ public class Padding {
     }
     /** Like HTML it's top, right, bottom, left */
     public static Padding of(float t, float r, float b, float l) {
-        if ((t == 1.5f) && (r == 1.5f) && (b == 2f) && (l == 1.5f)) { return DEFAULT_PADDING; }
         if ((t == 0f) && (r == 0f) && (b == 0f) && (l == 0f)) { return NO_PADDING; }
+        if ((t == 1.5f) && (r == 1.5f) && (b == 2f) && (l == 1.5f)) {
+            return DEFAULT_TEXT_PADDING;
+        }
         return new Padding(t, r, b, l);
     }
     /** Sets all padding values equally */

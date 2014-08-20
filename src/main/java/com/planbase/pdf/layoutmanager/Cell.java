@@ -134,13 +134,22 @@ public class Cell implements Renderable {
 
     public XyPair calcDimensions(float maxWidth) {
         //         maxHeight += 2; // padding.
-        XyPair maxWidthHeight = XyPair.of(0,0);
+        XyPair maxWidthHeight = XyPair.ORIGIN;
+        if (cellStyle.padding() != null) {
+            maxWidth -= (cellStyle.padding().left() + cellStyle.padding().right());
+            maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().left())
+                                           .y(maxWidthHeight.y() + cellStyle.padding().top());
+        }
         for (Renderable row : rows) {
             XyPair rowDim = row.calcDimensions(maxWidth);
-            maxWidthHeight = maxWidthHeight.maxXandY(rowDim);
+            maxWidthHeight = maxWidthHeight.plus(rowDim);
             System.out.println("\trow = " + row);
             System.out.println("\trowDim = " + rowDim);
             System.out.println("\tmaxWidthHeight = " + maxWidthHeight);
+        }
+        if (cellStyle.padding() != null) {
+            maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().right())
+                                           .y(maxWidthHeight.y() + cellStyle.padding().bottom());
         }
         return maxWidthHeight;
     }

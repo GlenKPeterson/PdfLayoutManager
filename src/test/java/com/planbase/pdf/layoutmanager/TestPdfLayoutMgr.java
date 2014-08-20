@@ -46,20 +46,24 @@ public class TestPdfLayoutMgr {
 
         float y = pageMgr.yPageTop();
 
+        Padding textCellPadding = Padding.of(2f);
+
         TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5f, Color.WHITE);
-        CellStyle headingCell = CellStyle.of(CellStyle.Align.TOP_CENTER, null, Color.BLUE,
-                                                  BorderStyle.builder()
-                                                          .left(LineStyle.of(Color.BLUE))
-                                                          .right(LineStyle.of(Color.WHITE))
-                                                          .build());
-        CellStyle headingCellR = CellStyle.of(CellStyle.Align.TOP_CENTER, null, Color.BLACK,
-                                                   BorderStyle.builder()
-                                                           .left(LineStyle.of(Color.WHITE))
-                                                           .right(LineStyle.of(Color.BLACK))
-                                                           .build());
+        CellStyle headingCell = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
+                                             Color.BLUE,
+                                             BorderStyle.builder()
+                                                     .left(LineStyle.of(Color.BLUE))
+                                                     .right(LineStyle.of(Color.WHITE))
+                                                     .build());
+        CellStyle headingCellR = CellStyle.of(CellStyle.Align.TOP_CENTER, textCellPadding,
+                                              Color.BLACK,
+                                              BorderStyle.builder()
+                                                      .left(LineStyle.of(Color.WHITE))
+                                                      .right(LineStyle.of(Color.BLACK))
+                                                      .build());
 
         TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5f, Color.BLACK);
-        CellStyle regularCell = CellStyle.of(CellStyle.Align.TOP_LEFT, null, null,
+        CellStyle regularCell = CellStyle.of(CellStyle.Align.TOP_LEFT, textCellPadding, null,
                                                   BorderStyle.builder()
                                                           .left(LineStyle.of(Color.BLACK))
                                                           .right(LineStyle.of(Color.BLACK))
