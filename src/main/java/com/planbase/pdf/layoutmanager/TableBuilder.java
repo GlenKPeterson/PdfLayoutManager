@@ -19,20 +19,20 @@ import java.util.List;
 
 public class TableBuilder { // implements Renderable {
     private final LogicalPageBuilder logicalPageBuilder;
-    private final XyPair topLeft;
+    private final XyDimension topLeft;
     private final List<Float> cellWidths = new ArrayList<Float>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(LogicalPageBuilder lp, XyPair tl) {
+    private TableBuilder(LogicalPageBuilder lp, XyDimension tl) {
         logicalPageBuilder = lp; topLeft = tl;
     }
-    public static TableBuilder of(LogicalPageBuilder lp, XyPair tl) {
+    public static TableBuilder of(LogicalPageBuilder lp, XyDimension tl) {
         return new TableBuilder(lp, tl);
     }
 
-    public XyPair topLeft() { return topLeft; }
+    public XyDimension topLeft() { return topLeft; }
 
     public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
     public TableBuilder addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }

@@ -29,33 +29,33 @@ public class CellStyle {
     /** Horizontal and vertical alignment options for cell contents */
     public enum Align {
         TOP_LEFT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 return Padding.of(0, outer.x() - inner.x(), outer.y() - inner.y(), 0);
             }
         },
         TOP_CENTER {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 float dx = (outer.x() - inner.x()) / 2;
                 return Padding.of(0, dx, outer.y() - inner.y(), dx);
             }
         },
         TOP_RIGHT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 return Padding.of(0, 0, outer.y() - inner.y(), outer.x() - inner.x());
             }
         },
         MIDDLE_LEFT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, outer.x() - inner.x(), dy, 0);
             }
         },
         MIDDLE_CENTER {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 float dx = (outer.x() - inner.x()) / 2;
                 float dy = (outer.y() - inner.y()) / 2;
@@ -63,27 +63,27 @@ public class CellStyle {
             }
         },
         MIDDLE_RIGHT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, 0, dy, outer.x() - inner.x());
             }
         },
         BOTTOM_LEFT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 return Padding.of(outer.y() - inner.y(), outer.x() - inner.x(), 0, 0);
             }
         },
         BOTTOM_CENTER {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 float dx = (outer.x() - inner.x()) / 2;
                 return Padding.of(outer.y() - inner.y(), dx, 0, dx);
             }
         },
         BOTTOM_RIGHT {
-            @Override public Padding calcPadding(XyPair outer, XyPair inner) {
+            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
                 if (outer.lte(inner)) { return Padding.NO_PADDING; }
                 return Padding.of(outer.y() - inner.y(), 0, 0, outer.x() - inner.x());
             }
@@ -93,7 +93,7 @@ public class CellStyle {
         Given outer dimensions (make sure to add padding as necessary), and inner dimensions,
         calculates additional padding to apply.
         */
-        public abstract Padding calcPadding(XyPair outer, XyPair inner);
+        public abstract Padding calcPadding(XyDimension outer, XyDimension inner);
     }
 
     public static final Align DEFAULT_ALIGN = Align.TOP_LEFT;

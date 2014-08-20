@@ -62,33 +62,18 @@ public class ScaledJpeg implements Renderable {
     /** @return the underlying buffered image */
     public BufferedImage bufferedImage() { return bufferedImage; }
 
-    /** @return the scaled width of the image in document units. */
-    private float width() { return width; }
+    public XyDimension dimensions() { return XyDimension.of(width, height); }
 
-    /** @return the scaled height of the image in document units. */
-    private float height() { return height; }
+    public XyDimension calcDimensions(float maxWidth) { return dimensions(); }
 
-    public XyPair dimensions() { return XyPair.of(width, height); }
-
-    public XyPair calcDimensions(float maxWidth) { return dimensions(); }
-
-    public XyPair render(PdfLayoutMgr mgr, XyPair outerTopLeft, XyPair outerDimensions, boolean allPages) {
-
-        // Padding innerPadding = align.calcPadding(outerDimensions, dimensions());
-
-//        XyPair blockTopLeft = outerTopLeft.plus(XyPair.of(innerPadding.left(),
-//                                                          innerPadding.top()));
-
-        float x = outerTopLeft.x();
-        float y = outerTopLeft.y();
-
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions, boolean allPages) {
         // use bottom of image for page-breaking calculation.
-        y -= this.height();
+        float y = outerTopLeft.y() - height;
 
         // Calculate what page image should start on
         PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
         // draw image based on baseline and decrement y appropriately for image.
-        pby.pb.drawJpeg(x, pby.y, this, mgr);
-        return XyPair.of(x + width(), y);
+        pby.pb.drawJpeg(outerTopLeft.x(), pby.y, this, mgr);
+        return XyOffset.of(outerTopLeft.x() + width, y);
     }
 }

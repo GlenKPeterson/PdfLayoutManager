@@ -132,20 +132,19 @@ public class Cell implements Renderable {
 //        return origY - y - cellStyle.padding().bottom(); // numLines * height;
 //    } // end processRows();
 
-    public XyPair calcDimensions(float maxWidth) {
-        //         maxHeight += 2; // padding.
-        XyPair maxWidthHeight = XyPair.ORIGIN;
+    public XyDimension calcDimensions(float maxWidth) {
+        XyDimension maxWidthHeight = XyDimension.ORIGIN;
         if (cellStyle.padding() != null) {
             maxWidth -= (cellStyle.padding().left() + cellStyle.padding().right());
             maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().left())
                                            .y(maxWidthHeight.y() + cellStyle.padding().top());
         }
         for (Renderable row : rows) {
-            XyPair rowDim = row.calcDimensions(maxWidth);
+            XyDimension rowDim = row.calcDimensions(maxWidth);
             maxWidthHeight = maxWidthHeight.plus(rowDim);
-            System.out.println("\trow = " + row);
-            System.out.println("\trowDim = " + rowDim);
-            System.out.println("\tmaxWidthHeight = " + maxWidthHeight);
+//            System.out.println("\trow = " + row);
+//            System.out.println("\trowDim = " + rowDim);
+//            System.out.println("\tmaxWidthHeight = " + maxWidthHeight);
         }
         if (cellStyle.padding() != null) {
             maxWidthHeight = maxWidthHeight.x(maxWidthHeight.x() + cellStyle.padding().right())
@@ -158,25 +157,27 @@ public class Cell implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyPair render(final PdfLayoutMgr mgr, final XyPair outerTopLeft,
-                         final XyPair outerDimensions, final boolean allPages) {
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
+                           boolean allPages) {
 
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
             mgr.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
         }
 
-        XyPair innerTopLeft = outerTopLeft;
-        XyPair innerDimensions = outerDimensions;
+        XyOffset innerTopLeft = outerTopLeft;
+        XyDimension innerDimensions = outerDimensions;
         if (cellStyle.padding() != null) {
-            innerTopLeft = XyPair.of((outerTopLeft.x() + cellStyle.padding().left()),
-                                     (outerTopLeft.y() - cellStyle.padding().top()));
-            innerDimensions = XyPair.of(
+            innerTopLeft = XyOffset.of((outerTopLeft.x() + cellStyle.padding().left()),
+                                       (outerTopLeft.y() - cellStyle.padding().top()));
+            innerDimensions = XyDimension.of(
                     (outerDimensions.x() - cellStyle.padding().left() - cellStyle.padding().right()),
                     (outerDimensions.y() - cellStyle.padding().top() - cellStyle.padding().bottom()));
         }
+        XyDimension wrappedBlockDim = calcDimensions(innerDimensions.x());
+        Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
 
-        XyPair outerLowerRight = outerTopLeft;
+        XyOffset outerLowerRight = innerTopLeft;
         for (Renderable row : rows) {
             outerLowerRight = row.render(mgr, innerTopLeft, innerDimensions, allPages);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());

@@ -226,7 +226,7 @@ public class PdfLayoutMgr {
         @Override
         public void commit(PDPageContentStream stream) throws IOException {
             // stream.drawImage(jpeg, x, y);
-            XyPair dim = scaledJpeg.dimensions();
+            XyDimension dim = scaledJpeg.dimensions();
             stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
         }
     }
@@ -520,15 +520,15 @@ public class PdfLayoutMgr {
         }
     }
 
-    public XyPair putRect(XyPair outerTopLeft, XyPair outerDimensions, final Color c) {
+    public XyOffset putRect(XyOffset outerTopLeft, XyDimension outerDimensions, final Color c) {
         System.out.println("=====================================================");
         System.out.println("outerTopLeft = " + outerTopLeft);
         System.out.println("outerDimensions = " + outerDimensions);
         System.out.println("color = " + c);
         System.out.println("=====================================================");
         putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
-        return XyPair.of(outerTopLeft.x() + outerDimensions.x(),
-                         outerTopLeft.y() - outerDimensions.y());
+        return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
+                           outerTopLeft.y() - outerDimensions.y());
     }
 
     public void putRect(final float left, final float topY, final float width,
@@ -597,7 +597,7 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
-        return cell.render(this, XyPair.of(x, origY), cell.calcDimensions(cell.width()), true).y();
+        return cell.render(this, XyOffset.of(x, origY), cell.calcDimensions(cell.width()), true).y();
     }
 
     /**
@@ -633,7 +633,7 @@ public class PdfLayoutMgr {
         // render the row with that maxHeight.
         float x = initialX;
         for (Cell cell : cells) {
-            cell.render(this, XyPair.of(x, origY), XyPair.of(cell.width(), maxHeight), false);
+            cell.render(this, XyOffset.of(x, origY), XyDimension.of(cell.width(), maxHeight), false);
             x += cell.width();
         }
 

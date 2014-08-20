@@ -27,18 +27,18 @@ public class Text implements Renderable {
 
     private static class WrappedRow {
         String string;
-        XyPair rowDim;
+        XyDimension rowDim;
         public static WrappedRow of(String s, float x, float y) {
             WrappedRow wr = new WrappedRow();
             wr.string = s;
-            wr.rowDim = XyPair.of(x, y);
+            wr.rowDim = XyDimension.of(x, y);
             return wr;
         }
     }
 
     private static class WrappedBlock {
         List<WrappedRow> rows = new ArrayList<WrappedRow>();
-        XyPair blockDim;
+        XyDimension blockDim;
     }
 
     public static final Text DEFAULT = new Text(null, "");
@@ -63,7 +63,7 @@ public class Text implements Renderable {
 
     public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
-    public XyPair calcDimensions(float maxWidth) {
+    public XyDimension calcDimensions(float maxWidth) {
         WrappedBlock wb = dims.get(maxWidth);
         if (wb != null) {
             return wb.blockDim;
@@ -71,7 +71,7 @@ public class Text implements Renderable {
         return calcDimensionsForReal(maxWidth);
     }
 
-    private XyPair calcDimensionsForReal(float maxWidth) {
+    private XyDimension calcDimensionsForReal(float maxWidth) {
         WrappedBlock wb = new WrappedBlock();
         float x = 0;
         float y = 0;
@@ -144,13 +144,13 @@ public class Text implements Renderable {
 //        if (y == 0) {
 //            y -= textStyle.lineHeight();
 //        }
-        wb.blockDim = XyPair.of(maxX, 0 - y);
+        wb.blockDim = XyDimension.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
         return wb.blockDim;
     }
 
-    public XyPair render(PdfLayoutMgr mgr, XyPair outerTopLeft, XyPair outerDimensions,
-                         boolean allPages) {
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
+                           boolean allPages) {
 
         float maxWidth = outerDimensions.x();
         WrappedBlock wb = dims.get(maxWidth);
@@ -181,7 +181,8 @@ public class Text implements Renderable {
             y -= textStyle.descent();
             y -= textStyle.leading();
         }
-        return wb.blockDim;
+        return XyOffset.of(outerTopLeft.x() + wb.blockDim.x(),
+                           outerTopLeft.y() - wb.blockDim.y());
     }
 
     private static String substrNoLeadingWhitespace(final String text, int startIdx) {
