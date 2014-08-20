@@ -22,7 +22,7 @@ public class Padding {
     /**
      Default padding of 1.5, 1.5, 2. 1.5 (top, right, bottom, left)
      */
-    public static final Padding DEFAULT_PADDING = Padding.valueOf(1.5f, 1.5f, 2f, 1.5f);
+    public static final Padding DEFAULT_PADDING = Padding.of(1.5f, 1.5f, 2f, 1.5f);
 
     private final float top;
     private final float right;
@@ -32,14 +32,11 @@ public class Padding {
         top = t; right = r; bottom = b; left = l;
     }
     /** Like HTML it's top, right, bottom, left */
-    public static Padding valueOf(final float t, final float r, final float b,
-                                   final float l) {
+    public static Padding of(float t, float r, float b, float l) {
         return new Padding(t, r, b, l);
     }
     /** Sets all padding values equally */
-    public static Padding valueOf(final float a) {
-        return new Padding(a,a,a,a);
-    }
+    public static Padding of(float a) { return new Padding(a,a,a,a); }
 
     @Override
     public boolean equals(Object other) {

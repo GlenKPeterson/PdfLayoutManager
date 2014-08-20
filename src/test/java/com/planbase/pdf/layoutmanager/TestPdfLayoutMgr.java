@@ -47,19 +47,19 @@ public class TestPdfLayoutMgr {
         float y = pageMgr.yPageTop();
 
         TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5f, Color.WHITE);
-        CellStyle headingCell = CellStyle.of(CellStyle.HorizAlign.CENTER, null, Color.BLUE,
+        CellStyle headingCell = CellStyle.of(CellStyle.Align.TOP_CENTER, null, Color.BLUE,
                                                   BorderStyle.builder()
                                                           .left(LineStyle.of(Color.BLUE))
                                                           .right(LineStyle.of(Color.WHITE))
                                                           .build());
-        CellStyle headingCellR = CellStyle.of(CellStyle.HorizAlign.CENTER, null, Color.BLACK,
+        CellStyle headingCellR = CellStyle.of(CellStyle.Align.TOP_CENTER, null, Color.BLACK,
                                                    BorderStyle.builder()
                                                            .left(LineStyle.of(Color.WHITE))
                                                            .right(LineStyle.of(Color.BLACK))
                                                            .build());
 
         TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5f, Color.BLACK);
-        CellStyle regularCell = CellStyle.of(CellStyle.HorizAlign.LEFT, null, null,
+        CellStyle regularCell = CellStyle.of(CellStyle.Align.TOP_LEFT, null, null,
                                                   BorderStyle.builder()
                                                           .left(LineStyle.of(Color.BLACK))
                                                           .right(LineStyle.of(Color.BLACK))
@@ -69,10 +69,13 @@ public class TestPdfLayoutMgr {
         pageMgr.logicalPageStart();
 
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
-        CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.HorizAlign.CENTER, null, null, null);
+        CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
         pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
                                       Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
+
+        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
+
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
                                    "Transliterated Russian (with un-transliterated Chinese below)"),

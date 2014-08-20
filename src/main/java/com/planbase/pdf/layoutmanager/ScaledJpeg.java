@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage;
  significantly decreases the file size of the resulting PDF when images are reused within that
  document.
  */
-public class ScaledJpeg {
+public class ScaledJpeg implements Renderable {
     public static final float ASSUMED_IMAGE_DPI = 300f;
     public static final float IMAGE_SCALE = 1f / ASSUMED_IMAGE_DPI * PdfLayoutMgr.DOC_UNITS_PER_INCH;
 
@@ -57,14 +57,38 @@ public class ScaledJpeg {
      @param bi the source BufferedImage
      @return a ScaledJpeg holding the width and height for that image.
      */
-    public static ScaledJpeg of(BufferedImage bi) {
-        return new ScaledJpeg(bi, 0, 0);
-    }
+    public static ScaledJpeg of(BufferedImage bi) { return new ScaledJpeg(bi, 0, 0); }
 
     /** @return the underlying buffered image */
     public BufferedImage bufferedImage() { return bufferedImage; }
+
     /** @return the scaled width of the image in document units. */
-    public float width() { return width; }
+    private float width() { return width; }
+
     /** @return the scaled height of the image in document units. */
-    public float height() { return height; }
+    private float height() { return height; }
+
+    public XyPair dimensions() { return XyPair.of(width, height); }
+
+    public XyPair calcDimensions(float maxWidth) { return dimensions(); }
+
+    public XyPair render(PdfLayoutMgr mgr, XyPair outerTopLeft, XyPair outerDimensions, boolean allPages) {
+
+        // Padding innerPadding = align.calcPadding(outerDimensions, dimensions());
+
+//        XyPair blockTopLeft = outerTopLeft.plus(XyPair.of(innerPadding.left(),
+//                                                          innerPadding.top()));
+
+        float x = outerTopLeft.x();
+        float y = outerTopLeft.y();
+
+        // use bottom of image for page-breaking calculation.
+        y -= this.height();
+
+        // Calculate what page image should start on
+        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+        // draw image based on baseline and decrement y appropriately for image.
+        pby.pb.drawJpeg(x, pby.y, this, mgr);
+        return XyPair.of(x + width(), y);
+    }
 }

@@ -226,8 +226,8 @@ public class PdfLayoutMgr {
         @Override
         public void commit(PDPageContentStream stream) throws IOException {
             // stream.drawImage(jpeg, x, y);
-
-            stream.drawXObject( jpeg, x, y, scaledJpeg.width(), scaledJpeg.height());
+            XyPair dim = scaledJpeg.dimensions();
+            stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
         }
     }
 
@@ -520,6 +520,17 @@ public class PdfLayoutMgr {
         }
     }
 
+    public XyPair putRect(XyPair outerTopLeft, XyPair outerDimensions, final Color c) {
+        System.out.println("=====================================================");
+        System.out.println("outerTopLeft = " + outerTopLeft);
+        System.out.println("outerDimensions = " + outerDimensions);
+        System.out.println("color = " + c);
+        System.out.println("=====================================================");
+        putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
+        return XyPair.of(outerTopLeft.x() + outerDimensions.x(),
+                         outerTopLeft.y() - outerDimensions.y());
+    }
+
     public void putRect(final float left, final float topY, final float width,
                         final float maxHeight, final Color c) {
         float bottomY = topY - maxHeight;
@@ -566,16 +577,16 @@ public class PdfLayoutMgr {
         }
     }
 
-    /**
-     Puts text on the page.
-     @param x the x-value of the top-left corner.
-     @param origY the logical-page Y-value of the top-left corner.
-     @param cell the cell containing the styling and text to render.
-     @return the bottom Y-value (logical-page) of the rendered cell.
-     */
-    public float putCell(final float x, float origY, final Cell cell) {
-        return cell.processRows(x, origY, false, this);
-    }
+//    /**
+//     Puts text on the page.
+//     @param x the x-value of the top-left corner.
+//     @param origY the logical-page Y-value of the top-left corner.
+//     @param cell the cell containing the styling and text to render.
+//     @return the bottom Y-value (logical-page) of the rendered cell.
+//     */
+//    public float putCell(final float x, float origY, final Cell cell) {
+//        return cell.processRows(x, origY, false, this);
+//    }
 
     /**
      For header or footer text on all pages in this logical page grouping.
@@ -586,7 +597,7 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
-        return cell.processRows(x, origY, true, this);
+        return cell.render(this, XyPair.of(x, origY), cell.calcDimensions(cell.width()), true).y();
     }
 
     /**
@@ -602,7 +613,6 @@ public class PdfLayoutMgr {
     public float putRow(final float initialX, final float origY, final Cell... cells)
             throws IOException {
 
-        float x = initialX;
 
 // Not sure why this didn't work, but it makes the next page start too high.
 //        // If we are too close to the bottom of a page, start on the next page.
@@ -611,60 +621,131 @@ public class PdfLayoutMgr {
 //            origY += overflow;
 //        }
 
+        // Go through all cells calculating the maximum height for the row.
         float maxHeight = 0;
         for (Cell cell : cells) {
-            float totalHeight = putCell(x, origY, cell);
-            x += cell.width();
+            float totalHeight = cell.calcDimensions(cell.width()).y(); //  putCell(x, origY, cell);
             if (totalHeight > maxHeight) {
                 maxHeight = totalHeight;
             }
         }
 
-        maxHeight += 2; // padding.
-        x = initialX;
-        float bottomY = origY - maxHeight;
+        // render the row with that maxHeight.
+        float x = initialX;
+        for (Cell cell : cells) {
+            cell.render(this, XyPair.of(x, origY), XyPair.of(cell.width(), maxHeight), false);
+            x += cell.width();
+        }
 
-//        LineStyle prevRightLineStyle = null;
-        // logger.info("Drawing cell background on page " + psy.ps.pageNum + " at y=" + psy.y);
-        for (int i = 0; i < cells.length; i++) {
-            Cell cell = cells[i];
-            float width = cell.width();
-            CellStyle cellStyle = cell.cellStyle();
-            if (cellStyle.bgColor() != null) {
-                putRect(x, origY, width, (origY - bottomY), cellStyle.bgColor());
-            }
+        return origY - maxHeight;
+//        maxHeight += 2; // padding.
+//        x = initialX;
+//        float bottomY = origY - maxHeight;
 
-            float rightX = x + width;
-            BorderStyle border = cellStyle.borderStyle();
-            if (border == null) {
-//                prevRightLineStyle = null;
-            } else {
-                // Like CSS it's listed Top, Right, Bottom, left
-                if (border.top() != null) {
-                    putLine(x, origY, rightX, origY, border.top());
-                }
-                if (border.right() != null) {
-                    putLine(rightX, origY, rightX, bottomY, border.right());
-//                    prevRightLineStyle = border.right();
-                }
-                if (border.bottom() != null) {
-                    putLine(x, bottomY, rightX, bottomY, border.bottom());
-                }
-                if (border.left() != null) {
-                    putLine(x, origY, x, bottomY, border.left());
-//                    // Only draw a left-hand line if it won't be the same as the right-hand line
-//                    // of the previous cell (don't draw double-lines).
-//                    if ( (prevRightLineStyle == null) ||
-//                         !prevRightLineStyle.equals(border.left()) ) {
-//                        putLine(x, origY, x, bottomY, border.left());
-//                    }
-                }
-            }
-
-            x += width;
-        } // end for
-        return bottomY;
+////        LineStyle prevRightLineStyle = null;
+//        // logger.info("Drawing cell background on page " + psy.ps.pageNum + " at y=" + psy.y);
+//        for (int i = 0; i < cells.length; i++) {
+//            Cell cell = cells[i];
+//            float width = cell.width();
+//
+//
+//
+//
+////            // I wanted to put this in Cell.processRows, but for the maxHeight param. Each cell has
+////            // a pre-defined width, but text-wrapping can change the height.  So all cells in a row
+////            // must report their max-height before any of them can have backgrounds or borders
+////            // rendered.
+////
+////            CellStyle cellStyle = cell.cellStyle();
+////            if (cellStyle.bgColor() != null) {
+////                putRect(x, origY, width, (origY - bottomY), cellStyle.bgColor());
+////            }
+////
+////            float rightX = x + width;
+////            BorderStyle border = cellStyle.borderStyle();
+////            if (border != null) {
+////                // Like CSS it's listed Top, Right, Bottom, left
+////                if (border.top() != null) {
+////                    putLine(x, origY, rightX, origY, border.top());
+////                }
+////                if (border.right() != null) {
+////                    putLine(rightX, origY, rightX, bottomY, border.right());
+////                }
+////                if (border.bottom() != null) {
+////                    putLine(x, bottomY, rightX, bottomY, border.bottom());
+////                }
+////                if (border.left() != null) {
+////                    putLine(x, origY, x, bottomY, border.left());
+////                }
+////            }
+//
+//
+//
+//
+//
+//            x += width;
+//        } // end for
+//        return bottomY;
     }
+
+    /*
+
+    Rows are cool, but tables are cooler.  Really want a table with a head section and body
+    section, each with their own default cell and text styles.  The "FixedTable" class should
+    hold the column widths and produce appropriate row builders with default styles set which in
+    turn make cell builders with default styles set, and so forth.
+
+    public float putRow(float initialX, float origY, Row r) throws IOException {
+        return putRow(initialX, origY, r.cells.toArray(new Cell[r.cells.size()]));
+    }
+
+    public float putRows(float initialX, float y, Iterable<Row> rs) throws IOException {
+        for (Row r : rs) {
+            y = putRow(initialX, y, r.cells.toArray(new Cell[r.cells.size()]));
+        }
+        return y;
+    }
+
+    private static class Row {
+        private final CellStyle cellStyle;
+        private final TextStyle textStyle;
+        private final List<Cell> cells;
+
+        private Row(CellStyle cs, TextStyle ts, List<Cell> ls) {
+            cellStyle = cs; textStyle = ts; cells = ls;
+        }
+    }
+
+    public static class RowBuilder {
+        private final List<Cell> cells = new ArrayList<Cell>();
+
+        private CellStyle cellStyle = CellStyle.DEFAULT;
+        private TextStyle textStyle;
+
+        private RowBuilder() { ; }
+
+        public RowBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this; }
+        public RowBuilder textStyle(TextStyle ts) { textStyle = ts; return this; }
+
+        // Adds an empty cell with default style
+        public RowBuilder addCell(float width) {
+            cells.add(Cell.of(cellStyle, width));
+            return this;
+        }
+
+        public RowBuilder addCell(float width, String s) {
+            if (textStyle == null) {
+                throw new IllegalStateException("Must set a text style before adding text");
+            }
+            cells.add(Cell.of(cellStyle, width, textStyle, s));
+            return this;
+        }
+
+        public RowBuilder add(Cell c) { cells.add(c); return this; }
+
+        public Row build() { return new Row(cellStyle, textStyle, cells); }
+    }
+    */
 
     private static final String ISO_8859_1 = "ISO_8859_1";
     private static final String UNICODE_BULLET = "\u2022";

@@ -100,4 +100,6 @@ public class TextStyle {
     public float descent() { return descent; }
     /** Leading as a positive number in document units */
     public float leading() { return leading; }
+
+    public float lineHeight() { return ascent + descent + leading; }
 }
