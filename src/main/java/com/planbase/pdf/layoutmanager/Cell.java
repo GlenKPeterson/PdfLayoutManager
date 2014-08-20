@@ -137,7 +137,7 @@ public class Cell implements Renderable {
         XyPair maxWidthHeight = XyPair.of(0,0);
         for (Renderable row : rows) {
             XyPair rowDim = row.calcDimensions(maxWidth);
-            maxWidthHeight = maxWidthHeight.maxXMinY(rowDim);
+            maxWidthHeight = maxWidthHeight.maxXandY(rowDim);
             System.out.println("\trowDim = " + rowDim);
             System.out.println("\trow = " + row);
             System.out.println("\tmaxWidthHeight = " + maxWidthHeight);

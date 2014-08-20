@@ -74,7 +74,7 @@ public class TestPdfLayoutMgr {
         pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
                                       Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
 
-        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
+//        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
