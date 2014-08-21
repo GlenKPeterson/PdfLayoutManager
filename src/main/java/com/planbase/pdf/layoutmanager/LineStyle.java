@@ -64,6 +64,6 @@ public class LineStyle {
     }
 
     @Override public String toString() {
-        return "LineStyle(" + color + " w=" + width + ")";
+        return "LineStyle(" + Utils.toString(color) + " w=" + width + ")";
     }
 }

@@ -77,9 +77,12 @@ public class CellStyle {
         },
         BOTTOM_CENTER {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+//                System.out.println("\t\t\tcalcPadding(o=" + outer + " i=" + inner + ")");
                 if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
+//                System.out.println("\t\t\tcalcPadding() dx=" + dx);
                 // Like HTML it's top, right, bottom, left
+//                System.out.println("\t\t\tcalcPadding() outer.y() - inner.y()=" + (outer.y() - inner.y()));
                 return Padding.of(outer.y() - inner.y(), dx, 0, dx);
             }
         },
@@ -178,7 +181,7 @@ public class CellStyle {
     @Override public String toString() {
         StringBuilder sB = new StringBuilder("CellStyle(").append(align);
         if (padding != null) { sB.append(" ").append(padding); }
-        if (bgColor != null) { sB.append(" ").append(bgColor); }
+        if (bgColor != null) { sB.append(" ").append(Utils.toString(bgColor)); }
         if (borderStyle != null) { sB.append(" ").append(borderStyle); }
         return sB.append(")").toString();
     }

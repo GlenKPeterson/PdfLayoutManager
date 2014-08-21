@@ -49,6 +49,20 @@ public class Padding {
     public XyDim topLeftPadDim() { return XyDim.of(left, top); }
     public XyDim botRightPadDim() { return XyDim.of(right, bottom); }
 
+    public XyDim subtractFrom(XyDim outer) {
+        return XyDim.of(outer.x() - (left + right),
+                        outer.y() - (top + bottom));
+    }
+
+    public XyDim addTo(XyDim outer) {
+        return XyDim.of(outer.x() + (left + right),
+                        outer.y() + (top + bottom));
+    }
+
+    public XyOffset applyTopLeft(XyOffset orig) {
+        return XyOffset.of(orig.x() + left, orig.y() - top);
+    }
+
 //    public XyOffset topLeftPadOffset() { return XyOffset.of(left, -top); }
 //    public XyOffset botRightPadOffset() { return XyOffset.of(right, -bottom); }
 
@@ -77,6 +91,9 @@ public class Padding {
 
     @Override
     public String toString() {
+        if ( (top == right) && (top == bottom) && (top == left) ) {
+            return "Padding(" + top + ")";
+        }
         return "Padding(t=" + top + ", r=" + right + ", b=" + bottom + ", l=" + left + ")";
     }
 

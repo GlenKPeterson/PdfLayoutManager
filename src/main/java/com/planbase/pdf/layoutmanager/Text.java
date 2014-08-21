@@ -138,8 +138,8 @@ public class Text implements Renderable {
 //        }
         wb.blockDim = XyDim.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
-        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
-        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
+//        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
+//        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
         return wb.blockDim;
     }
 
@@ -159,9 +159,9 @@ public class Text implements Renderable {
     public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages) {
 
-        System.out.println("\tText.render(" + this.toString());
-        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
-                           ", outerDimensions=" + outerDimensions);
+//        System.out.println("\tText.render(" + this.toString());
+//        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
+//                           ", outerDimensions=" + outerDimensions);
 
         float maxWidth = outerDimensions.x();
         WrappedBlock wb = ensureWrappedBlock(maxWidth);
@@ -169,7 +169,7 @@ public class Text implements Renderable {
         float x = outerTopLeft.x();
         float y = outerTopLeft.y();
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
-        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
+//        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
         if (innerPadding != null) {
             x += innerPadding.left();
             //y -= innerPadding.top();

@@ -15,9 +15,13 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import javax.imageio.ImageIO;
 
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -51,7 +55,7 @@ public class TestPdfLayoutMgr {
                                                      .left(LineStyle.of(Color.BLUE))
                                                      .right(LineStyle.of(Color.WHITE))
                                                      .build());
-        CellStyle headingCellR = CellStyle.of(CellStyle.Align.TOP_CENTER, textCellPadding,
+        CellStyle headingCellR = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
                                               Color.BLACK,
                                               BorderStyle.builder()
                                                       .left(LineStyle.of(Color.WHITE))
@@ -71,14 +75,14 @@ public class TestPdfLayoutMgr {
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
-//        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
-//                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
+        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
+                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
+
 //        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
-                                   "Transliterated Russian (with un-transliterated Chinese below)")); /*
-                                   ,
+                                   "Transliterated Russian (with un-transliterated Chinese below)"),
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
                            Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
                            Cell.of(headingCellR, colWidths[3], heading, "German"));
@@ -250,10 +254,8 @@ public class TestPdfLayoutMgr {
                            Cell.of(regularCell, colWidths[1], regular, "On the second page"),
                            Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
                            Cell.of(regularCell, colWidths[3], regular, "That's it!"));
-*/
         pageMgr.logicalPageEnd();
 
-/*
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
 
         pageMgr.logicalPageStart();
@@ -278,7 +280,7 @@ public class TestPdfLayoutMgr {
         // bottom line
         pageMgr.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         pageMgr.logicalPageEnd();
-*/
+
         pageMgr.save(os);
     }
 }

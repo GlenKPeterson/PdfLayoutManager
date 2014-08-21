@@ -521,9 +521,8 @@ public class PdfLayoutMgr {
     }
 
     public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
-        System.out.println("putRect(outerTopLeft=" + outerTopLeft +
-                           ", outerDim=" + outerDimensions + ", color=" + c);
-        System.out.println("=====================================================");
+//        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
+//                           Utils.toString(c) + ")");
         putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
         return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
                            outerTopLeft.y() - outerDimensions.y());
@@ -624,11 +623,12 @@ public class PdfLayoutMgr {
         // Go through all cells calculating the maximum height for the row.
         float maxHeight = 0;
         for (Cell cell : cells) {
-            float totalHeight = cell.calcDimensions(cell.width()).y(); //  putCell(x, origY, cell);
-            if (totalHeight > maxHeight) {
-                maxHeight = totalHeight;
-            }
+            float cellHeight = cell.calcDimensions(cell.width()).y(); //  putCell(x, origY, cell);
+//            System.out.println("putRow: cellHeight after calc:" + cellHeight);
+            if (cellHeight > maxHeight) { maxHeight = cellHeight; }
         }
+
+//        System.out.println("putRow: maxHeight=" + maxHeight);
 
         // render the row with that maxHeight.
         float x = initialX;
