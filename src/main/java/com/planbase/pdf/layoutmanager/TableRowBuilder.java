@@ -47,8 +47,40 @@ public class TableRowBuilder {
     }
 
     public TablePart buildRow() {
-        // TODO: Do we want to fill out the row with blank cells?
+        // Do we want to fill out the row with blank cells?
         return tablePart.addRow(this);
+    }
+
+    public XyDim calcDimensions() {
+        XyDim maxDim = XyDim.ZERO;
+        // Similar to PdfLayoutMgr.putRow().  Should be combined?
+        for (Cell cell : cells) {
+            XyDim wh = cell.calcDimensions(cell.width());
+            maxDim = XyDim.of(wh.x() + maxDim.x(),
+                              Float.max(maxDim.y(), wh.y()));
+        }
+        return maxDim;
+    }
+
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft,
+                           boolean allPages) {
+        XyDim maxDim = XyDim.ZERO;
+        for (Cell cell : cells) {
+            XyDim wh = cell.calcDimensions(cell.width());
+            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
+                              maxDim.y() + wh.y());
+        }
+        float maxHeight = maxDim.y();
+
+        XyOffset rightmostLowest = outerTopLeft;
+        for (Cell cell : cells) {
+            // TODO: Cache the duplicate cell.calcDimensions call!!!
+            XyOffset rl = cell.render(mgr, XyOffset.of(rightmostLowest.x(), outerTopLeft.y()),
+                                      XyDim.of(cell.width(), maxHeight), allPages);
+            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
+                                          Float.min(rl.y(), rightmostLowest.y()));
+        }
+        return rightmostLowest;
     }
 
 //    public static TableRow of(float[] cellWidths, Cell[] cells, CellStyle cellStyle,

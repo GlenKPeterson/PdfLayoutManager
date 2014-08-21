@@ -13,28 +13,27 @@
 // limitations under the License.
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.LayoutManager;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 public class DocumentBuilder {
-    private final LayoutManager layoutManager;
+    private final PdfLayoutMgr layoutManager;
     private TextStyle textStyle;
     private PDRectangle pageDimensions;
     private Padding pageMargins;
     private PDRectangle printableArea;
     private List<LogicalPageBuilder> pages = new ArrayList<LogicalPageBuilder>(1);
 
-    private DocumentBuilder(LayoutManager lm) { layoutManager = lm; }
+    private DocumentBuilder(PdfLayoutMgr lm) { layoutManager = lm; }
 
-//    private DocumentBuilder(LayoutManager lm, TextStyle a, PDRectangle b, Padding c, PDRectangle d) {
+//    private DocumentBuilder(PdfLayoutMgr lm, TextStyle a, PDRectangle b, Padding c, PDRectangle d) {
 //        layoutManager = lm;
 //        textStyle = a; pageDimensions = b; pageMargins = c; printableArea = d;
 //    }
 
-    public static DocumentBuilder of(LayoutManager lm) { return new DocumentBuilder(lm); }
+    public static DocumentBuilder of(PdfLayoutMgr lm) { return new DocumentBuilder(lm); }
 //    , TextStyle textStyle, PDRectangle pageDimensions, Padding pageMargins,
 //                              PDRectangle printableArea) {
 //        return new DocumentBuilder(textStyle, pageDimensions, pageMargins, printableArea);
@@ -56,5 +55,5 @@ public class DocumentBuilder {
     public PDRectangle printableArea() { return printableArea; }
     public DocumentBuilder printableArea(PDRectangle x) { printableArea = x; return this; }
 
-    public LayoutManager layoutManager() { return layoutManager; }
+    public PdfLayoutMgr layoutManager() { return layoutManager; }
 }

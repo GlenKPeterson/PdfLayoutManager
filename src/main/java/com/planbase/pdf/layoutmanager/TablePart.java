@@ -58,6 +58,27 @@ public class TablePart {
 
     public TableBuilder buildPart() { return tableBuilder.addPart(this); }
 
+    public XyDim calcDimensions() {
+        XyDim maxDim = XyDim.ZERO;
+        for (TableRowBuilder row : rows) {
+            XyDim wh = row.calcDimensions();
+            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
+                              maxDim.y() + wh.y());
+        }
+        return maxDim;
+    }
+
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, boolean allPages) {
+        XyOffset rightmostLowest = outerTopLeft;
+        for (TableRowBuilder row : rows) {
+            XyOffset rl = row.render(mgr, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
+                                     allPages);
+            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
+                                          Float.min(rl.y(), rightmostLowest.y()));
+        }
+        return rightmostLowest;
+    }
+
 //    public static Builder builder(TableBuilder t) { return new Builder(t); }
 //
 //    public static class Builder {

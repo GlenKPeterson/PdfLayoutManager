@@ -608,25 +608,17 @@ public class PdfLayoutMgr {
      @return the final y-value
      @throws IOException if there is an error writing to the underlying stream.
      */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putRow(final float initialX, final float origY, final Cell... cells)
             throws IOException {
 
-
-// Not sure why this didn't work, but it makes the next page start too high.
-//        // If we are too close to the bottom of a page, start on the next page.
-//        float overflow = origY % printAreaHeight;
-//        if ( (overflow > 0) && (overflow < 8) ) {
-//            origY += overflow;
-//        }
-
-        // Go through all cells calculating the maximum height for the row.
-        float maxHeight = 0;
+        // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
+        XyDim maxDim = XyDim.ZERO;
         for (Cell cell : cells) {
-            float cellHeight = cell.calcDimensions(cell.width()).y(); //  putCell(x, origY, cell);
-//            System.out.println("putRow: cellHeight after calc:" + cellHeight);
-            if (cellHeight > maxHeight) { maxHeight = cellHeight; }
+            XyDim wh = cell.calcDimensions(cell.width());
+            maxDim = XyDim.of(wh.x() + maxDim.x(),
+                              Float.max(maxDim.y(), wh.y()));
         }
+        float maxHeight = maxDim.y();
 
 //        System.out.println("putRow: maxHeight=" + maxHeight);
 
@@ -638,54 +630,6 @@ public class PdfLayoutMgr {
         }
 
         return origY - maxHeight;
-//        maxHeight += 2; // padding.
-//        x = initialX;
-//        float bottomY = origY - maxHeight;
-
-////        LineStyle prevRightLineStyle = null;
-//        // logger.info("Drawing cell background on page " + psy.ps.pageNum + " at y=" + psy.y);
-//        for (int i = 0; i < cells.length; i++) {
-//            Cell cell = cells[i];
-//            float width = cell.width();
-//
-//
-//
-//
-////            // I wanted to put this in Cell.processRows, but for the maxHeight param. Each cell has
-////            // a pre-defined width, but text-wrapping can change the height.  So all cells in a row
-////            // must report their max-height before any of them can have backgrounds or borders
-////            // rendered.
-////
-////            CellStyle cellStyle = cell.cellStyle();
-////            if (cellStyle.bgColor() != null) {
-////                putRect(x, origY, width, (origY - bottomY), cellStyle.bgColor());
-////            }
-////
-////            float rightX = x + width;
-////            BorderStyle border = cellStyle.borderStyle();
-////            if (border != null) {
-////                // Like CSS it's listed Top, Right, Bottom, left
-////                if (border.top() != null) {
-////                    putLine(x, origY, rightX, origY, border.top());
-////                }
-////                if (border.right() != null) {
-////                    putLine(rightX, origY, rightX, bottomY, border.right());
-////                }
-////                if (border.bottom() != null) {
-////                    putLine(x, bottomY, rightX, bottomY, border.bottom());
-////                }
-////                if (border.left() != null) {
-////                    putLine(x, origY, x, bottomY, border.left());
-////                }
-////            }
-//
-//
-//
-//
-//
-//            x += width;
-//        } // end for
-//        return bottomY;
     }
 
     /*

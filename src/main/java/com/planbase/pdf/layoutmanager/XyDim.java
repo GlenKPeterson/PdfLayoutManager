@@ -20,7 +20,7 @@ package com.planbase.pdf.layoutmanager;
  negative y is down from the upper left-hand corner.
  */
 public class XyDim {
-    public static final XyDim ORIGIN = new XyDim(0f, 0f) {
+    public static final XyDim ZERO = new XyDim(0f, 0f) {
         @Override public int hashCode() { return 0; }
     };
     private final float x;
@@ -32,7 +32,7 @@ public class XyDim {
         x = xCoord; y = yCoord;
     }
     public static XyDim of(float x, float y) {
-        if ((x == 0f) && (y == 0f)) { return ORIGIN; }
+        if ((x == 0f) && (y == 0f)) { return ZERO; }
         return new XyDim(x, y);
     }
     public float x() { return x; }

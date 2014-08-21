@@ -33,6 +33,7 @@ public class CellStyle {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(0, outer.x() - inner.x(), outer.y() - inner.y(), 0);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) { return 0f; }
         },
         TOP_CENTER {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
@@ -40,11 +41,17 @@ public class CellStyle {
                 float dx = (outer.x() - inner.x()) / 2;
                 return Padding.of(0, dx, outer.y() - inner.y(), dx);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth) / 2;
+            }
         },
         TOP_RIGHT {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(0, 0, outer.y() - inner.y(), outer.x() - inner.x());
+            }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth);
             }
         },
         MIDDLE_LEFT {
@@ -53,6 +60,7 @@ public class CellStyle {
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, outer.x() - inner.x(), dy, 0);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) { return 0f; }
         },
         MIDDLE_CENTER {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
@@ -61,6 +69,9 @@ public class CellStyle {
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, dx, dy, dx);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth) / 2;
+            }
         },
         MIDDLE_RIGHT {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
@@ -68,12 +79,16 @@ public class CellStyle {
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, 0, dy, outer.x() - inner.x());
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth);
+            }
         },
         BOTTOM_LEFT {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), outer.x() - inner.x(), 0, 0);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) { return 0f; }
         },
         BOTTOM_CENTER {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
@@ -85,11 +100,17 @@ public class CellStyle {
 //                System.out.println("\t\t\tcalcPadding() outer.y() - inner.y()=" + (outer.y() - inner.y()));
                 return Padding.of(outer.y() - inner.y(), dx, 0, dx);
             }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth) / 2;
+            }
         },
         BOTTOM_RIGHT {
             @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), 0, 0, outer.x() - inner.x());
+            }
+            @Override public float leftOffset(float outerWidth, float innerWidth) {
+                return (innerWidth >= outerWidth) ? 0f : (outerWidth - innerWidth);
             }
         };
 
@@ -98,6 +119,7 @@ public class CellStyle {
         calculates additional padding to apply.
         */
         public abstract Padding calcPadding(XyDim outer, XyDim inner);
+        public abstract float leftOffset(float outerWidth, float innerWidth);
     }
 
     public static final Align DEFAULT_ALIGN = Align.TOP_LEFT;

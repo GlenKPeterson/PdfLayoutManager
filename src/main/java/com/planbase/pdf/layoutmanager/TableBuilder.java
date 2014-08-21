@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TableBuilder { // implements Renderable {
+public class TableBuilder implements Renderable {
     private final LogicalPageBuilder logicalPageBuilder;
     private final XyDim topLeft;
     private final List<Float> cellWidths = new ArrayList<Float>(1);
@@ -50,15 +50,30 @@ public class TableBuilder { // implements Renderable {
 
 //    public LogicalPageBuilder buildTable() { return logicalPageBuilder.addRenderable(this); }
 
-//    public XyPair calcDimensions(float maxWidth) {
-//
-//    }
-//
-//
-//    public XyPair render(XyPair p, boolean allPages, PdfLayoutMgr mgr, float maxWidth) {
-//        if (p == null) { p = topLeft; }
-//        if (mgr == null) { mgr = logicalPageBuilder.documentBuilder().layoutMgr(); }
-//
-//    }
+    public XyDim calcDimensions(float maxWidth) {
+        XyDim maxDim = XyDim.ZERO;
+        for (TablePart part : parts) {
+            XyDim wh = part.calcDimensions();
+            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
+                              maxDim.y() + wh.y());
+        }
+        return maxDim;
+    }
+
+    /*
+    Renders item and all child-items with given width and returns the x-y pair of the
+    lower-right-hand corner of the last line (e.g. of text).
+    */
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
+                           boolean allPages) {
+        XyOffset rightmostLowest = outerTopLeft;
+        for (TablePart part : parts) {
+            XyOffset rl = part.render(mgr, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
+                                      allPages);
+            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
+                                          Float.min(rl.y(), rightmostLowest.y()));
+        }
+        return rightmostLowest;
+    }
 
 }

@@ -151,7 +151,7 @@ public class Cell implements Renderable {
 
     private void calcDimensionsForReal(final float maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
-        XyDim blockDim = XyDim.ORIGIN;
+        XyDim blockDim = XyDim.ZERO;
         Padding padding = cellStyle.padding();
         float innerWidth = maxWidth;
         if (padding != null) {
@@ -198,6 +198,8 @@ public class Cell implements Renderable {
 
         float maxWidth = outerDimensions.x();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
+        final Padding padding = cellStyle.padding();
+        // XyDim outerDimensions = padding.addTo(pcrs.blockDim);
 
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
@@ -207,7 +209,6 @@ public class Cell implements Renderable {
         }
 
         // Draw contents over background, but under border
-        final Padding padding = cellStyle.padding();
         XyOffset innerTopLeft;
         final XyDim innerDimensions;
         if (padding == null) {

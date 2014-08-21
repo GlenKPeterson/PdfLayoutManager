@@ -282,5 +282,7 @@ public class TestPdfLayoutMgr {
         pageMgr.logicalPageEnd();
 
         pageMgr.save(os);
+
+        //DocumentBuilder.of(pageMgr).logicalPageBuilder().
     }
 }
