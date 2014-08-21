@@ -71,14 +71,14 @@ public class TestPdfLayoutMgr {
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
-        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
-                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
-
+//        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
+//                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
 //        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
-                                   "Transliterated Russian (with un-transliterated Chinese below)")); /*,
+                                   "Transliterated Russian (with un-transliterated Chinese below)")); /*
+                                   ,
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
                            Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
                            Cell.of(headingCellR, colWidths[3], heading, "German"));
@@ -253,7 +253,7 @@ public class TestPdfLayoutMgr {
 */
         pageMgr.logicalPageEnd();
 
-
+/*
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
 
         pageMgr.logicalPageStart();
@@ -278,7 +278,7 @@ public class TestPdfLayoutMgr {
         // bottom line
         pageMgr.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         pageMgr.logicalPageEnd();
-
+*/
         pageMgr.save(os);
     }
 }

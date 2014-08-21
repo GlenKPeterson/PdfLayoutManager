@@ -61,7 +61,7 @@ public class XyDim {
     /** Compares dimensions */
     public boolean lte(XyDim that) { return (this.x <= that.x()) && (this.y <= that.y()); }
 
-    @Override public String toString() { return "XyDim(" + x + ", " + y + ")"; }
+    @Override public String toString() { return "XyDim(" + x + " " + y + ")"; }
 
     @Override public int hashCode() { return Float.hashCode(x) ^ Float.hashCode(y); }
 

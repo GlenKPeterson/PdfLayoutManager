@@ -14,6 +14,10 @@
 
 package com.planbase.pdf.layoutmanager;
 
+/**
+ Represents a 2D coordinate in terms of X and Y where negative y is down from the upper left-hand
+ corner.  Do not confuse this with an XyDim which represents positive width and height.
+ */
 public class XyOffset {
     public static final XyOffset ORIGIN = new XyOffset(0f, 0f) {
         @Override public int hashCode() { return 0; }
@@ -51,7 +55,7 @@ public class XyOffset {
     /** Compares dimensions */
     public boolean lte(XyOffset that) { return (this.x <= that.x()) && (this.y >= that.y()); }
 
-    @Override public String toString() { return "XyOffset(" + x + ", " + y + ")"; }
+    @Override public String toString() { return "XyOffset(" + x + " " + y + ")"; }
 
     @Override public int hashCode() { return Float.hashCode(x) ^ Float.hashCode(y); }
 

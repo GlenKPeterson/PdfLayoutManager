@@ -191,7 +191,7 @@ public class Cell implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, final XyDim outerDimensions,
                            boolean allPages) {
         System.out.println("Cell.render(" + this.toString());
 
@@ -217,6 +217,10 @@ public class Cell implements Renderable {
         }
         XyDim wrappedBlockDim = pcrs.blockDim;
         Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
+        System.out.println("\tCell.render outerDimensions=" + outerDimensions);
+        System.out.println("\tCell.render innerDimensions=" + innerDimensions);
+        System.out.println("\tCell.render wrappedBlockDim=" + wrappedBlockDim);
+        System.out.println("\tCell.render alignPad=" + alignPad);
         if (alignPad != null) {
             innerTopLeft = XyOffset.of(innerTopLeft.x() + alignPad.left(),
                                        innerTopLeft.y() - alignPad.top());

@@ -595,7 +595,9 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
-        return cell.render(this, XyOffset.of(x, origY), cell.calcDimensions(cell.width()), true).y();
+        float outerWidth = cell.width();
+        XyDim innerDim = cell.calcDimensions(outerWidth);
+        return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
     }
 
     /**
