@@ -27,18 +27,18 @@ public class Text implements Renderable {
 
     private static class WrappedRow {
         String string;
-        XyDimension rowDim;
+        XyDim rowDim;
         public static WrappedRow of(String s, float x, float y) {
             WrappedRow wr = new WrappedRow();
             wr.string = s;
-            wr.rowDim = XyDimension.of(x, y);
+            wr.rowDim = XyDim.of(x, y);
             return wr;
         }
     }
 
     private static class WrappedBlock {
         List<WrappedRow> rows = new ArrayList<WrappedRow>();
-        XyDimension blockDim;
+        XyDim blockDim;
     }
 
     public static final Text DEFAULT = new Text(null, "");
@@ -63,7 +63,7 @@ public class Text implements Renderable {
 
     public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
-    private XyDimension calcDimensionsForReal(final float maxWidth) {
+    private XyDim calcDimensionsForReal(final float maxWidth) {
         WrappedBlock wb = new WrappedBlock();
         float x = 0;
         float y = 0;
@@ -136,7 +136,7 @@ public class Text implements Renderable {
 //        if (y == 0) {
 //            y -= textStyle.lineHeight();
 //        }
-        wb.blockDim = XyDimension.of(maxX, 0 - y);
+        wb.blockDim = XyDim.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
         System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
         System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
@@ -152,15 +152,15 @@ public class Text implements Renderable {
         return wb;
     }
 
-    public XyDimension calcDimensions(final float maxWidth) {
+    public XyDim calcDimensions(final float maxWidth) {
         return ensureWrappedBlock(maxWidth).blockDim;
     }
 
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages) {
 
-        System.out.println("\trender(" + this.toString());
-        System.out.println("\t\ttext render(outerTopLeft=" + outerTopLeft +
+        System.out.println("\tText.render(" + this.toString());
+        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
                            ", outerDimensions=" + outerDimensions);
 
         float maxWidth = outerDimensions.x();
@@ -207,7 +207,7 @@ public class Text implements Renderable {
 
     @Override
     public String toString() {
-        return "Text(\"" + ((text.length() > 50) ? text.substring(0,47) + "..."
+        return "Text(\"" + ((text.length() > 25) ? text.substring(0,22) + "..."
                                                  : text) +
                "\")";
     }

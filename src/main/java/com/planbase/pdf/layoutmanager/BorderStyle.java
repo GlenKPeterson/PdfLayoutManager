@@ -43,7 +43,9 @@ public class BorderStyle {
     private final LineStyle bottom;
     private final LineStyle left;
 
-    public static final BorderStyle NO_BORDERS = builder().build();
+    public static final BorderStyle NO_BORDERS = new BorderStyle(null,null,null,null) {
+        @Override public String toString() { return "BorderStyle.NO_BORDERS"; }
+    };
 
     /** Factory helper-class for constructing immutable BorderStyle instances. */
     public static class Builder {
@@ -104,6 +106,10 @@ public class BorderStyle {
         }
     }
 
+    private BorderStyle(LineStyle t, LineStyle r, LineStyle b, LineStyle l) {
+        top = t; right = r; bottom = b; left = l;
+    }
+
     private BorderStyle(Builder b) {
         top = b.top;
         right = b.right;
@@ -151,4 +157,13 @@ public class BorderStyle {
     public BorderStyle right(LineStyle ls) { return new Builder(this).right(ls).build(); }
     public BorderStyle bottom(LineStyle ls) { return new Builder(this).bottom(ls).build(); }
     public BorderStyle left(LineStyle ls) { return new Builder(this).left(ls).build(); }
+
+    @Override public String toString() {
+        StringBuilder sB = new StringBuilder("BorderStyle(");
+        if (top != null) { sB.append("t=").append(top); }
+        if (right != null) { sB.append("r=").append(right); }
+        if (bottom != null) { sB.append("b=").append(bottom); }
+        if (left != null) { sB.append("l=").append(left); }
+        return sB.append(")").toString();
+    }
 }

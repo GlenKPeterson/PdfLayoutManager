@@ -29,33 +29,33 @@ public class CellStyle {
     /** Horizontal and vertical alignment options for cell contents */
     public enum Align {
         TOP_LEFT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(0, outer.x() - inner.x(), outer.y() - inner.y(), 0);
             }
         },
         TOP_CENTER {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
                 return Padding.of(0, dx, outer.y() - inner.y(), dx);
             }
         },
         TOP_RIGHT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(0, 0, outer.y() - inner.y(), outer.x() - inner.x());
             }
         },
         MIDDLE_LEFT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, outer.x() - inner.x(), dy, 0);
             }
         },
         MIDDLE_CENTER {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
                 float dy = (outer.y() - inner.y()) / 2;
@@ -63,20 +63,20 @@ public class CellStyle {
             }
         },
         MIDDLE_RIGHT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 float dy = (outer.y() - inner.y()) / 2;
                 return Padding.of(dy, 0, dy, outer.x() - inner.x());
             }
         },
         BOTTOM_LEFT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), outer.x() - inner.x(), 0, 0);
             }
         },
         BOTTOM_CENTER {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 float dx = (outer.x() - inner.x()) / 2;
                 // Like HTML it's top, right, bottom, left
@@ -84,7 +84,7 @@ public class CellStyle {
             }
         },
         BOTTOM_RIGHT {
-            @Override public Padding calcPadding(XyDimension outer, XyDimension inner) {
+            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
                 if (outer.lte(inner)) { return null; }
                 return Padding.of(outer.y() - inner.y(), 0, 0, outer.x() - inner.x());
             }
@@ -94,13 +94,12 @@ public class CellStyle {
         Given outer dimensions (make sure to add padding as necessary), and inner dimensions,
         calculates additional padding to apply.
         */
-        public abstract Padding calcPadding(XyDimension outer, XyDimension inner);
+        public abstract Padding calcPadding(XyDim outer, XyDim inner);
     }
 
     public static final Align DEFAULT_ALIGN = Align.TOP_LEFT;
 
-    public static final CellStyle DEFAULT = new CellStyle(DEFAULT_ALIGN, null, null,
-                                                          BorderStyle.NO_BORDERS);
+    public static final CellStyle DEFAULT = new CellStyle(DEFAULT_ALIGN, null, null, null);
 
     private final Align align;
     private final Padding padding;
@@ -154,12 +153,12 @@ public class CellStyle {
         public CellStyle build() {
             if (align == null) { align = DEFAULT_ALIGN; }
             if (padding == null) { padding = Padding.DEFAULT_TEXT_PADDING; }
-            if (borderStyle == null) { borderStyle = BorderStyle.NO_BORDERS; }
+            // if (borderStyle == null) { borderStyle = BorderStyle.NO_BORDERS; }
 
             if ( (align == DEFAULT_ALIGN) &&
                  (padding == Padding.DEFAULT_TEXT_PADDING) &&
                  ((bgColor == null) || bgColor.equals(Color.WHITE)) &&
-                 (borderStyle == BorderStyle.NO_BORDERS) ) {
+                 ((borderStyle == null) || (borderStyle == BorderStyle.NO_BORDERS)) ) {
                 return DEFAULT;
             }
             return new CellStyle(align, padding, bgColor, borderStyle);
@@ -174,5 +173,13 @@ public class CellStyle {
         public Builder padding(Padding p) { padding = p; return this; }
         public Builder bgColor(Color c) { bgColor = c; return this; }
         public Builder borderStyle(BorderStyle bs) { borderStyle = bs; return this; }
+    }
+
+    @Override public String toString() {
+        StringBuilder sB = new StringBuilder("CellStyle(").append(align);
+        if (padding != null) { sB.append(" ").append(padding); }
+        if (bgColor != null) { sB.append(" ").append(bgColor); }
+        if (borderStyle != null) { sB.append(" ").append(borderStyle); }
+        return sB.append(")").toString();
     }
 }

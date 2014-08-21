@@ -15,13 +15,9 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import javax.imageio.ImageIO;
 
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
@@ -82,7 +78,7 @@ public class TestPdfLayoutMgr {
 
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
-                                   "Transliterated Russian (with un-transliterated Chinese below)"), //);
+                                   "Transliterated Russian (with un-transliterated Chinese below)")); /*,
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
                            Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
                            Cell.of(headingCellR, colWidths[3], heading, "German"));
@@ -254,7 +250,7 @@ public class TestPdfLayoutMgr {
                            Cell.of(regularCell, colWidths[1], regular, "On the second page"),
                            Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
                            Cell.of(regularCell, colWidths[3], regular, "That's it!"));
-
+*/
         pageMgr.logicalPageEnd();
 
 

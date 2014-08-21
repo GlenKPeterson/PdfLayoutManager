@@ -46,8 +46,8 @@ public class Padding {
         return new Padding(a,a,a,a);
     }
 
-    public XyDimension topLeftPadDim() { return XyDimension.of(left, top); }
-    public XyDimension botRightPadDim() { return XyDimension.of(right, bottom); }
+    public XyDim topLeftPadDim() { return XyDim.of(left, top); }
+    public XyDim botRightPadDim() { return XyDim.of(right, bottom); }
 
 //    public XyOffset topLeftPadOffset() { return XyOffset.of(left, -top); }
 //    public XyOffset botRightPadOffset() { return XyOffset.of(right, -bottom); }

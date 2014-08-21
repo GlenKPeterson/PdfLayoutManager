@@ -49,7 +49,7 @@ public class LogicalPageBuilder {
 
     public DocumentBuilder buildLogicalPage() { return documentBuilder.addLogicalPage(this); }
 
-    public TableBuilder tableBuilder(XyDimension tl) { return TableBuilder.of(this, tl); }
+    public TableBuilder tableBuilder(XyDim tl) { return TableBuilder.of(this, tl); }
 
     public LogicalPageBuilder addRenderable(Renderable r) { renderables.add(r); return this; }
 

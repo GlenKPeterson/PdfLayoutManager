@@ -37,15 +37,15 @@ public class Cell implements Renderable {
 
     private static class PreCalcRow {
         Renderable row;
-        XyDimension blockDim;
-        public static PreCalcRow of(Renderable r, XyDimension d) {
+        XyDim blockDim;
+        public static PreCalcRow of(Renderable r, XyDim d) {
             PreCalcRow pcr = new PreCalcRow(); pcr.row = r; pcr.blockDim = d; return pcr;
         }
     }
 
     private static class PreCalcRows {
         List<PreCalcRow> rows = new ArrayList<PreCalcRow>(1);
-        XyDimension blockDim;
+        XyDim blockDim;
     }
 
     private Cell(CellStyle cs, float w, List<Renderable> r) {
@@ -149,9 +149,9 @@ public class Cell implements Renderable {
 //        return origY - y - cellStyle.padding().bottom(); // numLines * height;
 //    } // end processRows();
 
-    private XyDimension calcDimensionsForReal(final float maxWidth) {
+    private XyDim calcDimensionsForReal(final float maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
-        XyDimension actualDim = XyDimension.ORIGIN;
+        XyDim actualDim = XyDim.ORIGIN;
         Padding padding = cellStyle.padding();
         float innerWidth = maxWidth;
         if (padding != null) {
@@ -159,7 +159,7 @@ public class Cell implements Renderable {
             actualDim = padding.topLeftPadDim();
         }
         for (Renderable row : rows) {
-            XyDimension rowDim = row.calcDimensions(innerWidth);
+            XyDim rowDim = row.calcDimensions(innerWidth);
             actualDim = actualDim.plus(rowDim);
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
@@ -183,7 +183,7 @@ public class Cell implements Renderable {
         return pcr;
     }
 
-    public XyDimension calcDimensions(final float maxWidth) {
+    public XyDim calcDimensions(final float maxWidth) {
         return ensurePreCalcRows(maxWidth).blockDim;
     }
 
@@ -191,8 +191,10 @@ public class Cell implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages) {
+        System.out.println("Cell.render(" + this.toString());
+
 
         float maxWidth = outerDimensions.x();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
@@ -204,16 +206,16 @@ public class Cell implements Renderable {
 
         // Draw contents over background, but under border
         XyOffset innerTopLeft = outerTopLeft;
-        XyDimension innerDimensions = outerDimensions;
+        XyDim innerDimensions = outerDimensions;
         Padding padding = cellStyle.padding();
         if (padding != null) {
             innerTopLeft = XyOffset.of((outerTopLeft.x() + padding.left()),
                                        (outerTopLeft.y() - padding.top()));
-            innerDimensions = XyDimension.of(
+            innerDimensions = XyDim.of(
                     (outerDimensions.x() - padding.left() - padding.right()),
                     (outerDimensions.y() - padding.top() - padding.bottom()));
         }
-        XyDimension wrappedBlockDim = pcrs.blockDim;
+        XyDim wrappedBlockDim = pcrs.blockDim;
         Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
         if (alignPad != null) {
             innerTopLeft = XyOffset.of(innerTopLeft.x() + alignPad.left(),
@@ -332,4 +334,15 @@ public class Cell implements Renderable {
         public CellStyle cellStyle() { return cellStyle; }
     }
      */
+
+    @Override public String toString() {
+        StringBuilder sB = new StringBuilder("Cell(").append(cellStyle).append(" width=")
+                .append(width).append(" rows=[");
+
+        for (int i = 0; (i < rows.size()) && (i < 3); i++) {
+            if (i > 0) { sB.append(" "); }
+            sB.append(rows.get(i));
+        }
+        return sB.append("])").toString();
+    }
 }

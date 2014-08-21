@@ -62,11 +62,11 @@ public class ScaledJpeg implements Renderable {
     /** @return the underlying buffered image */
     public BufferedImage bufferedImage() { return bufferedImage; }
 
-    public XyDimension dimensions() { return XyDimension.of(width, height); }
+    public XyDim dimensions() { return XyDim.of(width, height); }
 
-    public XyDimension calcDimensions(float maxWidth) { return dimensions(); }
+    public XyDim calcDimensions(float maxWidth) { return dimensions(); }
 
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions, boolean allPages) {
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions, boolean allPages) {
         // use bottom of image for page-breaking calculation.
         float y = outerTopLeft.y() - height;
 

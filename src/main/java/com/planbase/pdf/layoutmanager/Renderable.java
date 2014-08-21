@@ -20,11 +20,11 @@ public interface Renderable {
     should be cached because render() will likely be called with the same width (or at least one
     previously given widths).
      */
-    public XyDimension calcDimensions(float maxWidth);
+    public XyDim calcDimensions(float maxWidth);
 
     /*
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions, boolean allPages);
+    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions, boolean allPages);
 }

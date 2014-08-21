@@ -62,4 +62,8 @@ public class LineStyle {
         final LineStyle that = (LineStyle) other;
         return (this.width == that.width) && this.color().equals(that.color());
     }
+
+    @Override public String toString() {
+        return "LineStyle(" + color + " w=" + width + ")";
+    }
 }

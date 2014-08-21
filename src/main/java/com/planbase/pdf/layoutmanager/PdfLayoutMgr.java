@@ -226,7 +226,7 @@ public class PdfLayoutMgr {
         @Override
         public void commit(PDPageContentStream stream) throws IOException {
             // stream.drawImage(jpeg, x, y);
-            XyDimension dim = scaledJpeg.dimensions();
+            XyDim dim = scaledJpeg.dimensions();
             stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
         }
     }
@@ -520,7 +520,7 @@ public class PdfLayoutMgr {
         }
     }
 
-    public XyOffset putRect(XyOffset outerTopLeft, XyDimension outerDimensions, final Color c) {
+    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
         System.out.println("putRect(outerTopLeft=" + outerTopLeft +
                            ", outerDim=" + outerDimensions + ", color=" + c);
         System.out.println("=====================================================");
@@ -631,7 +631,7 @@ public class PdfLayoutMgr {
         // render the row with that maxHeight.
         float x = initialX;
         for (Cell cell : cells) {
-            cell.render(this, XyOffset.of(x, origY), XyDimension.of(cell.width(), maxHeight), false);
+            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight), false);
             x += cell.width();
         }
 
