@@ -75,6 +75,11 @@ public class Padding {
         return (int) ((top + right + bottom + left) * 10);
     }
 
+    @Override
+    public String toString() {
+        return "Padding(t=" + top + ", r=" + right + ", b=" + bottom + ", l=" + left + ")";
+    }
+
     public float top() { return top; }
     public float right() { return right; }
     public float bottom() { return bottom; }

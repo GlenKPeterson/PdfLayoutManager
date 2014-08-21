@@ -15,7 +15,9 @@
 package com.planbase.pdf.layoutmanager;
 
 public class XyOffset {
-    public static final XyOffset ORIGIN = new XyOffset(0f, 0f);
+    public static final XyOffset ORIGIN = new XyOffset(0f, 0f) {
+        @Override public int hashCode() { return 0; }
+    };
     private final float x;
     private final float y;
     private XyOffset(float xCoord, float yCoord) { x = xCoord; y = yCoord; }
@@ -49,8 +51,23 @@ public class XyOffset {
     /** Compares dimensions */
     public boolean lte(XyOffset that) { return (this.x <= that.x()) && (this.y >= that.y()); }
 
-    @Override
-    public String toString() {
-        return "XyOffset(" + x + ", " + y + ")";
+    @Override public String toString() { return "XyOffset(" + x + ", " + y + ")"; }
+
+    @Override public int hashCode() { return Float.hashCode(x) ^ Float.hashCode(y); }
+
+    @Override public boolean equals(Object other) {
+        // Cheapest operation first...
+        if (this == other) { return true; }
+
+        if ( (other == null) ||
+             !(other instanceof XyOffset) ||
+             (this.hashCode() != other.hashCode()) ) {
+            return false;
+        }
+        // Details...
+        final XyOffset that = (XyOffset) other;
+
+        // Compare "significant" fields here.
+        return (x == that.x()) && (y == that.y());
     }
 }

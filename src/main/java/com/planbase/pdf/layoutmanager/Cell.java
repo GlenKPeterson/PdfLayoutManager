@@ -16,7 +16,9 @@ package com.planbase.pdf.layoutmanager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  A styled table cell or layout block with a pre-set horizontal width.  Vertical height is calculated 
@@ -30,6 +32,21 @@ public class Cell implements Renderable {
 
     // A list of the contents.  It's pretty limiting to have one item per row.
     private final List<Renderable> rows;
+
+    private final Map<Float,PreCalcRows> preCalcRows = new HashMap<Float,PreCalcRows>(0);
+
+    private static class PreCalcRow {
+        Renderable row;
+        XyDimension blockDim;
+        public static PreCalcRow of(Renderable r, XyDimension d) {
+            PreCalcRow pcr = new PreCalcRow(); pcr.row = r; pcr.blockDim = d; return pcr;
+        }
+    }
+
+    private static class PreCalcRows {
+        List<PreCalcRow> rows = new ArrayList<PreCalcRow>(1);
+        XyDimension blockDim;
+    }
 
     private Cell(CellStyle cs, float w, List<Renderable> r) {
         if (w < 0) {
@@ -132,24 +149,42 @@ public class Cell implements Renderable {
 //        return origY - y - cellStyle.padding().bottom(); // numLines * height;
 //    } // end processRows();
 
-    public XyDimension calcDimensions(float maxWidth) {
+    private XyDimension calcDimensionsForReal(final float maxWidth) {
+        PreCalcRows pcrs = new PreCalcRows();
         XyDimension actualDim = XyDimension.ORIGIN;
         Padding padding = cellStyle.padding();
+        float innerWidth = maxWidth;
         if (padding != null) {
-            maxWidth -= (padding.left() + padding.right());
+            innerWidth -= (padding.left() + padding.right());
             actualDim = padding.topLeftPadDim();
         }
         for (Renderable row : rows) {
-            XyDimension rowDim = row.calcDimensions(maxWidth);
+            XyDimension rowDim = row.calcDimensions(innerWidth);
             actualDim = actualDim.plus(rowDim);
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
 //            System.out.println("\tactualDim = " + actualDim);
+            pcrs.rows.add(PreCalcRow.of(row, rowDim));
         }
         if (padding != null) {
             actualDim = actualDim.plus(padding.botRightPadDim());
         }
+        pcrs.blockDim = actualDim;
+        preCalcRows.put(maxWidth, pcrs);
         return actualDim;
+    }
+
+    private PreCalcRows ensurePreCalcRows(final float maxWidth) {
+        PreCalcRows pcr = preCalcRows.get(maxWidth);
+        if (pcr == null) {
+            calcDimensionsForReal(maxWidth);
+            pcr = preCalcRows.get(maxWidth);
+        }
+        return pcr;
+    }
+
+    public XyDimension calcDimensions(final float maxWidth) {
+        return ensurePreCalcRows(maxWidth).blockDim;
     }
 
     /*
@@ -158,6 +193,9 @@ public class Cell implements Renderable {
     */
     public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
                            boolean allPages) {
+
+        float maxWidth = outerDimensions.x();
+        PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
 
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
@@ -175,7 +213,7 @@ public class Cell implements Renderable {
                     (outerDimensions.x() - padding.left() - padding.right()),
                     (outerDimensions.y() - padding.top() - padding.bottom()));
         }
-        XyDimension wrappedBlockDim = calcDimensions(outerDimensions.x());
+        XyDimension wrappedBlockDim = pcrs.blockDim;
         Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
         if (alignPad != null) {
             innerTopLeft = XyOffset.of(innerTopLeft.x() + alignPad.left(),
@@ -183,8 +221,10 @@ public class Cell implements Renderable {
         }
 
         XyOffset outerLowerRight = innerTopLeft;
-        for (Renderable row : rows) {
-            outerLowerRight = row.render(mgr, innerTopLeft, innerDimensions.y(row.calcDimensions(innerDimensions.x()).y()), allPages);
+        for (int i = 0; i < rows.size(); i++) {
+            Renderable row = rows.get(i);
+            PreCalcRow pcr = pcrs.rows.get(i);
+            outerLowerRight = row.render(mgr, innerTopLeft, pcr.blockDim, allPages);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 

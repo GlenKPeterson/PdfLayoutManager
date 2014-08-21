@@ -63,15 +63,7 @@ public class Text implements Renderable {
 
     public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
-    public XyDimension calcDimensions(float maxWidth) {
-        WrappedBlock wb = dims.get(maxWidth);
-        if (wb != null) {
-            return wb.blockDim;
-        }
-        return calcDimensionsForReal(maxWidth);
-    }
-
-    private XyDimension calcDimensionsForReal(float maxWidth) {
+    private XyDimension calcDimensionsForReal(final float maxWidth) {
         WrappedBlock wb = new WrappedBlock();
         float x = 0;
         float y = 0;
@@ -146,22 +138,38 @@ public class Text implements Renderable {
 //        }
         wb.blockDim = XyDimension.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
+        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
+        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
         return wb.blockDim;
+    }
+
+    private WrappedBlock ensureWrappedBlock(final float maxWidth) {
+        WrappedBlock wb = dims.get(maxWidth);
+        if (wb == null) {
+            calcDimensionsForReal(maxWidth);
+            wb = dims.get(maxWidth);
+        }
+        return wb;
+    }
+
+    public XyDimension calcDimensions(final float maxWidth) {
+        return ensureWrappedBlock(maxWidth).blockDim;
     }
 
     public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDimension outerDimensions,
                            boolean allPages) {
 
+        System.out.println("\trender(" + this.toString());
+        System.out.println("\t\ttext render(outerTopLeft=" + outerTopLeft +
+                           ", outerDimensions=" + outerDimensions);
+
         float maxWidth = outerDimensions.x();
-        WrappedBlock wb = dims.get(maxWidth);
-        if (wb == null) {
-            calcDimensions(maxWidth);
-            wb = dims.get(maxWidth);
-        }
+        WrappedBlock wb = ensureWrappedBlock(maxWidth);
 
         float x = outerTopLeft.x();
         float y = outerTopLeft.y();
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
+        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
         if (innerPadding != null) {
             x += innerPadding.left();
             //y -= innerPadding.top();

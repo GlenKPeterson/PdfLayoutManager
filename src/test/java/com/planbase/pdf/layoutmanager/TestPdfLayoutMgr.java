@@ -82,7 +82,7 @@ public class TestPdfLayoutMgr {
 
         y = pageMgr.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
-                                   "Transliterated Russian (with un-transliterated Chinese below)"),
+                                   "Transliterated Russian (with un-transliterated Chinese below)"), //);
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
                            Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
                            Cell.of(headingCellR, colWidths[3], heading, "German"));

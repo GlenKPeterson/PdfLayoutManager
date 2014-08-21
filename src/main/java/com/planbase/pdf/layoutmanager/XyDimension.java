@@ -15,7 +15,9 @@
 package com.planbase.pdf.layoutmanager;
 
 public class XyDimension {
-    public static final XyDimension ORIGIN = new XyDimension(0f, 0f);
+    public static final XyDimension ORIGIN = new XyDimension(0f, 0f) {
+        @Override public int hashCode() { return 0; }
+    };
     private final float x;
     private final float y;
     private XyDimension(float xCoord, float yCoord) { x = xCoord; y = yCoord; }
@@ -49,8 +51,23 @@ public class XyDimension {
     /** Compares dimensions */
     public boolean lte(XyDimension that) { return (this.x <= that.x()) && (this.y <= that.y()); }
 
-    @Override
-    public String toString() {
-        return "XyPair(" + x + ", " + y + ")";
+    @Override public String toString() { return "XyDimension(" + x + ", " + y + ")"; }
+
+    @Override public int hashCode() { return Float.hashCode(x) ^ Float.hashCode(y); }
+
+    @Override public boolean equals(Object other) {
+        // Cheapest operation first...
+        if (this == other) { return true; }
+
+        if ( (other == null) ||
+             !(other instanceof XyDimension) ||
+             (this.hashCode() != other.hashCode()) ) {
+            return false;
+        }
+        // Details...
+        final XyDimension that = (XyDimension) other;
+
+        // Compare "significant" fields here.
+        return (x == that.x()) && (y == that.y());
     }
 }

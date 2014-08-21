@@ -521,10 +521,8 @@ public class PdfLayoutMgr {
     }
 
     public XyOffset putRect(XyOffset outerTopLeft, XyDimension outerDimensions, final Color c) {
-        System.out.println("=====================================================");
-        System.out.println("outerTopLeft = " + outerTopLeft);
-        System.out.println("outerDimensions = " + outerDimensions);
-        System.out.println("color = " + c);
+        System.out.println("putRect(outerTopLeft=" + outerTopLeft +
+                           ", outerDim=" + outerDimensions + ", color=" + c);
         System.out.println("=====================================================");
         putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
         return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
