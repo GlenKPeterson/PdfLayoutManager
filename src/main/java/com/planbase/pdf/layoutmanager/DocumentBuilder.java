@@ -39,7 +39,11 @@ public class DocumentBuilder {
 //        return new DocumentBuilder(textStyle, pageDimensions, pageMargins, printableArea);
 //    }
 
-    public LogicalPageBuilder logicalPageBuilder() { return LogicalPageBuilder.of(this); }
+    public LogicalPageBuilder logicalPageBuilder() {
+        LogicalPageBuilder lpb = LogicalPageBuilder.of(this, pages.size() + 1);
+        pages.add(lpb);
+        return lpb;
+    }
 
     public DocumentBuilder addLogicalPage(LogicalPageBuilder lpb) { pages.add(lpb); return this; }
 

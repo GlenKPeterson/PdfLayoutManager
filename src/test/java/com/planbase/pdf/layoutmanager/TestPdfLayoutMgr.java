@@ -283,6 +283,9 @@ public class TestPdfLayoutMgr {
 
         pageMgr.save(os);
 
-        //DocumentBuilder.of(pageMgr).logicalPageBuilder().
+//        LogicalPageBuilder lpb = DocumentBuilder.of(pageMgr).pageMargins(Padding.of(40))
+//                .logicalPageBuilder();
+//        lpb.
+//        lpb.tableBuilder(
     }
 }

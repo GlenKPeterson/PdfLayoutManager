@@ -15,6 +15,8 @@ package com.planbase.pdf.layoutmanager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
@@ -24,14 +26,25 @@ public class LogicalPageBuilder {
     private PDRectangle pageDimensions;
     private Padding pageMargins;
     private PDRectangle printableArea;
+
+    private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
+
+    public final int pageNum;
+    private long lastOrd = 0;
+    private final Set<PdfItem> items = new TreeSet<PdfItem>();
+
+
     private List<Renderable> renderables = new ArrayList<Renderable>();
 
-    private LogicalPageBuilder(DocumentBuilder d) {
+    private LogicalPageBuilder(DocumentBuilder d, int pn) {
+        pageNum = pn;
         documentBuilder = d; textStyle = d.textStyle(); pageDimensions = d.pageDimensions();
         pageMargins = d.pageMargins(); printableArea = d.printableArea();
     }
 
-    public static LogicalPageBuilder of(DocumentBuilder d) { return new LogicalPageBuilder(d); }
+    public static LogicalPageBuilder of(DocumentBuilder d, int pn) {
+        return new LogicalPageBuilder(d, pn);
+    }
 
     public TextStyle textStyle() { return textStyle; }
     public LogicalPageBuilder textStyle(TextStyle x) { textStyle = x; return this; }
@@ -49,7 +62,7 @@ public class LogicalPageBuilder {
 
     public DocumentBuilder buildLogicalPage() { return documentBuilder.addLogicalPage(this); }
 
-    public TableBuilder tableBuilder(XyDim tl) { return TableBuilder.of(this, tl); }
+    public TableBuilder tableBuilder(XyOffset tl) { return TableBuilder.of(this, tl); }
 
     public LogicalPageBuilder addRenderable(Renderable r) { renderables.add(r); return this; }
 
