@@ -18,17 +18,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class TableBuilder implements Renderable {
-    private final PdfLayoutMgr.PageBuffer pageBuffer;
+    private final LogicalPage logicalPage;
     private final XyOffset topLeft;
     private final List<Float> cellWidths = new ArrayList<Float>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(PdfLayoutMgr.PageBuffer lp, XyOffset tl) {
-        pageBuffer = lp; topLeft = tl;
+    private TableBuilder(LogicalPage lp, XyOffset tl) {
+        logicalPage = lp; topLeft = tl;
     }
-    public static TableBuilder of(PdfLayoutMgr.PageBuffer lp, XyOffset tl) {
+    public static TableBuilder of(LogicalPage lp, XyOffset tl) {
         return new TableBuilder(lp, tl);
     }
 
@@ -48,7 +48,7 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-//    public PageBuffer buildTable() { return pageBuffer.addRenderable(this); }
+    public XyOffset buildTable() { return logicalPage.addTable(this); }
 
     public XyDim calcDimensions(float maxWidth) {
         XyDim maxDim = XyDim.ZERO;
@@ -68,6 +68,7 @@ public class TableBuilder implements Renderable {
                            boolean allPages) {
         XyOffset rightmostLowest = outerTopLeft;
         for (TablePart part : parts) {
+//            System.out.println("About to render part: " + part);
             XyOffset rl = part.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                       allPages);
             rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),

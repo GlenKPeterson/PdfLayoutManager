@@ -281,8 +281,28 @@ public class TestPdfLayoutMgr {
         lp.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         pageMgr.logicalPageEnd(lp);
 
-        pageMgr.save(os);
 
+        lp = pageMgr.logicalPageStart();
+        XyOffset xY = lp.tableBuilder(XyOffset.of(40f, 40f))
+                .addCellWidths(Arrays.asList(150f, 150f, 150f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.YELLOW))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.BLUE, null))
+                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(150f)
+                .textStyle(TextStyle.of(PDType1Font.COURIER_OBLIQUE, 12f, Color.BLACK))
+                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("widdle").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Biggie iggie, biggie, biggie, biggie, iggie, iggie, iggie").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("Line one", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line one", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("Line one", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line one", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line one", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line one", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line one", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
+
+        pageMgr.logicalPageEnd(lp);
+        pageMgr.save(os);
 //        LogicalPageBuilder lpb = DocumentBuilder.of(pageMgr).pageMargins(Padding.of(40))
 //                .logicalPageBuilder();
 //        lpb.

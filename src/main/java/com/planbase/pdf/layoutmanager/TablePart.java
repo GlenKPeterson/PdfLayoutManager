@@ -19,9 +19,10 @@ import java.util.List;
 
 public class TablePart {
     private final TableBuilder tableBuilder;
-    private List<Float> cellWidths;
+    private List<Float> cellWidths = new ArrayList<Float>();
     private CellStyle cellStyle;
     private TextStyle textStyle;
+    private float minRowHeight = 0;
     private final List<TableRowBuilder> rows = new ArrayList<TableRowBuilder>(1);
 
     private TablePart(TableBuilder t) {
@@ -50,7 +51,9 @@ public class TablePart {
 
     public TextStyle textStyle() { return textStyle; }
     public TablePart textStyle(TextStyle x) { textStyle = x; return this; }
-//    public TablePart textStyle(TextStyle x) { return new Builder().textStyle(textStyle).build(); }
+
+    public float minRowHeight() { return minRowHeight; }
+    public TablePart minRowHeight(float f) { minRowHeight = f; return this; }
 
     public TableRowBuilder rowBuilder() { return TableRowBuilder.of(this); }
 
@@ -71,6 +74,7 @@ public class TablePart {
     public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, boolean allPages) {
         XyOffset rightmostLowest = outerTopLeft;
         for (TableRowBuilder row : rows) {
+//            System.out.println("\tAbout to render row: " + row);
             XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                      allPages);
             rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),

@@ -157,31 +157,23 @@ public class PdfLayoutMgr {
         public final int pageNum;
         private long lastOrd = 0;
         private final Set<PdfItem> items = new TreeSet<PdfItem>();
-        private List<Renderable> renderables = new ArrayList<Renderable>();
-        private final PdfLayoutMgr pdfLayoutMgr;
 //        private TextStyle textStyle;
 //        private Padding pageMargins;
 
-        private PageBuffer(PdfLayoutMgr d, int pn) {
-            pdfLayoutMgr = d; pageNum = pn;
+        private PageBuffer(int pn) {
+            pageNum = pn;
             //textStyle = d.textStyle(); pageMargins = d.pageMargins();
         }
 
-        static PageBuffer of(PdfLayoutMgr d, int pn) {
-            return new PageBuffer(d, pn);
-        }
+//        static PageBuffer of(int pn) {
+//            return new PageBuffer(pn);
+//        }
 
 //        public TextStyle textStyle() { return textStyle; }
 //        public PageBuffer textStyle(TextStyle x) { textStyle = x; return this; }
 //
 //        public Padding pageMargins() { return pageMargins; }
 //        public PageBuffer pageMargins(Padding x) { pageMargins = x; return this; }
-
-        public PdfLayoutMgr pdfLayoutMgr() { return pdfLayoutMgr; }
-
-        public TableBuilder tableBuilder(XyOffset tl) { return TableBuilder.of(this, tl); }
-
-        public PageBuffer addRenderable(Renderable r) { renderables.add(r); return this; }
 
         public void fillRect(final float xVal, final float yVal, final float w, final float h,
                              final Color c, final float z) {
@@ -379,7 +371,7 @@ public class PdfLayoutMgr {
             // page until it's in the printable area.
             idx++;
             if (pages.size() <= idx) {
-                pages.add(PageBuffer.of(this, pages.size() + 1));
+                pages.add(new PageBuffer(pages.size() + 1));
             }
         }
         PageBuffer ps = pages.get(idx);
@@ -401,7 +393,7 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public LogicalPage logicalPageStart() {
-        PageBuffer pb = PageBuffer.of(this, pages.size() + 1);
+        PageBuffer pb = new PageBuffer(pages.size() + 1);
         pages.add(pb);
         return LogicalPage.of(this);
     }

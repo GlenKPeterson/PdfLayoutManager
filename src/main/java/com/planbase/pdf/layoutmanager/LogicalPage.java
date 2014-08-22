@@ -12,18 +12,32 @@ public class LogicalPage { // AKA Document Section
     // borderItems apply to a logical section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
+    boolean valid = true;
 
     LogicalPage(PdfLayoutMgr m) { mgr = m;}
 
     public static LogicalPage of(PdfLayoutMgr m) { return new LogicalPage(m); }
 
+    public TableBuilder tableBuilder(XyOffset tl) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
+        return TableBuilder.of(this, tl);
+    }
+
+    public PdfLayoutMgr commit() throws IOException {
+        mgr.logicalPageEnd(this);
+        valid = false;
+        return mgr;
+    }
+
     LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(y);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
         return this;
     }
 
     LogicalPage drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
         PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(yVal);
         // draw image based on baseline and decrement y appropriately for image.
@@ -32,6 +46,7 @@ public class LogicalPage { // AKA Document Section
     }
 
     public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
         mgr.putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
@@ -39,8 +54,14 @@ public class LogicalPage { // AKA Document Section
     }
 
     public LogicalPage putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         mgr.putLine(x1, y1, x2, y2, ls);
         return this;
+    }
+
+    public XyOffset addTable(TableBuilder tb) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
+        return tb.render(this, tb.topLeft(), null, false);
     }
 
     /**
@@ -54,6 +75,7 @@ public class LogicalPage { // AKA Document Section
      */
     public float putRow(final float initialX, final float origY, final Cell... cells)
             throws IOException {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
         XyDim maxDim = XyDim.ZERO;
@@ -85,12 +107,14 @@ public class LogicalPage { // AKA Document Section
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         float outerWidth = cell.width();
         XyDim innerDim = cell.calcDimensions(outerWidth);
         return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
     }
 
     void commitBorderItems(PDPageContentStream stream) throws IOException {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Since items are z-ordered, then sub-ordered by entry-order, we will draw
         // everything in the correct order.
         for (PdfItem item : borderItems) { item.commit(stream); }
@@ -98,6 +122,7 @@ public class LogicalPage { // AKA Document Section
 
     private void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s, final float z) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderItems.add(PdfLayoutMgr.PageBuffer.Text.of(xCoord, yCoord, text, s, borderOrd++, z));
     }
 
@@ -108,6 +133,7 @@ public class LogicalPage { // AKA Document Section
       */
     void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
     }
 }

@@ -194,7 +194,7 @@ public class Cell implements Renderable {
     public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, final XyDim outerDimensions,
                            boolean allPages) {
 //        System.out.println("Cell.render(" + this.toString());
-
+//        new Exception().printStackTrace();
 
         float maxWidth = outerDimensions.x();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
@@ -237,7 +237,7 @@ public class Cell implements Renderable {
         for (int i = 0; i < rows.size(); i++) {
             Renderable row = rows.get(i);
             PreCalcRow pcr = pcrs.rows.get(i);
-            outerLowerRight = row.render(lp, innerTopLeft, pcr.blockDim, allPages);
+            outerLowerRight = row.render(lp, innerTopLeft, pcr.blockDim, allPages); // TODO: Check this!
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
@@ -270,13 +270,22 @@ public class Cell implements Renderable {
         return new Builder(cellStyle, width);
     }
 
+    public static Builder builder(TableRowBuilder trb) {
+        Builder b = new Builder(trb.cellStyle(), trb.nextCellSize()).textStyle(trb.textStyle());
+        b.trb = trb;
+        return b;
+    }
+
     public static class Builder {
+        private TableRowBuilder trb;
         private final float width; // Both require this.
-        private final CellStyle cellStyle; // Both require this.
+        private CellStyle cellStyle; // Both require this.
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
 
         private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }
+
+        public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
 
         public Builder add(Text t) { rows.add(t); return this; }
         public Builder addAll(TextStyle ts, List<String> ls) {
@@ -288,7 +297,20 @@ public class Cell implements Renderable {
             return this;
         }
 
-        public Builder add(ScaledJpeg j) { rows.add(j); return this; }
+        public Builder add(String... ss) {
+            if (textStyle == null) {
+                throw new IllegalStateException("Must set a default text style before adding raw strings");
+            }
+            for (String s : ss) {
+                rows.add(Text.of(textStyle, s));
+            }
+            return this;
+        }
+// Sort of don't want to allow adding a cell to itself...
+//        public Builder add(Renderable... rs) {
+//            Collections.addAll(rows, rs);
+//            return this;
+//        }
         public Builder addAll(List<ScaledJpeg> js) {
             if (js != null) { rows.addAll(js); }
             return this;
@@ -298,6 +320,10 @@ public class Cell implements Renderable {
         public Builder add(Cell c) { rows.add(c); return this; }
 
         public Cell build() { return new Cell(cellStyle, width, rows); }
+        public TableRowBuilder buildCell() {
+            Cell c = new Cell(cellStyle, width, rows);
+            return trb.addCell(c);
+        }
     }
 
     /*

@@ -14,12 +14,16 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /* Unsynchronized mutable class which is not thread-safe. */
 public class TableRowBuilder {
     private final TablePart tablePart;
+    private TextStyle textStyle;
+    private CellStyle cellStyle;
     private final List<Cell> cells;
+    private float minRowHeight = 0;
 
 //    private TableRow(TablePart tp, float[] a, Cell[] b, CellStyle c, TextStyle d) {
 //        tablePart = tp; cellWidths = a; cells = b; cellStyle = c; textStyle = d;
@@ -28,22 +32,53 @@ public class TableRowBuilder {
     private TableRowBuilder(TablePart tp) {
         tablePart = tp;
         cells = new ArrayList<Cell>(tp.cellWidths().size());
+        textStyle = tp.textStyle();
+        cellStyle = tp.cellStyle();
+        minRowHeight = tp.minRowHeight();
     }
+
+    public float nextCellSize() { return tablePart.cellWidths().get(cells.size()).floatValue(); }
 
     public static TableRowBuilder of(TablePart tp) { return new TableRowBuilder(tp); }
 
-    public TableRowBuilder addCell(Renderable... things) {
-        for (Renderable thing : things) {
+    public TextStyle textStyle() { return textStyle; }
+    public TableRowBuilder textStyle(TextStyle x) { textStyle = x; return this; }
+
+    public CellStyle cellStyle() { return cellStyle; }
+
+    public TableRowBuilder addCells(Cell... cs) {
+        Collections.addAll(cells, cs);
+        return this;
+    }
+
+    public TableRowBuilder addTextCells(String... ss) {
+        if (textStyle == null) {
+            throw new IllegalStateException("Tried to add a text cell without setting a default text style");
+        }
+        for (String s : ss) {
             cells.add(Cell.of(tablePart.cellStyle(),
-                              tablePart.cellWidths().get(cells.size()).floatValue(), thing));
+                              nextCellSize(), Text.of(textStyle, s)));
+
         }
         return this;
     }
 
+// Because cells are renderable, this would accept one which could result in duplicate cells
+// when Cell.buildCell() creates a cell and passes it in here.
+//    public TableRowBuilder addCell(CellStyle.Align align, Renderable... things) {
+//            cells.add(Cell.builder(this).add(things).build());
+//        return this;
+//    }
+
+    public TableRowBuilder addCell(Cell c) {
+        cells.add(c);
+        return this;
+    }
+
+    public TableRowBuilder minRowHeight(float f) { minRowHeight = f; return this; }
+
     public Cell.Builder cellBuilder() {
-        return Cell.builder(tablePart.cellStyle(),
-                            tablePart.cellWidths().get(cells.size()).floatValue())
-                .textStyle(tablePart.textStyle());
+        return Cell.builder(this);
     }
 
     public TablePart buildRow() {
@@ -64,23 +99,23 @@ public class TableRowBuilder {
 
     public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
                            boolean allPages) {
-        XyDim maxDim = XyDim.ZERO;
+        XyDim maxDim = XyDim.ZERO.y(minRowHeight);
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
-                              maxDim.y() + wh.y());
+            maxDim = XyDim.of(maxDim.x() + cell.width(),
+                              Float.max(maxDim.y(), wh.y()));
         }
         float maxHeight = maxDim.y();
 
-        XyOffset rightmostLowest = outerTopLeft;
+        float x = outerTopLeft.x();
         for (Cell cell : cells) {
+//            System.out.println("\t\tAbout to render cell: " + cell);
             // TODO: Cache the duplicate cell.calcDimensions call!!!
-            XyOffset rl = cell.render(lp, XyOffset.of(rightmostLowest.x(), outerTopLeft.y()),
-                                      XyDim.of(cell.width(), maxHeight), allPages);
-            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
-                                          Float.min(rl.y(), rightmostLowest.y()));
+            cell.render(lp, XyOffset.of(x, outerTopLeft.y()),
+                        XyDim.of(cell.width(), maxHeight), allPages);
+            x += cell.width();
         }
-        return rightmostLowest;
+        return XyOffset.of(x, outerTopLeft.y() - maxHeight);
     }
 
 //    public static TableRow of(float[] cellWidths, Cell[] cells, CellStyle cellStyle,
