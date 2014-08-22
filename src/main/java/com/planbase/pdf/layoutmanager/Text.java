@@ -156,7 +156,7 @@ public class Text implements Renderable {
         return ensureWrappedBlock(maxWidth).blockDim;
     }
 
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages) {
 
 //        System.out.println("\tText.render(" + this.toString());
@@ -181,10 +181,9 @@ public class Text implements Renderable {
 
             y -= textStyle.ascent();
             if (allPages) {
-                mgr.borderStyledText(x, y, wr.string, textStyle);
+                lp.borderStyledText(x, y, wr.string, textStyle);
             } else {
-                PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(y);
-                pby.pb.drawStyledText(x, pby.y, wr.string, textStyle);
+                lp.drawStyledText(x, y, wr.string, textStyle);
             }
             y -= textStyle.descent();
             y -= textStyle.leading();

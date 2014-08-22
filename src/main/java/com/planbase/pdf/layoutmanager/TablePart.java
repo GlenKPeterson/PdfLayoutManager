@@ -68,10 +68,10 @@ public class TablePart {
         return maxDim;
     }
 
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, boolean allPages) {
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, boolean allPages) {
         XyOffset rightmostLowest = outerTopLeft;
         for (TableRowBuilder row : rows) {
-            XyOffset rl = row.render(mgr, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
+            XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                      allPages);
             rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
                                           Float.min(rl.y(), rightmostLowest.y()));

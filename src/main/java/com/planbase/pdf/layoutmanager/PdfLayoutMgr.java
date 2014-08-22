@@ -161,7 +161,6 @@ public class PdfLayoutMgr {
         private final PdfLayoutMgr pdfLayoutMgr;
 //        private TextStyle textStyle;
 //        private Padding pageMargins;
-        // TODO: Do borderItems belong here???
 
         private PageBuffer(PdfLayoutMgr d, int pn) {
             pdfLayoutMgr = d; pageNum = pn;
@@ -269,7 +268,7 @@ public class PdfLayoutMgr {
             }
         }
 
-        private static class Text extends PdfItem {
+        static class Text extends PdfItem {
             public final float x, y;
             public final String t;
             public final TextStyle style;
@@ -329,9 +328,6 @@ public class PdfLayoutMgr {
     }
 
     private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
-    // borderItems apply to *all pages* in the document.  Not sure why, but they do.
-    private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
-    private int borderOrd = 0;
     private final PDDocument doc;
 
     // pages.size() counts the first page as 1, so 0 is the appropriate sentinel value
@@ -362,27 +358,6 @@ public class PdfLayoutMgr {
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr() throws IOException {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE);
-    }
-
-    private void commitBorderItems(PDPageContentStream stream) throws IOException {
-        // Since items are z-ordered, then sub-ordered by entry-order, we will draw
-        // everything in the correct order.
-        for (PdfItem item : borderItems) { item.commit(stream); }
-    }
-
-    private void borderStyledText(final float xCoord, final float yCoord, final String text,
-                               TextStyle s, final float z) {
-        borderItems.add(PageBuffer.Text.of(xCoord, yCoord, text, s, borderOrd++, z));
-    }
-
-    /**
-     Adds items to every page in page grouping.  You should not need to use this directly.  It only
-     has package scope so that Cell can access it for one thing.  It may become private in the
-     future.
-      */
-    void borderStyledText(final float xCoord, final float yCoord, final String text,
-                               TextStyle s) {
-        borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
     }
 
     /**
@@ -425,11 +400,10 @@ public class PdfLayoutMgr {
      two or more physical pages).
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public PageBuffer logicalPageStart() {
-        borderItems = new TreeSet<PdfItem>();
+    public LogicalPage logicalPageStart() {
         PageBuffer pb = PageBuffer.of(this, pages.size() + 1);
         pages.add(pb);
-        return pb;
+        return LogicalPage.of(this);
     }
 
 //    void addLogicalPage(PageBuffer pb) {
@@ -446,7 +420,7 @@ public class PdfLayoutMgr {
      @throws IOException - if there is a failure writing to the underlying stream.
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public void logicalPageEnd() throws IOException {
+    void logicalPageEnd(LogicalPage lp) throws IOException {
 
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
@@ -464,7 +438,7 @@ public class PdfLayoutMgr {
 
                 PageBuffer pb = pages.get(unCommittedPageIdx);
                 pb.commit(stream);
-                commitBorderItems(stream);
+                lp.commitBorderItems(stream);
 
                 stream.close();
                 // Set to null to show that no exception was thrown and no need to close again.
@@ -566,13 +540,13 @@ public class PdfLayoutMgr {
         }
     }
 
-    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
-//        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
-//                           Utils.toString(c) + ")");
-        putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
-        return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
-                           outerTopLeft.y() - outerDimensions.y());
-    }
+//    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
+////        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
+////                           Utils.toString(c) + ")");
+//        putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
+//        return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
+//                           outerTopLeft.y() - outerDimensions.y());
+//    }
 
     public void putRect(final float left, final float topY, final float width,
                         final float maxHeight, final Color c) {
@@ -631,52 +605,7 @@ public class PdfLayoutMgr {
 //        return cell.processRows(x, origY, false, this);
 //    }
 
-    /**
-     For header or footer text on all pages in this logical page grouping.
-     @param x the x-value on all pages.
-     @param origY the y-value on all pages (probably outside the normal margins)
-     @param cell the cell containing the styling and text to render.
-     @return the bottom Y-value of the rendered cell (on all pages).
-     */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
-        float outerWidth = cell.width();
-        XyDim innerDim = cell.calcDimensions(outerWidth);
-        return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
-    }
 
-    /**
-     Shows the given cells plus either a background or an outline as appropriate.
-
-     @param initialX the left-most x-value.
-     @param origY the starting y-value
-     @param cells the Cells to display
-     @return the final y-value
-     @throws IOException if there is an error writing to the underlying stream.
-     */
-    public float putRow(final float initialX, final float origY, final Cell... cells)
-            throws IOException {
-
-        // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
-        XyDim maxDim = XyDim.ZERO;
-        for (Cell cell : cells) {
-            XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Float.max(maxDim.y(), wh.y()));
-        }
-        float maxHeight = maxDim.y();
-
-//        System.out.println("putRow: maxHeight=" + maxHeight);
-
-        // render the row with that maxHeight.
-        float x = initialX;
-        for (Cell cell : cells) {
-            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight), false);
-            x += cell.width();
-        }
-
-        return origY - maxHeight;
-    }
 
     private static final String ISO_8859_1 = "ISO_8859_1";
     private static final String UNICODE_BULLET = "\u2022";

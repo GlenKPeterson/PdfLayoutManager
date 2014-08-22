@@ -62,7 +62,7 @@ public class TableRowBuilder {
         return maxDim;
     }
 
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft,
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
                            boolean allPages) {
         XyDim maxDim = XyDim.ZERO;
         for (Cell cell : cells) {
@@ -75,7 +75,7 @@ public class TableRowBuilder {
         XyOffset rightmostLowest = outerTopLeft;
         for (Cell cell : cells) {
             // TODO: Cache the duplicate cell.calcDimensions call!!!
-            XyOffset rl = cell.render(mgr, XyOffset.of(rightmostLowest.x(), outerTopLeft.y()),
+            XyOffset rl = cell.render(lp, XyOffset.of(rightmostLowest.x(), outerTopLeft.y()),
                                       XyDim.of(cell.width(), maxHeight), allPages);
             rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
                                           Float.min(rl.y(), rightmostLowest.y()));

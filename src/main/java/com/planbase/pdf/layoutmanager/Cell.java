@@ -191,7 +191,7 @@ public class Cell implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, final XyDim outerDimensions,
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, final XyDim outerDimensions,
                            boolean allPages) {
 //        System.out.println("Cell.render(" + this.toString());
 
@@ -204,7 +204,7 @@ public class Cell implements Renderable {
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
 //            System.out.println("\tCell.render calling putRect...");
-            mgr.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
+            lp.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
 //            System.out.println("\tCell.render back from putRect");
         }
 
@@ -237,7 +237,7 @@ public class Cell implements Renderable {
         for (int i = 0; i < rows.size(); i++) {
             Renderable row = rows.get(i);
             PreCalcRow pcr = pcrs.rows.get(i);
-            outerLowerRight = row.render(mgr, innerTopLeft, pcr.blockDim, allPages);
+            outerLowerRight = row.render(lp, innerTopLeft, pcr.blockDim, allPages);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
@@ -250,16 +250,16 @@ public class Cell implements Renderable {
             float bottomY = outerTopLeft.y() - outerDimensions.y();
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
-                mgr.putLine(origX, origY, rightX, origY, border.top());
+                lp.putLine(origX, origY, rightX, origY, border.top());
             }
             if (border.right() != null) {
-                mgr.putLine(rightX, origY, rightX, bottomY, border.right());
+                lp.putLine(rightX, origY, rightX, bottomY, border.right());
             }
             if (border.bottom() != null) {
-                mgr.putLine(origX, bottomY, rightX, bottomY, border.bottom());
+                lp.putLine(origX, bottomY, rightX, bottomY, border.bottom());
             }
             if (border.left() != null) {
-                mgr.putLine(origX, origY, origX, bottomY, border.left());
+                lp.putLine(origX, origY, origX, bottomY, border.left());
             }
         }
 

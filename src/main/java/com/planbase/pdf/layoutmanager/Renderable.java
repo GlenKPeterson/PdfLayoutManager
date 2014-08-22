@@ -28,6 +28,6 @@ public interface Renderable {
      Renders item and all child-items with given width and returns the x-y pair of the
      lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages);
 }

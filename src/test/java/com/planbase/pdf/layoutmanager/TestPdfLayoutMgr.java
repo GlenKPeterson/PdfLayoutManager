@@ -70,17 +70,17 @@ public class TestPdfLayoutMgr {
                                                           .bottom(LineStyle.of(Color.BLACK))
                                                           .build());
 
-        pageMgr.logicalPageStart();
+        LogicalPage lp = pageMgr.logicalPageStart();
 
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
-        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
+        lp.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
                                       Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
 
 //        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
-        y = pageMgr.putRow(lMargin, y,
+        y = lp.putRow(lMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
                                    "Transliterated Russian (with un-transliterated Chinese below)"),
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
@@ -91,7 +91,7 @@ public class TestPdfLayoutMgr {
         System.out.println(f.getAbsolutePath());
         BufferedImage melonPic = ImageIO.read(f);
 
-        y = pageMgr.putRow(
+        y = lp.putRow(
                 lMargin, y,
                 Cell.builder(regularCell, colWidths[0])
                         .addAll(regular, Arrays.asList(
@@ -249,37 +249,37 @@ public class TestPdfLayoutMgr {
                                 "  Blühe, deutsches Vaterland!"))
                         .build());
 
-        y = pageMgr.putRow(lMargin, y,
+        y = lp.putRow(lMargin, y,
                            Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
                            Cell.of(regularCell, colWidths[1], regular, "On the second page"),
                            Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
                            Cell.of(regularCell, colWidths[3], regular, "That's it!"));
-        pageMgr.logicalPageEnd();
+        pageMgr.logicalPageEnd(lp);
 
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
 
-        pageMgr.logicalPageStart();
+        lp = pageMgr.logicalPageStart();
 
-        pageMgr.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
+        lp.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
                                       Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
                                               "Test Logical Page Two"));
 
         // Make a big 3-page X in a box
 
         // top lne
-        pageMgr.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, pageMgr.yPageTop(), lineStyle);
+        lp.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, pageMgr.yPageTop(), lineStyle);
         // left line
-        pageMgr.putLine(lMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(lMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
         // 3-page-long X
-        pageMgr.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         // middle line
-        pageMgr.putLine(lMargin, 0, pageRMargin, 0, lineStyle);
-        pageMgr.putLine(pageRMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(lMargin, 0, pageRMargin, 0, lineStyle);
+        lp.putLine(pageRMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
         // right line
-        pageMgr.putLine(pageRMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pageRMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         // bottom line
-        pageMgr.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
-        pageMgr.logicalPageEnd();
+        lp.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        pageMgr.logicalPageEnd(lp);
 
         pageMgr.save(os);
 

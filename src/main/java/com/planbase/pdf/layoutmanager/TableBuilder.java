@@ -64,11 +64,11 @@ public class TableBuilder implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(PdfLayoutMgr mgr, XyOffset outerTopLeft, XyDim outerDimensions,
+    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
                            boolean allPages) {
         XyOffset rightmostLowest = outerTopLeft;
         for (TablePart part : parts) {
-            XyOffset rl = part.render(mgr, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
+            XyOffset rl = part.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                       allPages);
             rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
                                           Float.min(rl.y(), rightmostLowest.y()));
