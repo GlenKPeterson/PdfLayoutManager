@@ -138,6 +138,20 @@ public class PdfLayoutMgr {
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDJpeg> jpegMap = new HashMap<BufferedImage,PDJpeg>();
 
+    PDJpeg ensureCached(final ScaledJpeg sj) {
+        BufferedImage bufferedImage = sj.bufferedImage();
+        PDJpeg temp = jpegMap.get(bufferedImage);
+        if (temp == null) {
+            try {
+                temp = new PDJpeg(doc, bufferedImage);
+            } catch (IOException ioe) {
+                 // can there ever be an exception here?  Doesn't it get written later?
+                throw new IllegalStateException("Caught exception creating a PDJpeg from a bufferedImage", ioe);
+            }
+            jpegMap.put(bufferedImage, temp);
+        }
+        return temp;
+    }
 
     public static class PageBuffer {
         public final int pageNum;
@@ -154,9 +168,9 @@ public class PdfLayoutMgr {
             //textStyle = d.textStyle(); pageMargins = d.pageMargins();
         }
 
-//        public static PageBuffer of(PdfLayoutMgr d, int pn) {
-//            return new PageBuffer(d, pn);
-//        }
+        static PageBuffer of(PdfLayoutMgr d, int pn) {
+            return new PageBuffer(d, pn);
+        }
 
 //        public TextStyle textStyle() { return textStyle; }
 //        public PageBuffer textStyle(TextStyle x) { textStyle = x; return this; }
@@ -291,18 +305,7 @@ public class PdfLayoutMgr {
                              final long ord, final float z) {
                 super(ord, z);
                 x = xVal; y = yVal;
-                BufferedImage bufferedImage = sj.bufferedImage();
-                PDJpeg temp = mgr.jpegMap.get(bufferedImage);
-                if (temp == null) {
-                    try {
-                        temp = new PDJpeg(mgr.doc, bufferedImage);
-                    } catch (IOException ioe) {
-                         // can there ever be an exception here?  Doesn't it get written later?
-                        throw new IllegalStateException("Caught exception creating a PDJpeg from a bufferedImage", ioe);
-                    }
-                    mgr.jpegMap.put(bufferedImage, temp);
-                }
-                jpeg = temp;
+                jpeg = mgr.ensureCached(sj);
                 scaledJpeg = sj;
             }
             public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
@@ -318,7 +321,7 @@ public class PdfLayoutMgr {
             }
         }
 
-        static class PageBufferAndY {
+        public static class PageBufferAndY {
             public final PageBuffer pb;
             public final float y;
             public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
@@ -326,6 +329,7 @@ public class PdfLayoutMgr {
     }
 
     private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
+    // borderItems apply to *all pages* in the document.  Not sure why, but they do.
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     private final PDDocument doc;
@@ -400,7 +404,7 @@ public class PdfLayoutMgr {
             // page until it's in the printable area.
             idx++;
             if (pages.size() <= idx) {
-                pages.add(new PageBuffer(this, pages.size() + 1));
+                pages.add(PageBuffer.of(this, pages.size() + 1));
             }
         }
         PageBuffer ps = pages.get(idx);
@@ -421,10 +425,16 @@ public class PdfLayoutMgr {
      two or more physical pages).
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public void logicalPageStart() {
+    public PageBuffer logicalPageStart() {
         borderItems = new TreeSet<PdfItem>();
-        pages.add(new PageBuffer(this, pages.size() + 1));
+        PageBuffer pb = PageBuffer.of(this, pages.size() + 1);
+        pages.add(pb);
+        return pb;
     }
+
+//    void addLogicalPage(PageBuffer pb) {
+//        pages.add(pb);
+//    }
 
     /**
      Call this when you are through with your current set of pages to commit all pending text and
