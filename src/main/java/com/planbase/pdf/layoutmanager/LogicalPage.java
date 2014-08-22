@@ -59,6 +59,21 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
+    public XyOffset putCell(final float topLeftX, final float topLeftY, Cell cell) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
+        // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
+        XyDim maxDim = XyDim.ZERO;
+        XyDim wh = cell.calcDimensions(cell.width());
+        maxDim = XyDim.of(wh.x() + maxDim.x(), Float.max(maxDim.y(), wh.y()));
+        float maxHeight = maxDim.y();
+
+        // render the row with that maxHeight.
+        cell.render(this, XyOffset.of(topLeftX, topLeftY), XyDim.of(cell.width(), maxHeight), false);
+
+        return XyOffset.of(topLeftX + wh.x(), topLeftY - wh.y());
+    }
+
+
     public XyOffset addTable(TableBuilder tb) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         return tb.render(this, tb.topLeft(), null, false);

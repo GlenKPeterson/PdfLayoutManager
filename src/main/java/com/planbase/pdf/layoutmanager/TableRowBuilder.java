@@ -61,9 +61,16 @@ public class TableRowBuilder {
             throw new IllegalStateException("Tried to add a text cell without setting a default text style");
         }
         for (String s : ss) {
-            cells.add(Cell.of(tablePart.cellStyle(),
+            cells.add(Cell.of(cellStyle,
                               nextCellSize(), Text.of(textStyle, s)));
 
+        }
+        return this;
+    }
+
+    public TableRowBuilder addJpegCells(ScaledJpeg... js) {
+        for (ScaledJpeg j : js) {
+            cells.add(Cell.of(cellStyle, nextCellSize(), j));
         }
         return this;
     }

@@ -48,11 +48,16 @@ public class Cell implements Renderable {
         XyDim blockDim;
     }
 
-    private Cell(CellStyle cs, float w, List<Renderable> r) {
+    private Cell(CellStyle cs, float w, List<Renderable> rs) {
         if (w < 0) {
             throw new IllegalArgumentException("A cell cannot have a negative width");
         }
-        cellStyle = cs; width = w; rows = r;
+//        for (Renderable r : rs) {
+//            if (r == null) {
+//                throw new IllegalArgumentException("How am I supposed to render a null?");
+//            }
+//        }
+        cellStyle = cs; width = w; rows = rs;
     }
 
     /**
@@ -158,7 +163,7 @@ public class Cell implements Renderable {
             innerWidth -= (padding.left() + padding.right());
         }
         for (Renderable row : rows) {
-            XyDim rowDim = row.calcDimensions(innerWidth);
+            XyDim rowDim = (row == null) ? XyDim.ZERO : row.calcDimensions(innerWidth);
             blockDim = XyDim.of(Float.max(blockDim.x(), rowDim.x()),
                                 blockDim.y() + rowDim.y());
 //            System.out.println("\trow = " + row);
@@ -236,6 +241,9 @@ public class Cell implements Renderable {
         XyOffset outerLowerRight = innerTopLeft;
         for (int i = 0; i < rows.size(); i++) {
             Renderable row = rows.get(i);
+            if (row == null) {
+                continue;
+            }
             PreCalcRow pcr = pcrs.rows.get(i);
             float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
             outerLowerRight = row.render(lp,
@@ -289,6 +297,10 @@ public class Cell implements Renderable {
         private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }
 
         public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
+
+        public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+
+        public Builder add(ScaledJpeg sj) { rows.add(sj); return this; }
 
         public Builder add(Text t) { rows.add(t); return this; }
         public Builder addAll(TextStyle ts, List<String> ls) {

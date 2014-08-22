@@ -41,7 +41,17 @@ public class TablePart {
 //    }
 
     public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
-    public TablePart cellWidths(List<Float> x) { cellWidths = x; return this; }
+    public float cellWidth(int i) { return cellWidths.get(i); }
+    // TODO: Not used
+    public TablePart replaceAllCellWidths(List<Float> x) { cellWidths = x; return this; }
+    // TODO: Not used
+    public TablePart addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }
+    public TablePart addCellWidths(float... ws) {
+        for (float w : ws) { cellWidths.add(w); }
+        return this;
+    }
+    public TablePart addCellWidth(Float x) { cellWidths.add(x); return this; }
+
     public int numCellWidths() { return cellWidths.size(); }
 
 //    public TablePart cellWidths(float[] x) { return new Builder().cellWidths(cellWidths).build(); }

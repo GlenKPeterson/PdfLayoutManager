@@ -36,6 +36,10 @@ public class TableBuilder implements Renderable {
 
     public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
     public TableBuilder addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }
+    public TableBuilder addCellWidths(float... ws) {
+        for (float w : ws) { cellWidths.add(w); }
+        return this;
+    }
     public TableBuilder addCellWidth(Float x) { cellWidths.add(x); return this; }
 
     public CellStyle cellStyle() { return cellStyle; }
