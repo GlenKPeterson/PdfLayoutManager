@@ -71,6 +71,72 @@ public class TestPdfLayoutMgr {
                                                           .build());
 
         LogicalPage lp = pageMgr.logicalPageStart();
+        XyOffset xya = lp.tableBuilder(XyOffset.of(40f, pageMgr.yPageTop()))
+                .addCellWidths(Arrays.asList(120f, 120f, 120f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, Color.YELLOW.brighter()))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
+                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
+                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
+                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
+
+        XyOffset xyb = lp.tableBuilder(XyOffset.of(xya.x() + 10, pageMgr.yPageTop()))
+                .addCellWidths(Arrays.asList(100f, 100f, 100f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
+                                        Color.YELLOW.brighter()))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2),
+                                                      Color.decode("#3366cc"),
+                                                      BorderStyle.of(Color.BLACK)))
+                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                                                      Color.decode("#ccffcc"),
+                                                      BorderStyle.of(Color.DARK_GRAY)))
+                .minRowHeight(100f)
+                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
+                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
+
+        XyOffset xyc = lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
+                .addCellWidths(Arrays.asList(100f, 100f, 100f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
+                                        Color.YELLOW.brighter()))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2),
+                                                      Color.decode("#3366cc"),
+                                                      BorderStyle.of(Color.BLACK)))
+                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                                                      Color.decode("#ccffcc"),
+                                                      BorderStyle.of(Color.DARK_GRAY)))
+                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
+                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line 1", "Line two", "[Line three is long enough to wrap]").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line 1", "Line two").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line 1").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("L1").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1").buildCell().buildRow().buildPart().buildTable();
+
+        pageMgr.logicalPageEnd(lp);
+
+        lp = pageMgr.logicalPageStart();
 
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
@@ -281,27 +347,6 @@ public class TestPdfLayoutMgr {
         lp.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         pageMgr.logicalPageEnd(lp);
 
-
-        lp = pageMgr.logicalPageStart();
-        XyOffset xY = lp.tableBuilder(XyOffset.of(40f, pageMgr.yPageTop()))
-                .addCellWidths(Arrays.asList(150f, 150f, 150f))
-                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, Color.YELLOW.brighter()))
-                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
-                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
-                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(150f)
-                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
-                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
-                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
-                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two", "Line three").buildCell()
-                .cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
-
-        pageMgr.logicalPageEnd(lp);
         pageMgr.save(os);
 //        LogicalPageBuilder lpb = DocumentBuilder.of(pageMgr).pageMargins(Padding.of(40))
 //                .logicalPageBuilder();
