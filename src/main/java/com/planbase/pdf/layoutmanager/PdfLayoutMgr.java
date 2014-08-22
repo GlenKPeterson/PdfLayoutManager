@@ -138,7 +138,7 @@ public class PdfLayoutMgr {
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDJpeg> jpegMap = new HashMap<BufferedImage,PDJpeg>();
 
-    PDJpeg ensureCached(final ScaledJpeg sj) {
+    private PDJpeg ensureCached(final ScaledJpeg sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
         PDJpeg temp = jpegMap.get(bufferedImage);
         if (temp == null) {
@@ -157,25 +157,12 @@ public class PdfLayoutMgr {
         public final int pageNum;
         private long lastOrd = 0;
         private final Set<PdfItem> items = new TreeSet<PdfItem>();
-//        private TextStyle textStyle;
-//        private Padding pageMargins;
 
         private PageBuffer(int pn) {
             pageNum = pn;
-            //textStyle = d.textStyle(); pageMargins = d.pageMargins();
         }
 
-//        static PageBuffer of(int pn) {
-//            return new PageBuffer(pn);
-//        }
-
-//        public TextStyle textStyle() { return textStyle; }
-//        public PageBuffer textStyle(TextStyle x) { textStyle = x; return this; }
-//
-//        public Padding pageMargins() { return pageMargins; }
-//        public PageBuffer pageMargins(Padding x) { pageMargins = x; return this; }
-
-        public void fillRect(final float xVal, final float yVal, final float w, final float h,
+        private void fillRect(final float xVal, final float yVal, final float w, final float h,
                              final Color c, final float z) {
             items.add(FillRect.of(xVal, yVal, w, h, c, lastOrd++, z));
         }
@@ -190,30 +177,30 @@ public class PdfLayoutMgr {
 //            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
-        public void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                             final PdfLayoutMgr mgr) {
+        void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
+                      final PdfLayoutMgr mgr) {
             items.add(DrawJpeg.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
-        public void drawLine(final float xa, final float ya, final float xb,
-                             final float yb, final LineStyle ls, final float z) {
+        private void drawLine(final float xa, final float ya, final float xb,
+                              final float yb, final LineStyle ls, final float z) {
             items.add(DrawLine.of(xa, ya, xb, yb, ls, lastOrd++, z));
         }
-        public void drawLine(final float xa, final float ya, final float xb, final float yb,
-                             final LineStyle ls) {
+        private void drawLine(final float xa, final float ya, final float xb, final float yb,
+                              final LineStyle ls) {
             drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
         }
 
-        public void drawStyledText(final float xCoord, final float yCoord, final String text,
+        private void drawStyledText(final float xCoord, final float yCoord, final String text,
                                    TextStyle s, final float z) {
             items.add(Text.of(xCoord, yCoord, text, s, lastOrd++, z));
         }
-        public void drawStyledText(final float xCoord, final float yCoord, final String text,
+        void drawStyledText(final float xCoord, final float yCoord, final String text,
                                    TextStyle s) {
             drawStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
         }
 
-        public void commit(PDPageContentStream stream) throws IOException {
+        private void commit(PDPageContentStream stream) throws IOException {
             // Since items are z-ordered, then sub-ordered by entry-order, we will draw
             // everything in the correct order.
             for (PdfItem item : items) { item.commit(stream); }
@@ -311,12 +298,12 @@ public class PdfLayoutMgr {
                 stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
             }
         }
+    }
 
-        public static class PageBufferAndY {
-            public final PageBuffer pb;
-            public final float y;
-            public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
-        }
+    static class PageBufferAndY {
+        public final PageBuffer pb;
+        public final float y;
+        public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
     }
 
     private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
@@ -358,7 +345,7 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    PageBuffer.PageBufferAndY appropriatePage(float y) {
+    PageBufferAndY appropriatePage(float y) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been created by calling newPage().");
         }
@@ -375,7 +362,7 @@ public class PdfLayoutMgr {
             }
         }
         PageBuffer ps = pages.get(idx);
-        return new PageBuffer.PageBufferAndY(ps, y);
+        return new PageBufferAndY(ps, y);
     }
 
     /**
@@ -469,11 +456,11 @@ public class PdfLayoutMgr {
      @param x2 second x-value
      @param y2 second (lower or same) y-value
      */
-    public void putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
+    void putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
         if (y1 < y2) { throw new IllegalStateException("y1 param must be >= y2 param"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBuffer.PageBufferAndY pby1 = appropriatePage(y1);
-        PageBuffer.PageBufferAndY pby2 = appropriatePage(y2);
+        PageBufferAndY pby1 = appropriatePage(y1);
+        PageBufferAndY pby2 = appropriatePage(y2);
         if (pby1.equals(pby2)) {
             pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
         } else {
@@ -540,14 +527,14 @@ public class PdfLayoutMgr {
 //                           outerTopLeft.y() - outerDimensions.y());
 //    }
 
-    public void putRect(final float left, final float topY, final float width,
+    void putRect(final float left, final float topY, final float width,
                         final float maxHeight, final Color c) {
         float bottomY = topY - maxHeight;
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBuffer.PageBufferAndY pby1 = appropriatePage(topY);
-        PageBuffer.PageBufferAndY pby2 = appropriatePage(bottomY);
+        PageBufferAndY pby1 = appropriatePage(topY);
+        PageBufferAndY pby2 = appropriatePage(bottomY);
         if (pby1.equals(pby2)) {
             pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
         } else {

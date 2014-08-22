@@ -31,7 +31,7 @@ public class LogicalPage { // AKA Document Section
 
     LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(y);
+        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
         return this;
     }
@@ -39,7 +39,7 @@ public class LogicalPage { // AKA Document Section
     LogicalPage drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(yVal);
+        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(yVal);
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawJpeg(xVal, pby.y, sj, mgr);
         return this;
