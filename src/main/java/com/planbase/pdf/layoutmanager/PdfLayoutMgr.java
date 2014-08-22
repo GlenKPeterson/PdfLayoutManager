@@ -119,6 +119,17 @@ public class PdfLayoutMgr {
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() { return pageWidth; }
 
+// TODO: add Sensible defaults, such as textStyle?
+//    private TextStyle textStyle;
+//    private PDRectangle pageDimensions;
+//    private Padding pageMargins;
+//    private PDRectangle printableArea;
+//
+//    public TextStyle textStyle() { return textStyle; }
+//    public PDRectangle pageDimensions() { return pageDimensions; }
+//    public Padding pageMargins() { return pageMargins; }
+//    public PDRectangle printableArea() { return printableArea; }
+
     // You can have many DrawJpegs backed by only a few images - it is a flyweight, and this
     // hash map keeps track of the few underlying images, even as intances of DrawJpeg
     // represent all the places where these images are used.
@@ -231,12 +242,36 @@ public class PdfLayoutMgr {
         }
     }
 
-    class PageBuffer {
+    public static class PageBuffer {
         public final int pageNum;
         private long lastOrd = 0;
         private final Set<PdfItem> items = new TreeSet<PdfItem>();
+        private List<Renderable> renderables = new ArrayList<Renderable>();
+        private final PdfLayoutMgr pdfLayoutMgr;
+//        private TextStyle textStyle;
+//        private Padding pageMargins;
+        // TODO: Do borderItems belong here???
 
-        public PageBuffer(int pn) { pageNum = pn; }
+        private PageBuffer(PdfLayoutMgr d, int pn) {
+            pdfLayoutMgr = d; pageNum = pn;
+            //textStyle = d.textStyle(); pageMargins = d.pageMargins();
+        }
+
+//        public static PageBuffer of(PdfLayoutMgr d, int pn) {
+//            return new PageBuffer(d, pn);
+//        }
+
+//        public TextStyle textStyle() { return textStyle; }
+//        public PageBuffer textStyle(TextStyle x) { textStyle = x; return this; }
+//
+//        public Padding pageMargins() { return pageMargins; }
+//        public PageBuffer pageMargins(Padding x) { pageMargins = x; return this; }
+
+        public PdfLayoutMgr pdfLayoutMgr() { return pdfLayoutMgr; }
+
+        public TableBuilder tableBuilder(XyOffset tl) { return TableBuilder.of(this, tl); }
+
+        public PageBuffer addRenderable(Renderable r) { renderables.add(r); return this; }
 
         public void fillRect(final float xVal, final float yVal, final float w, final float h,
                              final Color c, final float z) {
@@ -364,7 +399,7 @@ public class PdfLayoutMgr {
             // page until it's in the printable area.
             idx++;
             if (pages.size() <= idx) {
-                pages.add(new PageBuffer(pages.size() + 1));
+                pages.add(new PageBuffer(this, pages.size() + 1));
             }
         }
         PageBuffer ps = pages.get(idx);
@@ -387,7 +422,7 @@ public class PdfLayoutMgr {
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public void logicalPageStart() {
         borderItems = new TreeSet<PdfItem>();
-        pages.add(new PageBuffer(pages.size() + 1));
+        pages.add(new PageBuffer(this, pages.size() + 1));
     }
 
     /**

@@ -18,17 +18,17 @@ import java.util.Collections;
 import java.util.List;
 
 public class TableBuilder implements Renderable {
-    private final LogicalPageBuilder logicalPageBuilder;
+    private final PdfLayoutMgr.PageBuffer pageBuffer;
     private final XyOffset topLeft;
     private final List<Float> cellWidths = new ArrayList<Float>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(LogicalPageBuilder lp, XyOffset tl) {
-        logicalPageBuilder = lp; topLeft = tl;
+    private TableBuilder(PdfLayoutMgr.PageBuffer lp, XyOffset tl) {
+        pageBuffer = lp; topLeft = tl;
     }
-    public static TableBuilder of(LogicalPageBuilder lp, XyOffset tl) {
+    public static TableBuilder of(PdfLayoutMgr.PageBuffer lp, XyOffset tl) {
         return new TableBuilder(lp, tl);
     }
 
@@ -48,7 +48,7 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-//    public LogicalPageBuilder buildTable() { return logicalPageBuilder.addRenderable(this); }
+//    public PageBuffer buildTable() { return pageBuffer.addRenderable(this); }
 
     public XyDim calcDimensions(float maxWidth) {
         XyDim maxDim = XyDim.ZERO;
