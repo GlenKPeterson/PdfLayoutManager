@@ -71,7 +71,7 @@ public class ScaledJpeg implements Renderable {
         float y = outerTopLeft.y() - height;
 
         // Calculate what page image should start on
-        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+        PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(y);
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawJpeg(outerTopLeft.x(), pby.y, this, mgr);
         return XyOffset.of(outerTopLeft.x() + width, y);

@@ -183,7 +183,7 @@ public class Text implements Renderable {
             if (allPages) {
                 mgr.borderStyledText(x, y, wr.string, textStyle);
             } else {
-                PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+                PdfLayoutMgr.PageBuffer.PageBufferAndY pby = mgr.appropriatePage(y);
                 pby.pb.drawStyledText(x, pby.y, wr.string, textStyle);
             }
             y -= textStyle.descent();

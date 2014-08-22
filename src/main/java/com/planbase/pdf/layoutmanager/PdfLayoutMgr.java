@@ -138,109 +138,6 @@ public class PdfLayoutMgr {
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDJpeg> jpegMap = new HashMap<BufferedImage,PDJpeg>();
 
-    private static class DrawLine extends PdfItem {
-        private final float x1, y1, x2, y2;
-        private final LineStyle style;
-        private DrawLine(final float xa, final float ya, final float xb, final float yb,
-                         LineStyle s,
-                         final long ord, final float z) {
-            super(ord, z);
-            x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
-        }
-        public static DrawLine of(final float xa, final float ya, final float xb,
-                                  final float yb, LineStyle s,
-                                  final long ord, final float z) {
-            return new DrawLine(xa, ya, xb, yb, s, ord, z);
-        }
-        @Override
-        public void commit(PDPageContentStream stream) throws IOException {
-            stream.setStrokingColor(style.color());
-            stream.setLineWidth(style.width());
-            stream.drawLine(x1, y1, x2, y2);
-        }
-    }
-
-    private static class FillRect extends PdfItem {
-        private final float x, y, width, height;
-        private final Color color;
-        private FillRect(final float xVal, final float yVal, final float w, final float h,
-                         final Color c, final long ord, final float z) {
-            super(ord, z);
-            x = xVal; y = yVal; width = w; height = h; color = c;
-        }
-        public static FillRect of(final float xVal, final float yVal, final float w,
-                                  final float h, final Color c, final long ord, final float z) {
-            return new FillRect(xVal, yVal, w, h, c, ord, z);
-        }
-        @Override
-        public void commit(PDPageContentStream stream) throws IOException {
-            stream.setNonStrokingColor(color);
-            stream.fillRect(x, y, width, height);
-        }
-    }
-
-    private static class Text extends PdfItem {
-        public final float x, y;
-        public final String t;
-        public final TextStyle style;
-        private Text(final float xCoord, final float yCoord, final String text,
-                     TextStyle s, final long ord, final float z) {
-            super(ord, z);
-            x = xCoord; y = yCoord; t = text; style = s;
-        }
-        public static Text of(final float xCoord, final float yCoord, final String text,
-                              TextStyle s, final long ord, final float z) {
-            return new Text(xCoord, yCoord, text, s, ord, z);
-        }
-        @Override
-        public void commit(PDPageContentStream stream) throws IOException {
-            stream.beginText();
-            stream.setNonStrokingColor(style.textColor());
-            stream.setFont(style.font(), style.fontSize());
-            stream.moveTextPositionByAmount(x, y);
-            stream.drawString(t);
-            stream.endText();
-        }
-    }
-
-    private static class DrawJpeg extends PdfItem {
-        private final float x, y;
-        private final PDJpeg jpeg;
-        private final ScaledJpeg scaledJpeg;
-
-        // private Log logger = LogFactory.getLog(DrawJpeg.class);
-
-        private DrawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                         final PdfLayoutMgr mgr,
-                         final long ord, final float z) {
-            super(ord, z);
-            x = xVal; y = yVal;
-            BufferedImage bufferedImage = sj.bufferedImage();
-            PDJpeg temp = mgr.jpegMap.get(bufferedImage);
-            if (temp == null) {
-                try {
-                    temp = new PDJpeg(mgr.doc, bufferedImage);
-                } catch (IOException ioe) {
-                     // can there ever be an exception here?  Doesn't it get written later?
-                    throw new IllegalStateException("Caught exception creating a PDJpeg from a bufferedImage", ioe);
-                }
-                mgr.jpegMap.put(bufferedImage, temp);
-            }
-            jpeg = temp;
-            scaledJpeg = sj;
-        }
-        public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
-                                  final PdfLayoutMgr mgr,
-                                  final long ord, final float z) {
-            return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
-        }
-        @Override
-        public void commit(PDPageContentStream stream) throws IOException {
-            // stream.drawImage(jpeg, x, y);
-            XyDim dim = scaledJpeg.dimensions();
-            stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
-        }
-    }
 
     public static class PageBuffer {
         public final int pageNum;
@@ -316,12 +213,116 @@ public class PdfLayoutMgr {
             // everything in the correct order.
             for (PdfItem item : items) { item.commit(stream); }
         }
-    }
 
-    class PageBufferAndY {
-        public final PageBuffer pb;
-        public final float y;
-        public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
+        private static class DrawLine extends PdfItem {
+            private final float x1, y1, x2, y2;
+            private final LineStyle style;
+            private DrawLine(final float xa, final float ya, final float xb, final float yb,
+                             LineStyle s,
+                             final long ord, final float z) {
+                super(ord, z);
+                x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
+            }
+            public static DrawLine of(final float xa, final float ya, final float xb,
+                                      final float yb, LineStyle s,
+                                      final long ord, final float z) {
+                return new DrawLine(xa, ya, xb, yb, s, ord, z);
+            }
+            @Override
+            public void commit(PDPageContentStream stream) throws IOException {
+                stream.setStrokingColor(style.color());
+                stream.setLineWidth(style.width());
+                stream.drawLine(x1, y1, x2, y2);
+            }
+        }
+
+        private static class FillRect extends PdfItem {
+            private final float x, y, width, height;
+            private final Color color;
+            private FillRect(final float xVal, final float yVal, final float w, final float h,
+                             final Color c, final long ord, final float z) {
+                super(ord, z);
+                x = xVal; y = yVal; width = w; height = h; color = c;
+            }
+            public static FillRect of(final float xVal, final float yVal, final float w,
+                                      final float h, final Color c, final long ord, final float z) {
+                return new FillRect(xVal, yVal, w, h, c, ord, z);
+            }
+            @Override
+            public void commit(PDPageContentStream stream) throws IOException {
+                stream.setNonStrokingColor(color);
+                stream.fillRect(x, y, width, height);
+            }
+        }
+
+        private static class Text extends PdfItem {
+            public final float x, y;
+            public final String t;
+            public final TextStyle style;
+            private Text(final float xCoord, final float yCoord, final String text,
+                         TextStyle s, final long ord, final float z) {
+                super(ord, z);
+                x = xCoord; y = yCoord; t = text; style = s;
+            }
+            public static Text of(final float xCoord, final float yCoord, final String text,
+                                  TextStyle s, final long ord, final float z) {
+                return new Text(xCoord, yCoord, text, s, ord, z);
+            }
+            @Override
+            public void commit(PDPageContentStream stream) throws IOException {
+                stream.beginText();
+                stream.setNonStrokingColor(style.textColor());
+                stream.setFont(style.font(), style.fontSize());
+                stream.moveTextPositionByAmount(x, y);
+                stream.drawString(t);
+                stream.endText();
+            }
+        }
+
+        private static class DrawJpeg extends PdfItem {
+            private final float x, y;
+            private final PDJpeg jpeg;
+            private final ScaledJpeg scaledJpeg;
+
+            // private Log logger = LogFactory.getLog(DrawJpeg.class);
+
+            private DrawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
+                             final PdfLayoutMgr mgr,
+                             final long ord, final float z) {
+                super(ord, z);
+                x = xVal; y = yVal;
+                BufferedImage bufferedImage = sj.bufferedImage();
+                PDJpeg temp = mgr.jpegMap.get(bufferedImage);
+                if (temp == null) {
+                    try {
+                        temp = new PDJpeg(mgr.doc, bufferedImage);
+                    } catch (IOException ioe) {
+                         // can there ever be an exception here?  Doesn't it get written later?
+                        throw new IllegalStateException("Caught exception creating a PDJpeg from a bufferedImage", ioe);
+                    }
+                    mgr.jpegMap.put(bufferedImage, temp);
+                }
+                jpeg = temp;
+                scaledJpeg = sj;
+            }
+            public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
+                                      final PdfLayoutMgr mgr,
+                                      final long ord, final float z) {
+                return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
+            }
+            @Override
+            public void commit(PDPageContentStream stream) throws IOException {
+                // stream.drawImage(jpeg, x, y);
+                XyDim dim = scaledJpeg.dimensions();
+                stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
+            }
+        }
+
+        static class PageBufferAndY {
+            public final PageBuffer pb;
+            public final float y;
+            public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
+        }
     }
 
     private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
@@ -367,7 +368,7 @@ public class PdfLayoutMgr {
 
     private void borderStyledText(final float xCoord, final float yCoord, final String text,
                                TextStyle s, final float z) {
-        borderItems.add(Text.of(xCoord, yCoord, text, s, borderOrd++, z));
+        borderItems.add(PageBuffer.Text.of(xCoord, yCoord, text, s, borderOrd++, z));
     }
 
     /**
@@ -386,7 +387,7 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    PageBufferAndY appropriatePage(float y) {
+    PageBuffer.PageBufferAndY appropriatePage(float y) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been created by calling newPage().");
         }
@@ -403,7 +404,7 @@ public class PdfLayoutMgr {
             }
         }
         PageBuffer ps = pages.get(idx);
-        return new PageBufferAndY(ps, y);
+        return new PageBuffer.PageBufferAndY(ps, y);
     }
 
     /**
@@ -495,8 +496,8 @@ public class PdfLayoutMgr {
     public void putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
         if (y1 < y2) { throw new IllegalStateException("y1 param must be >= y2 param"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = appropriatePage(y1);
-        PageBufferAndY pby2 = appropriatePage(y2);
+        PageBuffer.PageBufferAndY pby1 = appropriatePage(y1);
+        PageBuffer.PageBufferAndY pby2 = appropriatePage(y2);
         if (pby1.equals(pby2)) {
             pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
         } else {
@@ -569,8 +570,8 @@ public class PdfLayoutMgr {
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = appropriatePage(topY);
-        PageBufferAndY pby2 = appropriatePage(bottomY);
+        PageBuffer.PageBufferAndY pby1 = appropriatePage(topY);
+        PageBuffer.PageBufferAndY pby2 = appropriatePage(bottomY);
         if (pby1.equals(pby2)) {
             pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
         } else {
@@ -666,65 +667,6 @@ public class PdfLayoutMgr {
 
         return origY - maxHeight;
     }
-
-    /*
-
-    Rows are cool, but tables are cooler.  Really want a table with a head section and body
-    section, each with their own default cell and text styles.  The "FixedTable" class should
-    hold the column widths and produce appropriate row builders with default styles set which in
-    turn make cell builders with default styles set, and so forth.
-
-    public float putRow(float initialX, float origY, Row r) throws IOException {
-        return putRow(initialX, origY, r.cells.toArray(new Cell[r.cells.size()]));
-    }
-
-    public float putRows(float initialX, float y, Iterable<Row> rs) throws IOException {
-        for (Row r : rs) {
-            y = putRow(initialX, y, r.cells.toArray(new Cell[r.cells.size()]));
-        }
-        return y;
-    }
-
-    private static class Row {
-        private final CellStyle cellStyle;
-        private final TextStyle textStyle;
-        private final List<Cell> cells;
-
-        private Row(CellStyle cs, TextStyle ts, List<Cell> ls) {
-            cellStyle = cs; textStyle = ts; cells = ls;
-        }
-    }
-
-    public static class RowBuilder {
-        private final List<Cell> cells = new ArrayList<Cell>();
-
-        private CellStyle cellStyle = CellStyle.DEFAULT;
-        private TextStyle textStyle;
-
-        private RowBuilder() { ; }
-
-        public RowBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this; }
-        public RowBuilder textStyle(TextStyle ts) { textStyle = ts; return this; }
-
-        // Adds an empty cell with default style
-        public RowBuilder addCell(float width) {
-            cells.add(Cell.of(cellStyle, width));
-            return this;
-        }
-
-        public RowBuilder addCell(float width, String s) {
-            if (textStyle == null) {
-                throw new IllegalStateException("Must set a text style before adding text");
-            }
-            cells.add(Cell.of(cellStyle, width, textStyle, s));
-            return this;
-        }
-
-        public RowBuilder add(Cell c) { cells.add(c); return this; }
-
-        public Row build() { return new Row(cellStyle, textStyle, cells); }
-    }
-    */
 
     private static final String ISO_8859_1 = "ISO_8859_1";
     private static final String UNICODE_BULLET = "\u2022";
