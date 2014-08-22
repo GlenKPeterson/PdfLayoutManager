@@ -42,6 +42,7 @@ public class TablePart {
 
     public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
     public TablePart cellWidths(List<Float> x) { cellWidths = x; return this; }
+    public int numCellWidths() { return cellWidths.size(); }
 
 //    public TablePart cellWidths(float[] x) { return new Builder().cellWidths(cellWidths).build(); }
 

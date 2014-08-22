@@ -37,7 +37,12 @@ public class TableRowBuilder {
         minRowHeight = tp.minRowHeight();
     }
 
-    public float nextCellSize() { return tablePart.cellWidths().get(cells.size()).floatValue(); }
+    public float nextCellSize() {
+        if (tablePart.numCellWidths() <= cells.size()) {
+            throw new IllegalStateException("Tried to add more cells than you set sizes for");
+        }
+        return tablePart.cellWidths().get(cells.size()).floatValue();
+    }
 
     public static TableRowBuilder of(TablePart tp) { return new TableRowBuilder(tp); }
 

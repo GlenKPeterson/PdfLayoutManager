@@ -237,7 +237,10 @@ public class Cell implements Renderable {
         for (int i = 0; i < rows.size(); i++) {
             Renderable row = rows.get(i);
             PreCalcRow pcr = pcrs.rows.get(i);
-            outerLowerRight = row.render(lp, innerTopLeft, pcr.blockDim, allPages); // TODO: Check this!
+            float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
+            outerLowerRight = row.render(lp,
+                                         innerTopLeft.x(innerTopLeft.x() + rowXOffset),
+                                         pcr.blockDim, allPages);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
