@@ -93,6 +93,13 @@ public class TablePart {
         return rightmostLowest;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder("TablePart(").append(tableBuilder).append(" ")
+                .append(System.identityHashCode(this)).append(")").toString();
+
+    }
+
 //    public static Builder builder(TableBuilder t) { return new Builder(t); }
 //
 //    public static class Builder {

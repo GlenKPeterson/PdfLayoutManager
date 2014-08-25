@@ -146,6 +146,11 @@ public class Cell implements Renderable {
     }
 
     public XyDim calcDimensions(final float maxWidth) {
+        // I think zero or negative width cells might be OK to ignore.  I'd like to try to make
+        // Text.calcDimensionsForReal() handle this situation before throwing an error here.
+//        if (maxWidth < 0) {
+//            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
+//        }
         XyDim blockDim = ensurePreCalcRows(maxWidth).blockDim;
         XyDim ret = ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
 //        System.out.println("Cell.calcDimensions(" + maxWidth + ") blockDim=" + blockDim +

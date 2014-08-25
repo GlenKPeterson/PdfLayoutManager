@@ -75,6 +75,7 @@ public class TableRowBuilder {
         return this;
     }
 
+    // TODO: This should be add Renderable Cells.
     public TableRowBuilder addJpegCells(ScaledJpeg... js) {
         for (ScaledJpeg j : js) {
             addCellAt(Cell.of(cellStyle, nextCellSize(), j), nextCellIdx);
@@ -157,6 +158,13 @@ public class TableRowBuilder {
         return XyOffset.of(x, outerTopLeft.y() - maxHeight);
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder("TableRowBuilder(").append(tablePart).append(" ")
+                .append(System.identityHashCode(this)).append(")").toString();
+
+    }
+
     public class RowCellBuilder implements CellBuilder {
 
         private final TableRowBuilder tableRowBuilder;
@@ -176,6 +184,8 @@ public class TableRowBuilder {
         // public TableRowCellBuilder width(float w) { width = w; return this; }
 
         public RowCellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+
+        public RowCellBuilder borderStyle(BorderStyle bs) { cellStyle = cellStyle.borderStyle(bs); return this;}
 
         public RowCellBuilder align(CellStyle.Align align) {
             cellStyle = cellStyle.align(align); return this;
@@ -215,7 +225,7 @@ public class TableRowBuilder {
         }
 
         @Override public String toString() {
-            return new StringBuilder("TableRowCellBuilder(").append(tableRowBuilder).append(" colIdx=")
+            return new StringBuilder("RowCellBuilder(").append(tableRowBuilder).append(" colIdx=")
                     .append(colIdx).append(")").toString();
         }
 

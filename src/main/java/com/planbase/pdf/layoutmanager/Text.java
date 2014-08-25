@@ -64,6 +64,10 @@ public class Text implements Renderable {
     public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
     private XyDim calcDimensionsForReal(final float maxWidth) {
+        // TODO: Make this show text even if the width is zero or less, just show one word per line.
+        if (maxWidth < 0) {
+            throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
+        }
         WrappedBlock wb = new WrappedBlock();
         float x = 0;
         float y = 0;
@@ -76,6 +80,7 @@ public class Text implements Renderable {
 
         while (text.length() > 0) {
             int textLen = text.length();
+//            System.out.println("text=[" + text + "] len=" + textLen);
             // Knowing the average width of a character lets us guess and generally be near
             // the word where the line break will occur.  Since the font reports a narrow average,
             // (possibly due to the predominance of spaces in text) we widen it a little for a
@@ -85,10 +90,12 @@ public class Text implements Renderable {
             String substr = text.substring(0, idx);
             float strWidth = textStyle.stringWidthInDocUnits(substr);
 
+//            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
             // If too short - find shortest string that is too long.
             // int idx = idx;
             // int maxTooShortIdx = -1;
             while ( (strWidth < maxWidth) && (idx < textLen) ) {
+//                System.out.println("find shortest string that is too long");
                 // Consume any whitespace.
                 while ( (idx < textLen) &&
                         Character.isWhitespace(text.charAt(idx)) ) {
@@ -105,8 +112,10 @@ public class Text implements Renderable {
             }
 
             idx--;
+//            System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
             // Too long.  Find longest string that is short enough.
             while ( (strWidth > maxWidth) && (idx > 0) ) {
+//                System.out.println("find longest string that is short enough");
                 //logger.info("strWidth: " + strWidth + " cell.width: " + cell.width + " idx: " + idx);
                 // Find previous whitespace run
                 while ( (idx > -1) && !Character.isWhitespace(text.charAt(idx)) ) {
@@ -125,11 +134,14 @@ public class Text implements Renderable {
             }
 
             wb.rows.add(WrappedRow.of(substr, strWidth, textStyle.lineHeight()));
+//            System.out.println("added row");
             y -= textStyle.lineHeight();
+//            System.out.println("y=" + y);
 
             // Chop off section of substring that we just wrote out.
             text = substrNoLeadingWhitespace(text, substr.length());
             if (strWidth > maxX) { maxX = strWidth; }
+//            System.out.println("maxX=" + maxX);
         }
 //        // Not sure what to do if passed "".  This used to mean to insert a blank line, but I'd
 //        // really like to make that "\n" instead, but don't have the time.  *sigh*
@@ -153,6 +165,10 @@ public class Text implements Renderable {
     }
 
     public XyDim calcDimensions(final float maxWidth) {
+        // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
+//        if (maxWidth < 0) {
+//            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
+//        }
         return ensureWrappedBlock(maxWidth).blockDim;
     }
 

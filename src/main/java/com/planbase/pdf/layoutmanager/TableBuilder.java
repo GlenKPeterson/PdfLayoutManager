@@ -81,4 +81,10 @@ public class TableBuilder implements Renderable {
         return rightmostLowest;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder("TableBuilder(").append(System.identityHashCode(this))
+                .append(")").toString();
+
+    }
 }
