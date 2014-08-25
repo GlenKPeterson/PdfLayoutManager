@@ -17,13 +17,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/* Unsynchronized mutable class which is not thread-safe. */
+/**
+ Unsynchronized mutable class which is not thread-safe.  The internal tracking of cells and widths
+ allows you to make a cell builder for a cell at a given column, add cells in subsequent columns,
+ then complete (buildCell()) the cell and have it find its proper (now previous) column.
+ */
 public class TableRowBuilder {
     private final TablePart tablePart;
     private TextStyle textStyle;
     private CellStyle cellStyle;
     private final List<Cell> cells;
     private float minRowHeight = 0;
+    private int nextCellIdx = 0;
 
 //    private TableRow(TablePart tp, float[] a, Cell[] b, CellStyle c, TextStyle d) {
 //        tablePart = tp; cellWidths = a; cells = b; cellStyle = c; textStyle = d;
@@ -38,10 +43,10 @@ public class TableRowBuilder {
     }
 
     public float nextCellSize() {
-        if (tablePart.numCellWidths() <= cells.size()) {
+        if (tablePart.numCellWidths() <= nextCellIdx) {
             throw new IllegalStateException("Tried to add more cells than you set sizes for");
         }
-        return tablePart.cellWidths().get(cells.size()).floatValue();
+        return tablePart.cellWidths().get(nextCellIdx).floatValue();
     }
 
     public static TableRowBuilder of(TablePart tp) { return new TableRowBuilder(tp); }
@@ -53,24 +58,27 @@ public class TableRowBuilder {
 
     public TableRowBuilder addCells(Cell... cs) {
         Collections.addAll(cells, cs);
+        nextCellIdx += cs.length;
         return this;
     }
+
+    public int nextCellIdx() { return nextCellIdx; }
 
     public TableRowBuilder addTextCells(String... ss) {
         if (textStyle == null) {
             throw new IllegalStateException("Tried to add a text cell without setting a default text style");
         }
         for (String s : ss) {
-            cells.add(Cell.of(cellStyle,
-                              nextCellSize(), Text.of(textStyle, s)));
-
+            addCellAt(Cell.of(cellStyle, nextCellSize(), Text.of(textStyle, s)), nextCellIdx);
+            nextCellIdx++;
         }
         return this;
     }
 
     public TableRowBuilder addJpegCells(ScaledJpeg... js) {
         for (ScaledJpeg j : js) {
-            cells.add(Cell.of(cellStyle, nextCellSize(), j));
+            addCellAt(Cell.of(cellStyle, nextCellSize(), j), nextCellIdx);
+            nextCellIdx++;
         }
         return this;
     }
@@ -84,17 +92,36 @@ public class TableRowBuilder {
 
     public TableRowBuilder addCell(Cell c) {
         cells.add(c);
+        nextCellIdx++;
+        return this;
+    }
+
+    public TableRowBuilder addCellAt(Cell c, int idx) {
+        // Ensure capacity in the list.
+        while (cells.size() < (idx + 1)) {
+            cells.add(null);
+        }
+        if (cells.get(idx) != null) {
+            // System.out.println("Existing cell was: " + cells.get(idx) + "\n Added cell was: " + c);
+            throw new IllegalStateException("Tried to add a cell built from a table row back to the row after adding a free cell in its spot.");
+        }
+        cells.set(idx, c);
         return this;
     }
 
     public TableRowBuilder minRowHeight(float f) { minRowHeight = f; return this; }
 
-    public Cell.Builder cellBuilder() {
-        return Cell.builder(this);
+    public CellBuilder cellBuilder() {
+        CellBuilder cb = new CellBuilder(this);
+        nextCellIdx++;
+        return cb;
     }
 
     public TablePart buildRow() {
         // Do we want to fill out the row with blank cells?
+        if (cells.contains(null)) {
+            throw new IllegalStateException("Cannot build row when some TableRowCellBuilders have been created but the cells not built and added back to the row.");
+        }
         return tablePart.addRow(this);
     }
 
@@ -130,45 +157,86 @@ public class TableRowBuilder {
         return XyOffset.of(x, outerTopLeft.y() - maxHeight);
     }
 
-//    public static TableRow of(float[] cellWidths, Cell[] cells, CellStyle cellStyle,
-//                              TextStyle textStyle) {
-//        return new TableRow(cellWidths, cells, cellStyle, textStyle);
-//    }
+    public class CellBuilder {
 
-//    public float[] cellWidths() { return cellWidths; }
-//    public TableRow cellWidths(float[] x) { return new Builder().cellWidths(cellWidths).build(); }
+        private final TableRowBuilder tableRowBuilder;
+        private float width; // Both require this.
+        private CellStyle cellStyle; // Both require this.
+        private final List<Renderable> rows = new ArrayList<Renderable>();
+        private TextStyle textStyle;
+        private final int colIdx;
 
-//    public Cell[] cells() { return cells; }
-//    public TableRow cells(Cell[] x) { return new Builder().cells(cells).build(); }
+        private CellBuilder(TableRowBuilder trb) {
+            tableRowBuilder = trb; width = trb.nextCellSize(); cellStyle = trb.cellStyle();
+            textStyle = trb.textStyle(); colIdx = trb.nextCellIdx();
+        }
 
-//    public CellStyle cellStyle() { return cellStyle; }
-//    public TableRow cellStyle(CellStyle x) { return new Builder().cellStyle(cellStyle).build(); }
+        public CellBuilder align(CellStyle.Align align) {
+            cellStyle = cellStyle.align(align); return this;
+        }
 
-//    public TextStyle textStyle() { return textStyle; }
-//    public TableRow textStyle(TextStyle x) { return new Builder().textStyle(textStyle).build(); }
+        // I think setting the width after creation is a pretty bad idea for this class since so much
+        // is put into getting the width and column correct.
+        // public TableRowCellBuilder width(float w) { width = w; return this; }
 
-//    public static Builder builder(TablePart tp) { return new Builder(tp); }
-//
-//    public static class Builder {
-//        private final TablePart tablePart;
-//        private float[] cellWidths;
-////        private Cell[] cells;
-//        private CellStyle cellStyle;
-//        private TextStyle textStyle;
-//
-//        private Builder(TablePart tp) {
-//            tablePart = tp; cellWidths = tp.cellWidths(); cellStyle = tp.cellStyle();
-//            textStyle = tp.textStyle();
-//        }
-//
-//        public Builder cellWidths(float[] x) { cellWidths = x; return this; }
-//
-////        public Builder cells(Cell[] x) { cells = x; return this; }
-//        public Builder cellStyle(CellStyle x) { cellStyle = x; return this; }
-//        public Builder textStyle(TextStyle x) { textStyle = x; return this; }
-//
-//        public TableRow build() {
-//            return new TableRow(tablePart, cellWidths, cells, cellStyle, textStyle);
-//        }
-//    } // end of class Builder
+        public CellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+
+        // Do we want to (and how could we?) prevent adding a cell to itself?
+        public CellBuilder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
+
+        public CellBuilder addAll(TextStyle ts, List<String> ls) {
+            if (ls != null) {
+                for (String s : ls) {
+                    rows.add(Text.of(ts, s));
+                }
+            }
+            return this;
+        }
+        public CellBuilder add(String... ss) {
+            if (textStyle == null) {
+                throw new IllegalStateException("Must set a default text style before adding raw strings");
+            }
+            for (String s : ss) {
+                rows.add(Text.of(textStyle, s));
+            }
+            return this;
+        }
+
+        public CellBuilder addAll(List<ScaledJpeg> js) {
+            if (js != null) { rows.addAll(js); }
+            return this;
+        }
+        public CellBuilder textStyle(TextStyle x) { textStyle = x; return this; }
+
+        public TableRowBuilder buildCell() {
+            Cell c = Cell.of(cellStyle, width, rows);
+            return tableRowBuilder.addCellAt(c, colIdx);
+        }
+
+        @Override public String toString() {
+            return new StringBuilder("TableRowCellBuilder(").append(tableRowBuilder).append(" colIdx=")
+                    .append(colIdx).append(")").toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return tableRowBuilder.hashCode() + colIdx;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            // Cheapest operation first...
+            if (this == other) { return true; }
+
+            if ((other == null) ||
+                !(other instanceof CellBuilder) ||
+                (this.hashCode() != other.hashCode())) {
+                return false;
+            }
+            // Details...
+            final CellBuilder that = (CellBuilder) other;
+
+            return (this.colIdx == that.colIdx) && tableRowBuilder.equals(that.tableRowBuilder);
+        }
+    }
 }

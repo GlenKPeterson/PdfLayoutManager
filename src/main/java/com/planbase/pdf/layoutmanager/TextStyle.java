@@ -89,6 +89,7 @@ public class TextStyle {
     public float fontSize() { return fontSize; }
 
     public Color textColor() { return textColor; }
+    public TextStyle textColor(Color c) { return TextStyle.of(font, fontSize, c); }
     /**
      Average character width (for this font, or maybe guessed) as a positive number in document
      units

@@ -68,12 +68,6 @@ public class Cell implements Renderable {
      @param cs the cell style
      @return a cell suitable for rendering.
      */
-
-//    @param s the style to show any text objects in.
-    //      @param r the text (String) and/or pictures (Jpegs as BufferedImages) to render in this cell.
-//         Pictures are assumed to print 300DPI with 72 document units per inch.  A null in this list
-//         adds a little vertical space, like a half-line between paragraphs.
-
     public static Cell of(CellStyle cs, float w) { //, final Object... r) {
         return new Cell(cs, w, Collections.<Renderable>emptyList());
 //                        (r == null) ? Collections.emptyList()
@@ -106,6 +100,10 @@ public class Cell implements Renderable {
         return new Cell(cs, w, ls);
     }
 
+    public static Cell of(CellStyle cs, float w, List<Renderable> ls) {
+        return new Cell(cs, w, ls);
+    }
+
     // Simple case of a single styled String
     public static Cell of(CellStyle cs, float w, Cell c) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
@@ -116,43 +114,6 @@ public class Cell implements Renderable {
     public CellStyle cellStyle() { return cellStyle; }
     // public BorderStyle border() { return borderStyle; }
     public float width() { return width; }
-    // public Color bgColor() { return bgColor; }
-
-//    /**
-//     Shows text without any boxing or background.
-//
-//     @return the final y-value
-//     @throws java.io.IOException if there is an error reading the font metrics from the underlying font
-//     file.  I think with a built-in font this is not possible, but it's in the signature of
-//     the PDFBox class, so I have to throw it too.
-//
-//     @param x the left-most (least) x-value.
-//     @param origY the top-most (greatest) y-value.
-//     @param allPages set to true if this should be treated as a header or footer for all pages.
-//     @param mgr the page manager this Cell belongs to.  Probably should be set at creation
-//     time.
-//     */
-//    float processRows(final float x, final float origY, boolean allPages, PdfLayoutMgr mgr) {
-//        // Note: Always used as: y = origY - TextStyle.BREADCRUMB.height,
-//        if ( (rows == null) || (rows.size() < 1) ) {
-//            return 0;
-//        }
-//        // Text is displayed based on its baseline, but this method takes a top-left corner of the
-//        // "cell" that contains the text.  This is the translation:
-//
-//        float y = origY - cellStyle.padding().top();
-//        for (Renderable renderable : rows) {
-//            if (renderable == null) {
-//                y -= 4;
-//                continue;
-//            }
-//
-//            XyPair p = renderable.render(XyPair.of(x, y), allPages, mgr, width);
-//            y = p.y();
-//        } // end for each row
-//
-//        return origY - y - cellStyle.padding().bottom(); // numLines * height;
-//    } // end processRows();
 
     private void calcDimensionsForReal(final float maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
@@ -281,16 +242,24 @@ public class Cell implements Renderable {
         return new Builder(cellStyle, width);
     }
 
-    public static Builder builder(TableRowBuilder trb) {
-        Builder b = new Builder(trb.cellStyle(), trb.nextCellSize()).textStyle(trb.textStyle());
-        b.trb = trb;
-        return b;
-    }
+    // Replaced with TableRow.CellBuilder.of()
+//    /**
+//     Be careful when adding multiple cell builders at once because the cell size is based upon
+//     a pointer into the list of cell sizes.  That pointer gets incremented each time a cell is
+//     added, not each time nextCellSize() is called.  Is this a bug?  Or would fixing it create
+//     too many other bugs?
+//     @param trb
+//     @return
+//     */
+//    public static Builder builder(TableRowBuilder trb) {
+//        Builder b = new Builder(trb.cellStyle(), trb.nextCellSize()).textStyle(trb.textStyle());
+//        b.trb = trb;
+//        return b;
+//    }
 
     public static class Builder {
-        private TableRowBuilder trb;
-        private final float width; // Both require this.
-        private CellStyle cellStyle; // Both require this.
+        private float width;
+        private CellStyle cellStyle;
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
 
@@ -298,11 +267,16 @@ public class Cell implements Renderable {
 
         public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
 
+        public Builder width(float w) { width = w; return this; }
+
         public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
 
-        public Builder add(ScaledJpeg sj) { rows.add(sj); return this; }
+        // This is a builder which is not Renderable.  No way to add something to itself *here*.
+        public Builder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
 
-        public Builder add(Text t) { rows.add(t); return this; }
+//        public Builder add(ScaledJpeg sj) { rows.add(sj); return this; }
+
+//        public Builder add(Text t) { rows.add(t); return this; }
         public Builder addAll(TextStyle ts, List<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
@@ -321,71 +295,33 @@ public class Cell implements Renderable {
             }
             return this;
         }
-// Sort of don't want to allow adding a cell to itself...
-//        public Builder add(Renderable... rs) {
-//            Collections.addAll(rows, rs);
-//            return this;
-//        }
         public Builder addAll(List<ScaledJpeg> js) {
             if (js != null) { rows.addAll(js); }
             return this;
         }
         public Builder textStyle(TextStyle x) { textStyle = x; return this; }
 
-        public Builder add(Cell c) { rows.add(c); return this; }
+//        public Builder add(Cell c) { rows.add(c); return this; }
 
         public Cell build() { return new Cell(cellStyle, width, rows); }
-        public TableRowBuilder buildCell() {
-            Cell c = new Cell(cellStyle, width, rows);
-            return trb.addCell(c);
-        }
-    }
 
-    /*
-    These are limits of the cell, not the contents.
+// Replaced with TableRow.CellBuilder.buildCell()
+//        public TableRowBuilder buildCell() {
+//            Cell c = new Cell(cellStyle, width, rows);
+//            return trb.addCell(c);
+//        }
 
-    float width is a limit of the cell, not of the contents.
-    CellStyle cellStyle is the over-all style of the cell, inherited by all contents for which
-    it is relevant.
+        @Override public String toString() {
+            StringBuilder sB = new StringBuilder("Cell.Builder(").append(cellStyle).append(" width=")
+                    .append(width).append(" rows=[");
 
-    public static interface CellContents {
-        // This is just some junk to indicate that this method will handle anything of this type.
-        // Don't go implementing your own stuff and passing it to this method.
-
-    }
-
-    public static class CellText implements CellContents {
-        private final float width; // Both require this.
-        private final CellStyle cellStyle; // Both require this.
-        private final TextStyle textStyle; // Required for Strings.  Unnecessary for Images.
-        private final int avgCharsForWidth; // Required for Strings.  Unnecessary for Images.
-
-        private CellText(final TextStyle ts, final float w, CellStyle cs) {
-            if (w < 0) {
-                throw new IllegalArgumentException("A cell cannot have a negative width");
+            for (int i = 0; (i < rows.size()) && (i < 3); i++) {
+                if (i > 0) { sB.append(" "); }
+                sB.append(rows.get(i));
             }
-            textStyle = ts; width = w; cellStyle = cs;
-            avgCharsForWidth = (int) ((width * 1220) / textStyle.avgCharWidth());
+            return sB.append("])").toString();
         }
-
-        public float width() { return width; }
-        public CellStyle cellStyle() { return cellStyle; }
     }
-
-    public static class CellImage implements CellContents {
-        private final float width; // Both require this.
-        private final CellStyle cellStyle; // Both require this.
-
-        private CellImage(final float w, CellStyle cs) {
-            if (w < 0) {
-                throw new IllegalArgumentException("A cell cannot have a negative width");
-            }
-            width = w; cellStyle = cs;
-        }
-        public float width() { return width; }
-        public CellStyle cellStyle() { return cellStyle; }
-    }
-     */
 
     @Override public String toString() {
         StringBuilder sB = new StringBuilder("Cell(").append(cellStyle).append(" width=")
