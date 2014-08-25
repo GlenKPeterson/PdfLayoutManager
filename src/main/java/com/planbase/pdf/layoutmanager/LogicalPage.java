@@ -45,6 +45,15 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
+    LogicalPage drawPng(final float xVal, final float yVal, final ScaledPng sj) {
+        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
+        // Calculate what page image should start on
+        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(yVal);
+        // draw image based on baseline and decrement y appropriately for image.
+        pby.pb.drawPng(xVal, pby.y, sj, mgr);
+        return this;
+    }
+
     public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +

@@ -36,6 +36,7 @@ import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
 
 /**
  <p>The main class in this package; it handles page and line breaks.</p>
@@ -153,6 +154,29 @@ public class PdfLayoutMgr {
         return temp;
     }
 
+        // You can have many DrawPngs backed by only a few images - it is a flyweight, and this
+    // hash map keeps track of the few underlying images, even as intances of DrawPng
+    // represent all the places where these images are used.
+    // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
+    // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawPng, and DrawPng
+    // must be an inner class (or this would have to be package scoped).
+    private final Map<BufferedImage,PDPixelMap> pngMap = new HashMap<BufferedImage,PDPixelMap>();
+
+    private PDPixelMap ensureCached(final ScaledPng sj) {
+        BufferedImage bufferedImage = sj.bufferedImage();
+        PDPixelMap temp = pngMap.get(bufferedImage);
+        if (temp == null) {
+            try {
+                temp = new PDPixelMap(doc, bufferedImage);
+            } catch (IOException ioe) {
+                 // can there ever be an exception here?  Doesn't it get written later?
+                throw new IllegalStateException("Caught exception creating a PDPixelMap from a bufferedImage", ioe);
+            }
+            pngMap.put(bufferedImage, temp);
+        }
+        return temp;
+    }
+
     public static class PageBuffer {
         public final int pageNum;
         private long lastOrd = 0;
@@ -180,6 +204,11 @@ public class PdfLayoutMgr {
         void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
                       final PdfLayoutMgr mgr) {
             items.add(DrawJpeg.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+        }
+
+        void drawPng(final float xVal, final float yVal, final ScaledPng sj,
+                      final PdfLayoutMgr mgr) {
+            items.add(DrawPng.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
         private void drawLine(final float xa, final float ya, final float xb,
@@ -268,6 +297,34 @@ public class PdfLayoutMgr {
                 stream.moveTextPositionByAmount(x, y);
                 stream.drawString(t);
                 stream.endText();
+            }
+        }
+
+        private static class DrawPng extends PdfItem {
+            private final float x, y;
+            private final PDPixelMap png;
+            private final ScaledPng scaledPng;
+
+            // private Log logger = LogFactory.getLog(DrawPng.class);
+
+            private DrawPng(final float xVal, final float yVal, final ScaledPng sj,
+                             final PdfLayoutMgr mgr,
+                             final long ord, final float z) {
+                super(ord, z);
+                x = xVal; y = yVal;
+                png = mgr.ensureCached(sj);
+                scaledPng = sj;
+            }
+            public static DrawPng of(final float xVal, final float yVal, final ScaledPng sj,
+                                      final PdfLayoutMgr mgr,
+                                      final long ord, final float z) {
+                return new DrawPng(xVal, yVal, sj, mgr, ord, z);
+            }
+            @Override
+            public void commit(PDPageContentStream stream) throws IOException {
+                // stream.drawImage(png, x, y);
+                XyDim dim = scaledPng.dimensions();
+                stream.drawXObject(png, x, y, dim.x(), dim.y());
             }
         }
 
