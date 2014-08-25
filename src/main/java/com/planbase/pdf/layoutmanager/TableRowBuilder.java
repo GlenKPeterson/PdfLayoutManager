@@ -111,8 +111,8 @@ public class TableRowBuilder {
 
     public TableRowBuilder minRowHeight(float f) { minRowHeight = f; return this; }
 
-    public CellBuilder cellBuilder() {
-        CellBuilder cb = new CellBuilder(this);
+    public RowCellBuilder cellBuilder() {
+        RowCellBuilder cb = new RowCellBuilder(this);
         nextCellIdx++;
         return cb;
     }
@@ -157,7 +157,7 @@ public class TableRowBuilder {
         return XyOffset.of(x, outerTopLeft.y() - maxHeight);
     }
 
-    public class CellBuilder {
+    public class RowCellBuilder implements CellBuilder {
 
         private final TableRowBuilder tableRowBuilder;
         private float width; // Both require this.
@@ -166,33 +166,31 @@ public class TableRowBuilder {
         private TextStyle textStyle;
         private final int colIdx;
 
-        private CellBuilder(TableRowBuilder trb) {
+        private RowCellBuilder(TableRowBuilder trb) {
             tableRowBuilder = trb; width = trb.nextCellSize(); cellStyle = trb.cellStyle();
             textStyle = trb.textStyle(); colIdx = trb.nextCellIdx();
-        }
-
-        public CellBuilder align(CellStyle.Align align) {
-            cellStyle = cellStyle.align(align); return this;
         }
 
         // I think setting the width after creation is a pretty bad idea for this class since so much
         // is put into getting the width and column correct.
         // public TableRowCellBuilder width(float w) { width = w; return this; }
 
-        public CellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+        public RowCellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+
+        public RowCellBuilder align(CellStyle.Align align) {
+            cellStyle = cellStyle.align(align); return this;
+        }
+
+        public RowCellBuilder textStyle(TextStyle x) { textStyle = x; return this; }
 
         // Do we want to (and how could we?) prevent adding a cell to itself?
-        public CellBuilder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
+        public RowCellBuilder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
 
-        public CellBuilder addAll(TextStyle ts, List<String> ls) {
-            if (ls != null) {
-                for (String s : ls) {
-                    rows.add(Text.of(ts, s));
-                }
-            }
-            return this;
+        public RowCellBuilder add(List<Renderable> js) {
+            if (js != null) { rows.addAll(js); } return this;
         }
-        public CellBuilder add(String... ss) {
+
+        public RowCellBuilder add(String... ss) {
             if (textStyle == null) {
                 throw new IllegalStateException("Must set a default text style before adding raw strings");
             }
@@ -202,11 +200,14 @@ public class TableRowBuilder {
             return this;
         }
 
-        public CellBuilder addAll(List<ScaledJpeg> js) {
-            if (js != null) { rows.addAll(js); }
+        public RowCellBuilder add(TextStyle ts, List<String> ls) {
+            if (ls != null) {
+                for (String s : ls) {
+                    rows.add(Text.of(ts, s));
+                }
+            }
             return this;
         }
-        public CellBuilder textStyle(TextStyle x) { textStyle = x; return this; }
 
         public TableRowBuilder buildCell() {
             Cell c = Cell.of(cellStyle, width, rows);
@@ -229,12 +230,12 @@ public class TableRowBuilder {
             if (this == other) { return true; }
 
             if ((other == null) ||
-                !(other instanceof CellBuilder) ||
+                !(other instanceof RowCellBuilder) ||
                 (this.hashCode() != other.hashCode())) {
                 return false;
             }
             // Details...
-            final CellBuilder that = (CellBuilder) other;
+            final RowCellBuilder that = (RowCellBuilder) other;
 
             return (this.colIdx == that.colIdx) && tableRowBuilder.equals(that.tableRowBuilder);
         }

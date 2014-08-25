@@ -257,27 +257,31 @@ public class Cell implements Renderable {
 //        return b;
 //    }
 
-    public static class Builder {
-        private float width;
+    public static class Builder implements CellBuilder {
+        private final float width;
         private CellStyle cellStyle;
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
 
         private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }
 
-        public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
-
-        public Builder width(float w) { width = w; return this; }
+        // Is this necessary?
+//        public Builder width(float w) { width = w; return this; }
 
         public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+
+        public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
+
+        public Builder textStyle(TextStyle x) { textStyle = x; return this; }
 
         // This is a builder which is not Renderable.  No way to add something to itself *here*.
         public Builder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
 
-//        public Builder add(ScaledJpeg sj) { rows.add(sj); return this; }
+        public Builder add(List<Renderable> js) {
+            if (js != null) { rows.addAll(js); } return this;
+        }
 
-//        public Builder add(Text t) { rows.add(t); return this; }
-        public Builder addAll(TextStyle ts, List<String> ls) {
+        public Builder add(TextStyle ts, List<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
                     rows.add(Text.of(ts, s));
@@ -295,12 +299,6 @@ public class Cell implements Renderable {
             }
             return this;
         }
-        public Builder addAll(List<ScaledJpeg> js) {
-            if (js != null) { rows.addAll(js); }
-            return this;
-        }
-        public Builder textStyle(TextStyle x) { textStyle = x; return this; }
-
 //        public Builder add(Cell c) { rows.add(c); return this; }
 
         public Cell build() { return new Cell(cellStyle, width, rows); }

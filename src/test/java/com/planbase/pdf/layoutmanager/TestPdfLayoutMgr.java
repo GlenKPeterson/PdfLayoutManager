@@ -160,7 +160,7 @@ public class TestPdfLayoutMgr {
         y = lp.putRow(
                 lMargin, y,
                 Cell.builder(regularCell, colWidths[0])
-                        .addAll(regular, Arrays.asList(
+                        .add(regular, Arrays.asList(
                                 "Россия – священная наша держава,",
                                 "Россия – любимая наша страна.",
                                 "Могучая воля, великая слава –",
@@ -196,13 +196,13 @@ public class TestPdfLayoutMgr {
                                 "前進！前進！進！",
                                 null,
                                 "Here is a picture with the default and other sizes.  Though it shows up several times, the image data is only attached to the file once and reused."))
-                        .addAll(Arrays.asList(ScaledJpeg.of(melonPic),
-                                              ScaledJpeg.of(melonPic, 50, 50),
-                                              ScaledJpeg.of(melonPic, 50, 50),
-                                              ScaledJpeg.of(melonPic, 170, 100)))
+                        .add(ScaledJpeg.of(melonPic),
+                             ScaledJpeg.of(melonPic, 50, 50),
+                             ScaledJpeg.of(melonPic, 50, 50),
+                             ScaledJpeg.of(melonPic, 170, 100))
                         .build(),
                 Cell.builder(regularCell, colWidths[1])
-                        .addAll(regular, Arrays.asList(
+                        .add(regular, Arrays.asList(
                                 // Flowing text
                                 "O say can you see by the dawn's early light, " +
                                 "What so proudly we hailed at the twilight's last gleaming, " +
@@ -252,7 +252,7 @@ public class TestPdfLayoutMgr {
                                 "O'er the land of the free and the home of the brave!"))
                         .build(),
                 Cell.builder(regularCell, colWidths[2])
-                        .addAll(regular, Arrays.asList(
+                        .add(regular, Arrays.asList(
                                 "Maamme",
                                 null,
                                 "Monument to the Vårt Land poem in Helsinki. " +
@@ -286,7 +286,7 @@ public class TestPdfLayoutMgr {
                                 "Vår fosterländska sång."))
                         .build(),
                 Cell.builder(regularCell, colWidths[3])
-                        .addAll(regular, Arrays.asList(
+                        .add(regular, Arrays.asList(
                                 "Deutschland, Deutschland über alles, " +
                                 "Über alles in der Welt, " +
                                 "Wenn es stets zu Schutz und Trutze " +
@@ -316,10 +316,10 @@ public class TestPdfLayoutMgr {
                         .build());
 
         y = lp.putRow(lMargin, y,
-                           Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
-                           Cell.of(regularCell, colWidths[1], regular, "On the second page"),
-                           Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
-                           Cell.of(regularCell, colWidths[3], regular, "That's it!"));
+                      Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
+                      Cell.of(regularCell, colWidths[1], regular, "On the second page"),
+                      Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
+                      Cell.of(regularCell, colWidths[3], regular, "That's it!"));
         pageMgr.logicalPageEnd(lp);
 
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
@@ -327,8 +327,8 @@ public class TestPdfLayoutMgr {
         lp = pageMgr.logicalPageStart();
 
         lp.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
-                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                              "Test Logical Page Two"));
+                                 Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
+                                         "Test Logical Page Two"));
 
         // Make a big 3-page X in a box
 
