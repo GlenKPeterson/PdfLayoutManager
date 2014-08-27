@@ -57,6 +57,8 @@ public class TablePart {
 
     public CellStyle cellStyle() { return cellStyle; }
     public TablePart cellStyle(CellStyle x) { cellStyle = x; return this; }
+    public TablePart align(CellStyle.Align a) { cellStyle = cellStyle.align(a); return this; }
+
 //    public TablePart cellStyle(CellStyle x) { return new Builder().cellStyle(cellStyle).build(); }
 
     public TextStyle textStyle() { return textStyle; }
