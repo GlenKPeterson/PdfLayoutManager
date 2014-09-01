@@ -13,6 +13,8 @@ A jar file (and separate sample PDF) can be built with `mvn clean install` and e
 
 Recent Changes
 ==============
+Version 0.2: Added true table builder classes, a cascade of styles from Document to LogicalPage to Renderable/Cell/Table, etc.  Tables have Parts (which you probably will define as a head and body with appropriate styles and column widths).  TableParts have Rows, Rows have Cells.  Cells are also Renderable and available outside of Tables, analagous to the HTML box-model, but without "margins" only padding and borders.  Also added PNG image support.
+
 Version 0.1.1: Added run-time check for appropriate data types used to create a Cell to provide fail-fast behavior for client code - if you pass an invalid object type, it throws an exception immediately instead of waiting to purge the cache.
 
 Version 0.1: Initial working and documented version
