@@ -287,24 +287,7 @@ public class TestPdfLayoutMgr {
                         .build(),
                 Cell.builder(regularCell, colWidths[3])
                         .add(regular, Arrays.asList(
-                                "Deutschland, Deutschland über alles, " +
-                                "Über alles in der Welt, " +
-                                "Wenn es stets zu Schutz und Trutze " +
-                                "Brüderlich zusammenhält. " +
-                                "Von der Maas bis an die Memel, " +
-                                "Von der Etsch bis an den Belt, " +
-                                "Deutschland, Deutschland über alles, " +
-                                "Über alles in der Welt!",
-                                null,
-                                "Deutsche Frauen, deutsche Treue, " +
-                                "Deutscher Wein und deutscher Sang " +
-                                "Sollen in der Welt behalten " +
-                                "Ihren alten schönen Klang, " +
-                                "Uns zu edler Tat begeistern " +
-                                "Unser ganzes Leben lang." +
-                                "Deutsche Frauen, deutsche Treue, " +
-                                "Deutscher Wein und deutscher Sang!",
-                                null,
+                                // Older first 2 verses obsolete.
                                 "Einigkeit und Recht und Freiheit " +
                                 "Für das deutsche Vaterland! " +
                                 "Danach lasst uns alle streben " +
