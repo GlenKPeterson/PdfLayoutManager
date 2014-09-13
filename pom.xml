@@ -8,8 +8,29 @@
   <packaging>jar</packaging>
 
   <name>PdfLayoutManager</name>
+  <description>A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables. Uses a box-model for styles.</description>
   <url>https://github.com/GlenKPeterson/PdfLayoutManager</url>
 
+<licenses>
+  <license>
+    <name>The Apache License, Version 2.0</name>
+    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+  </license>
+</licenses>
+
+  <developers>
+    <developer>
+      <name>Glen K. Peterson</name>
+      <email>glen@organicdesign.org</email>
+      <organization>PlanBase Inc.</organization>
+      <organizationUrl>http://glenpeterson.blogspot.com/</organizationUrl>
+    </developer>
+  </developers>
+<scm>
+  <connection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</connection>
+  <developerConnection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</developerConnection>
+  <url>https://github.com/GlenKPeterson/PdfLayoutManager.git</url>
+</scm>
   <build>
     <plugins>
       <plugin>
