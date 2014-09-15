@@ -11,21 +11,20 @@
   <description>A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables. Uses a box-model for styles.</description>
   <url>https://github.com/GlenKPeterson/PdfLayoutManager</url>
 
-<licenses>
-  <license>
-    <name>The Apache License, Version 2.0</name>
-    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-  </license>
-</licenses>
-
-  <developers>
-    <developer>
-      <name>Glen K. Peterson</name>
-      <email>glen@organicdesign.org</email>
-      <organization>PlanBase Inc.</organization>
-      <organizationUrl>http://glenpeterson.blogspot.com/</organizationUrl>
-    </developer>
-  </developers>
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Glen K. Peterson</name>
+			<email>glen@organicdesign.org</email>
+			<organization>PlanBase Inc.</organization>
+			<organizationUrl>http://glenpeterson.blogspot.com/</organizationUrl>
+		</developer>
+	</developers>
 <scm>
   <connection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</connection>
   <developerConnection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</developerConnection>
@@ -49,12 +48,12 @@
     <dependency>
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox</artifactId>
-      <version>1.7.1</version>
+      <version>1.8.6</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.2</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
