@@ -57,7 +57,7 @@ public class XyOffset {
 
     @Override public String toString() { return "XyOffset(" + x + " " + y + ")"; }
 
-    @Override public int hashCode() { return Float.hashCode(x) ^ Float.hashCode(y); }
+    @Override public int hashCode() { return Utils.floatHashCode(x) ^ Utils.floatHashCode(y); }
 
     @Override public boolean equals(Object other) {
         // Cheapest operation first...

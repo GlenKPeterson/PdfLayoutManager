@@ -2,6 +2,10 @@ package com.planbase.pdf.layoutmanager;
 
 import java.util.List;
 
+/**
+ * Something that can be built into a table cell, or just something rendered within a box model (like HTML) where
+ * the table-free cell is the box.
+ */
 public interface CellBuilder {
     public CellBuilder cellStyle(CellStyle cs);
 

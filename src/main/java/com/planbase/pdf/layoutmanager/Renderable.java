@@ -13,6 +13,10 @@
 // limitations under the License.
 package com.planbase.pdf.layoutmanager;
 
+/**
+ * Implementing Renderable means being suitable for use with a two-pass layout manager whose first pass says, "given
+ * this width, what is your height?" and second pass says, "Given these dimensions, draw yourself as best you can."
+ */
 // TODO: Split into Layoutable and Renderable where Layoutable just has calcDimensions() which returns a Renderable which just has render() (but without maxWidth) and getXyDim()
 public interface Renderable {
     /**

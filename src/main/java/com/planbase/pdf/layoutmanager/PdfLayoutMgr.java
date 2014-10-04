@@ -14,6 +14,15 @@
 
 package com.planbase.pdf.layoutmanager;
 
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
+import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -28,15 +37,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.pdfbox.exceptions.COSVisitorException;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
-import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
 
 /**
  <p>The main class in this package; it handles page and line breaks.</p>
@@ -177,7 +177,12 @@ public class PdfLayoutMgr {
         return temp;
     }
 
-    public static class PageBuffer {
+    /**
+     * Please don't access this class directly if you don't have to.  It's a little bit like a model for stuff that
+     * needs to be drawn on a page, but much more like a heap of random functionality that sort of landed in an
+     * inner class.  This will probably be refactored away in future releases.
+     */
+    static class PageBuffer {
         public final int pageNum;
         private long lastOrd = 0;
         private final Set<PdfItem> items = new TreeSet<PdfItem>();

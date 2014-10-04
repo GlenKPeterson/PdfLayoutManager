@@ -125,7 +125,7 @@ public class Cell implements Renderable {
         }
         for (Renderable row : rows) {
             XyDim rowDim = (row == null) ? XyDim.ZERO : row.calcDimensions(innerWidth);
-            blockDim = XyDim.of(Float.max(blockDim.x(), rowDim.x()),
+            blockDim = XyDim.of(Math.max(blockDim.x(), rowDim.x()),
                                 blockDim.y() + rowDim.y());
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
@@ -262,6 +262,9 @@ public class Cell implements Renderable {
 //        return b;
 //    }
 
+    /**
+     * A mutable Builder for somewhat less mutable cells.
+     */
     public static class Builder implements CellBuilder {
         private final float width;
         private CellStyle cellStyle;

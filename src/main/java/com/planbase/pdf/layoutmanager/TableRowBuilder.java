@@ -132,7 +132,7 @@ public class TableRowBuilder {
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
             maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Float.max(maxDim.y(), wh.y()));
+                              Math.max(maxDim.y(), wh.y()));
         }
         return maxDim;
     }
@@ -143,7 +143,7 @@ public class TableRowBuilder {
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
             maxDim = XyDim.of(maxDim.x() + cell.width(),
-                              Float.max(maxDim.y(), wh.y()));
+                              Math.max(maxDim.y(), wh.y()));
         }
         float maxHeight = maxDim.y();
 

@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A set of styles to be the default for a table header or footer, or whatever other kind of group of table rows you
+ * dream up.
+ */
 public class TablePart {
     private final TableBuilder tableBuilder;
     private List<Float> cellWidths = new ArrayList<Float>();
@@ -77,7 +81,7 @@ public class TablePart {
         XyDim maxDim = XyDim.ZERO;
         for (TableRowBuilder row : rows) {
             XyDim wh = row.calcDimensions();
-            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
+            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
                               maxDim.y() + wh.y());
         }
         return maxDim;
@@ -89,8 +93,8 @@ public class TablePart {
 //            System.out.println("\tAbout to render row: " + row);
             XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                      allPages);
-            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
-                                          Float.min(rl.y(), rightmostLowest.y()));
+            rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
+                                          Math.min(rl.y(), rightmostLowest.y()));
         }
         return rightmostLowest;
     }

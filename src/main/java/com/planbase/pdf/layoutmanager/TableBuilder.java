@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Use this to create Tables.  This strives to remind the programmer of HTML tables but because you can resize and
+ * scroll a browser window, but not a piece of paper, this is fundamentally different.  Still familiarity with HTML may
+ * make this class easier to use.
+ */
 public class TableBuilder implements Renderable {
     private final LogicalPage logicalPage;
     private final XyOffset topLeft;
@@ -58,7 +63,7 @@ public class TableBuilder implements Renderable {
         XyDim maxDim = XyDim.ZERO;
         for (TablePart part : parts) {
             XyDim wh = part.calcDimensions();
-            maxDim = XyDim.of(Float.max(wh.x(), maxDim.x()),
+            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
                               maxDim.y() + wh.y());
         }
         return maxDim;
@@ -75,8 +80,8 @@ public class TableBuilder implements Renderable {
 //            System.out.println("About to render part: " + part);
             XyOffset rl = part.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
                                       allPages);
-            rightmostLowest = XyOffset.of(Float.max(rl.x(), rightmostLowest.x()),
-                                          Float.min(rl.y(), rightmostLowest.y()));
+            rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
+                                          Math.min(rl.y(), rightmostLowest.y()));
         }
         return rightmostLowest;
     }

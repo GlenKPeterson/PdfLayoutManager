@@ -15,7 +15,6 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
-import java.util.Objects;
 
 // TODO: This class should at least allow the user to provide LineStyles instead of colors and widths directly.
 
@@ -69,25 +68,25 @@ public class BorderStyle {
         private Builder color(Color c) {
             if (top == null) {
                 top = LineStyle.of(c);
-            } else if (!Objects.equals(top.color(), c)) {
+            } else if (!Utils.equals(top.color(), c)) {
                 top = LineStyle.of(c, top.width());
             }
 
             if (right == null) {
                 right = LineStyle.of(c);
-            } else if (!Objects.equals(right.color(), c)) {
+            } else if (!Utils.equals(right.color(), c)) {
                 right = LineStyle.of(c, right.width());
             }
 
             if (bottom == null) {
                 bottom = LineStyle.of(c);
-            } else if (!Objects.equals(bottom.color(), c)) {
+            } else if (!Utils.equals(bottom.color(), c)) {
                 bottom = LineStyle.of(c, bottom.width());
             }
 
             if (left == null) {
                 left = LineStyle.of(c);
-            } else if (!Objects.equals(left.color(), c)) {
+            } else if (!Utils.equals(left.color(), c)) {
                 left = LineStyle.of(c, left.width());
             }
             return this;

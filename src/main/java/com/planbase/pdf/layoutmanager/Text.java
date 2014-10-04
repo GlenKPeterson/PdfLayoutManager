@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents styled text kind of like a #Text node in HTML.
+ */
 public class Text implements Renderable {
     private final TextStyle textStyle;
     private final String text;

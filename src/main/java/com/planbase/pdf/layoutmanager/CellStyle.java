@@ -162,6 +162,9 @@ public class CellStyle {
 
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * A mutable Builder for immutable CellStyles.
+     */
     public static class Builder {
         private Align align;
         private Padding padding;

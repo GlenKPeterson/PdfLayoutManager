@@ -2,7 +2,12 @@ package com.planbase.pdf.layoutmanager;
 
 import java.awt.Color;
 
-public class Utils {
+/**
+ * Holds utility functions.
+ */
+final class Utils {
+    private Utils() { throw new UnsupportedOperationException("No instances!"); }
+
     public static String toString(Color c) {
         if (c == null) { return "null"; }
         return new StringBuilder("#").append(twoDigitHex(c.getRed()))
@@ -14,4 +19,14 @@ public class Utils {
         return (h.length() < 2) ? "0" + h : h;
     }
 //    public static void println(CharSequence cs) { System.out.println(cs); }
+
+    public static boolean equals(Object o1, Object o2) {
+        return (o1 == o2) ||
+                ((o1 != null) && o1.equals(o2));
+    }
+
+    public static int floatHashCode(float value) {
+        return Float.floatToIntBits(value);
+    }
+
 }
