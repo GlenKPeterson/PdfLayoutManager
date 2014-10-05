@@ -4,6 +4,13 @@ A page-layout manager for PDFBox to do things like line-breaking, page-breaking,
 Uses a box-model for styles.
 Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
+Usage Example
+=============
+The unit tests may be monolithic, but they provide a good usage example:
+
+https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/com/planbase/pdf/layoutmanager/TestPdfLayoutMgr.java
+
+
 Building from Source
 ====================
 Requires Maven 3 and Java JDK 1.5 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
