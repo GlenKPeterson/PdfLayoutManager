@@ -19,6 +19,9 @@ Download / Maven Dependency
         <version>0.2.1-SNAPSHOT</version>
     </dependency>
 
+Actual files are here:
+https://oss.sonatype.org/content/repositories/snapshots/com/planbase/pdf/PdfLayoutManager/0.2.1-SNAPSHOT/
+
 Building from Source
 ====================
 Requires Maven 3 and Java JDK 1.5 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
