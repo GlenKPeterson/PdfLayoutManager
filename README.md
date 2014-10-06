@@ -10,6 +10,14 @@ The unit tests may be monolithic, but they provide a good usage example:
 
 https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/com/planbase/pdf/layoutmanager/TestPdfLayoutMgr.java
 
+Download / Maven Dependency
+===========================
+
+    <dependency>
+        <groupId>com.planbase.pdf</groupId>
+        <artifactId>PdfLayoutManager</artifactId>
+        <version>0.2.1-SNAPSHOT</version>
+    </dependency>
 
 Building from Source
 ====================
