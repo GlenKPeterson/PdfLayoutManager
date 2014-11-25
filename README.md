@@ -8,7 +8,7 @@ Usage Example
 =============
 The unit tests may be monolithic, but they provide a good usage example:
 
-https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/com/planbase/pdf/layoutmanager/TestPdfLayoutMgr.java
+https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/TestPdfLayoutMgr.java
 
 Download / Maven Dependency
 ===========================
@@ -20,7 +20,7 @@ Download / Maven Dependency
     </dependency>
 
 Actual files are here:
-https://oss.sonatype.org/content/repositories/snapshots/com/planbase/pdf/PdfLayoutManager/0.2.1-SNAPSHOT/
+https://oss.sonatype.org/content/repositories/snapshots/com/planbase/pdf/PdfLayoutManager/0.2.2-SNAPSHOT/
 
 Building from Source
 ====================
