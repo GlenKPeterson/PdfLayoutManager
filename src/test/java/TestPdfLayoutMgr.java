@@ -12,8 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.planbase.pdf.layoutmanager;
+import com.planbase.pdf.layoutmanager.BorderStyle;
+import com.planbase.pdf.layoutmanager.Cell;
+import com.planbase.pdf.layoutmanager.CellStyle;
+import com.planbase.pdf.layoutmanager.LineStyle;
+import com.planbase.pdf.layoutmanager.LogicalPage;
+import com.planbase.pdf.layoutmanager.Padding;
+import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
+import com.planbase.pdf.layoutmanager.ScaledJpeg;
+import com.planbase.pdf.layoutmanager.TextStyle;
+import com.planbase.pdf.layoutmanager.XyOffset;
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.junit.Test;
 
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -21,11 +34,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import javax.imageio.ImageIO;
-
-import org.apache.pdfbox.exceptions.COSVisitorException;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.junit.Test;
 
 public class TestPdfLayoutMgr {
 
@@ -112,7 +120,7 @@ public class TestPdfLayoutMgr {
                 .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
                 .cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
 
-        XyOffset xyc = lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
+        lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
                 .addCellWidths(Arrays.asList(100f, 100f, 100f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
                                         Color.YELLOW.brighter()))
@@ -134,7 +142,7 @@ public class TestPdfLayoutMgr {
                 .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two").buildCell()
                 .cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1").buildCell().buildRow().buildPart().buildTable();
 
-        pageMgr.logicalPageEnd(lp);
+        lp.commit();
 
         lp = pageMgr.logicalPageStart();
 
@@ -298,12 +306,12 @@ public class TestPdfLayoutMgr {
                                 "  Blühe, deutsches Vaterland!"))
                         .build());
 
-        y = lp.putRow(lMargin, y,
-                      Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
-                      Cell.of(regularCell, colWidths[1], regular, "On the second page"),
-                      Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
-                      Cell.of(regularCell, colWidths[3], regular, "That's it!"));
-        pageMgr.logicalPageEnd(lp);
+        lp.putRow(lMargin, y,
+                  Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
+                  Cell.of(regularCell, colWidths[1], regular, "On the second page"),
+                  Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
+                  Cell.of(regularCell, colWidths[3], regular, "That's it!"));
+        lp.commit();
 
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
 
@@ -328,12 +336,8 @@ public class TestPdfLayoutMgr {
         lp.putLine(pageRMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
         // bottom line
         lp.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
-        pageMgr.logicalPageEnd(lp);
+        lp.commit();
 
         pageMgr.save(os);
-//        LogicalPageBuilder lpb = DocumentBuilder.of(pageMgr).pageMargins(Padding.of(40))
-//                .logicalPageBuilder();
-//        lpb.
-//        lpb.tableBuilder(
     }
 }

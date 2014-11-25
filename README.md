@@ -16,8 +16,10 @@ A jar file can be built with `mvn clean package` and ends up in the `target/` su
 
 Recent Changes
 ==============
+Version 0.2.2: Fixed misleading use of package-scoped method in the example/test.  Thank you @wienczny
+
 Version 0.2.1: Built with JDK 1.6.0_45 to ensure backward compatibility (Maven 3 wouldn't run with 1.5.0_22).
-Made a few classes private and updated the JavaDocs.
+Made a few classes private and updated the JavaDocs.  Thank you @peterdietz
 
 Version 0.2: Added true table builder classes, a cascade of styles from Document to LogicalPage to Renderable/Cell/Table, etc.
 Tables have Parts (which you probably will define as a head and body with appropriate styles and column widths).
@@ -29,6 +31,17 @@ Version 0.1.1: Added run-time check for appropriate data types used to create a 
 client code - if you pass an invalid object type, it throws an exception immediately instead of waiting to purge the cache.
 
 Version 0.1: Initial working and documented version
+
+Intended API Changes
+====================
+Make the positive Y axis go down instead of up.  This will match how PDF files work and allow us to replace the XyOffset
+class with XyDim.  One less class, one less perspective to worry about.  Also, this adds consistency to the API, thus
+facilitating reuse.  When this happens, clients will have to redo 2-3 lines of code where they calculate page dimensions
+and change `y +=` to `y -=`.
+
+Be a little more careful about making things inside the PdfLayoutMgr class private.  Some older code in there is working
+and needs a cleanup before this can happen.  If you follow the sample code in test/java/TestPdfLayoutMgr and don't
+try accessing default/package-scoped methods, you should not need to make any changes.
 
 License
 =======
