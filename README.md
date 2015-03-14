@@ -16,7 +16,7 @@ Download / Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.3.0-SNAPSHOT</version>
     </dependency>
 
 Actual files are here:
@@ -34,6 +34,14 @@ A jar file can be built with `mvn clean package` and ends up in the `target/` su
 
 Recent Changes
 ==============
+2015-03-14 Portrait Orientation
+Version 0.3.0-SNAPSHOT
+Added Portrait page orientation (previously only Landscape was available).  Orientation applies to a LogicalPage
+(a grouping of similar pages) so that you can switch mid-document.  Public methods were moved from PdfLayoutMgr to
+LogicalPage in order for this to work: pageMgr(), yPageTop(), yPageBottom(), and pageWidth(). Now you must call
+them *after* LogicalPage lp = pageMgr.logicalPageStart(); Also added some comments and fixed others.  Because this
+changes the API, I bumped up the middle version number.  Thank you @EricHans76 for requesting this feature.
+
 Version 0.2.2: Fixed misleading use of package-scoped method in the example/test.  Thank you @wienczny
 
 Version 0.2.1: Built with JDK 1.6.0_45 to ensure backward compatibility (Maven 3 wouldn't run with 1.5.0_22).

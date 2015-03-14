@@ -43,43 +43,54 @@ public class TestPdfLayoutMgr {
 
     @Test
     public void testPdf() throws IOException, COSVisitorException {
+        // Nothing happens without a PdfLayoutMgr.
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
-        OutputStream os = new FileOutputStream("test.pdf");
-        final float lMargin = 40;
-        final float tableWidth = pageMgr.pageWidth() - (2 * lMargin);
-        final float pageRMargin = lMargin + tableWidth;
+        // One inch is 72 document units.  40 is about a half-inch - enough margin to satisfy most printers.
+        // A typical monitor has 72 dots per inch, you can think of these as pixels if it makes you happy.
+        // Just remember that they aren't pixels: things can be aligned right, center, top, or anywhere within
+        // a "pixel".
+        final float pMargin = 40;
+
+        // A LogicalPage is a group of pages with the same settings.  When your contents scroll off the bottom of a
+        // page, a new page is automatically created for you with the settings taken from the LogicPage grouping.
+        // If you don't want a new page, be sure to stay within the bounds of the current one!
+        LogicalPage lp = pageMgr.logicalPageStart();
+
+        // Set up some useful constants for later.
+        final float tableWidth = lp.pageWidth() - (2 * pMargin);
+        final float pageRMargin = pMargin + tableWidth;
         final float colWidth = tableWidth/4f;
         final float[] colWidths = new float[] { colWidth + 10, colWidth + 10, colWidth + 10, colWidth - 30 };
+        final Padding textCellPadding = Padding.of(2f);
 
-        float y = pageMgr.yPageTop();
+        // Set up some useful styles for later
+        final TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5f, Color.WHITE);
+        final CellStyle headingCell = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
+                Color.BLUE,
+                BorderStyle.builder()
+                        .left(LineStyle.of(Color.BLUE))
+                        .right(LineStyle.of(Color.WHITE))
+                        .build());
+        final CellStyle headingCellR = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
+                Color.BLACK,
+                BorderStyle.builder()
+                        .left(LineStyle.of(Color.WHITE))
+                        .right(LineStyle.of(Color.BLACK))
+                        .build());
 
-        Padding textCellPadding = Padding.of(2f);
+        final TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5f, Color.BLACK);
+        final CellStyle regularCell = CellStyle.of(CellStyle.Align.TOP_LEFT, textCellPadding, null,
+                BorderStyle.builder()
+                        .left(LineStyle.of(Color.BLACK))
+                        .right(LineStyle.of(Color.BLACK))
+                        .bottom(LineStyle.of(Color.BLACK))
+                        .build());
 
-        TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5f, Color.WHITE);
-        CellStyle headingCell = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
-                                             Color.BLUE,
-                                             BorderStyle.builder()
-                                                     .left(LineStyle.of(Color.BLUE))
-                                                     .right(LineStyle.of(Color.WHITE))
-                                                     .build());
-        CellStyle headingCellR = CellStyle.of(CellStyle.Align.BOTTOM_CENTER, textCellPadding,
-                                              Color.BLACK,
-                                              BorderStyle.builder()
-                                                      .left(LineStyle.of(Color.WHITE))
-                                                      .right(LineStyle.of(Color.BLACK))
-                                                      .build());
+        // Let's draw three tables on our first landscape-style page grouping.
 
-        TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5f, Color.BLACK);
-        CellStyle regularCell = CellStyle.of(CellStyle.Align.TOP_LEFT, textCellPadding, null,
-                                                  BorderStyle.builder()
-                                                          .left(LineStyle.of(Color.BLACK))
-                                                          .right(LineStyle.of(Color.BLACK))
-                                                          .bottom(LineStyle.of(Color.BLACK))
-                                                          .build());
-
-        LogicalPage lp = pageMgr.logicalPageStart();
-        XyOffset xya = lp.tableBuilder(XyOffset.of(40f, pageMgr.yPageTop()))
+        // Draw the first table with lots of extra room to show off the vertical and horizontal alignment.
+        XyOffset xya = lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
                 .addCellWidths(Arrays.asList(120f, 120f, 120f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, Color.YELLOW.brighter()))
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
@@ -97,7 +108,8 @@ public class TestPdfLayoutMgr {
                 .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two", "Line three").buildCell()
                 .cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
 
-        XyOffset xyb = lp.tableBuilder(XyOffset.of(xya.x() + 10, pageMgr.yPageTop()))
+        // The second table uses the x and y offsets from the previous table to position it to the right of the first.
+        XyOffset xyb = lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yPageTop()))
                 .addCellWidths(Arrays.asList(100f, 100f, 100f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
                                         Color.YELLOW.brighter()))
@@ -120,6 +132,9 @@ public class TestPdfLayoutMgr {
                 .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
                 .cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
 
+        // The third table uses the x and y offsets from the previous tables to position it to the right of the first
+        // and below the second.  Negative Y is down.  This third table showcases the way cells extend vertically
+        // (but not horizontally) to fit the text you put in them.
         lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
                 .addCellWidths(Arrays.asList(100f, 100f, 100f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
@@ -144,17 +159,53 @@ public class TestPdfLayoutMgr {
 
         lp.commit();
 
-        lp = pageMgr.logicalPageStart();
+        // Let's do a portrait page now.  I just copied this from the previous page.
+        lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
+        lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
+                .addCellWidths(Arrays.asList(120f, 120f, 120f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, Color.YELLOW.brighter()))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
+                .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
+                .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
+                .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.TOP_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.MIDDLE_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.MIDDLE_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow()
+                .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_LEFT).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two", "Line three").buildCell()
+                .cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell().buildRow().buildPart().buildTable();
 
+        // Where's the lower-right-hand corner?  Put a cell there.
+        lp.tableBuilder(XyOffset.of(lp.pageWidth() - (100 + pMargin), lp.yPageBottom() + 15 + pMargin))
+                .addCellWidths(Arrays.asList(100f))
+                .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
+                        Color.YELLOW.brighter()))
+                .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
+                        Color.decode("#3366cc"),
+                        BorderStyle.of(Color.BLACK)))
+                .rowBuilder().addTextCells("Lower-Right").buildRow().buildPart()
+                .buildTable();
+
+        lp.commit();
+
+        // More landscape pages
+        lp = pageMgr.logicalPageStart();
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, Color.BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
-        lp.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
-                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page One"));
+        lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
+                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page Three"));
 
-//        y = pageMgr.putRect(XyPair.of(lMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
+//        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
-        y = lp.putRow(lMargin, y,
+        // We're going to reset and reuse this y variable.
+        float y = lp.yPageTop();
+
+        y = lp.putRow(pMargin, y,
                            Cell.of(headingCell, colWidths[0], heading,
                                    "Transliterated Russian (with un-transliterated Chinese below)"),
                            Cell.of(headingCellR, colWidths[1], heading, "US English"),
@@ -166,7 +217,7 @@ public class TestPdfLayoutMgr {
         BufferedImage melonPic = ImageIO.read(f);
 
         y = lp.putRow(
-                lMargin, y,
+                pMargin, y,
                 Cell.builder(regularCell, colWidths[0])
                         .add(regular, Arrays.asList(
                                 "Россия – священная наша держава,",
@@ -306,7 +357,7 @@ public class TestPdfLayoutMgr {
                                 "  Blühe, deutsches Vaterland!"))
                         .build());
 
-        lp.putRow(lMargin, y,
+        lp.putRow(pMargin, y,
                   Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
                   Cell.of(regularCell, colWidths[1], regular, "On the second page"),
                   Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
@@ -317,27 +368,42 @@ public class TestPdfLayoutMgr {
 
         lp = pageMgr.logicalPageStart();
 
-        lp.putCellAsHeaderFooter(lMargin, pageMgr.yPageTop() + 10,
+        lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
                                  Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                         "Test Logical Page Two"));
+                                         "Test Logical Page Four"));
 
-        // Make a big 3-page X in a box
+        // Make a big 3-page X in a box.  Notice that we code it as though it's on one page, and the API
+        // adds two more pages as needed.  This is a great test for how geometric shapes break across pages.
 
         // top lne
-        lp.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yPageTop(), pageRMargin, lp.yPageTop(), lineStyle);
         // left line
-        lp.putLine(lMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yPageTop(), pMargin, -lp.yPageTop(), lineStyle);
         // 3-page-long X
-        lp.putLine(lMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
         // middle line
-        lp.putLine(lMargin, 0, pageRMargin, 0, lineStyle);
-        lp.putLine(pageRMargin, pageMgr.yPageTop(), lMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pMargin, 0, pageRMargin, 0, lineStyle);
+        lp.putLine(pageRMargin, lp.yPageTop(), pMargin, -lp.yPageTop(), lineStyle);
         // right line
-        lp.putLine(pageRMargin, pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pageRMargin, lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
         // bottom line
-        lp.putLine(lMargin, -pageMgr.yPageTop(), pageRMargin, -pageMgr.yPageTop(), lineStyle);
+        lp.putLine(pMargin, -lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
         lp.commit();
 
+        // All done - write it out!
+
+        // In a web application, this could be:
+        //
+        // httpServletResponse.setContentType("application/pdf") // your server may do this for you.
+        // os = httpServletResponse.getOutputStream()            // you probably have to do this
+        //
+        // Also, in a web app, you probably want name your action something.pdf and put target="_blank"
+        // on your link to the PDF download action.
+
+        // We're just going to write to a file.
+        OutputStream os = new FileOutputStream("test.pdf");
+
+        // Commit it to the output stream!
         pageMgr.save(os);
     }
 }

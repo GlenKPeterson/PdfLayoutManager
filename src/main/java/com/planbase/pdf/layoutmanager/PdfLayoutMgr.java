@@ -41,28 +41,29 @@ import java.util.regex.Pattern;
 /**
  <p>The main class in this package; it handles page and line breaks.</p>
 
-<h3>Usage:</h3>
-<pre><code>// The file to write to
-OutputStream os = new FileOutputStream("test.pdf");
-
-// Create a new manager
+<h3>Usage (the unit test is a much better example):</h3>
+<pre><code>// Create a new manager
 PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
-pageMgr.logicalPageStart();
-// call various put...() methods here.
+LogicalPage lp = pageMgr.logicalPageStart();
+// defaults to Landscape orientation
+// call various lp.tableBuilder() or lp.put...() methods here.
 // They will page-break and create extra physical pages as needed.
 // ...
-pageMgr.logicalPageEnd();
+lp.commit();
 
-pageMgr.logicalPageStart();
-// put things on next page
+lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
+// These pages will be in Portrait orientation
+// call various lp methods to put things on the next page grouping
 // ...
-pageMgr.logicalPageEnd();
+lp.commit();
+
+// The file to write to
+OutputStream os = new FileOutputStream("test.pdf");
 
 // Commit all pages to output stream.
 pageMgr.save(os);</code></pre>
-
- <br />
+<br>
 <h3>Note:</h3>
 <p>Because this class buffers and writes to an underlying stream, it is mutable, has side effects,
  and is NOT thread-safe!</p>
@@ -100,25 +101,6 @@ public class PdfLayoutMgr {
      roughly one document unit.  This is a useful constant for page layout math.
      */
     public static final float DOC_UNITS_PER_INCH = 72f;
-
-    // TODO: Get this from document measurements:
-    private static final float maxY = 755;
-    private static final float minY = 230;
-    private static final float printAreaHeight = maxY - minY;
-    private static final float pageWidth = PDPage.PAGE_SIZE_LETTER.getHeight();
-
-    /** The Y-value for the top margin of the page (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return maxY; }
-    /** The Y-value for the bottom margin of the page (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageBottom() { return minY; }
-    /** Height of the printable area (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float printAreaHeight() { return printAreaHeight; }
-    /** Width of the printable area (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float pageWidth() { return pageWidth; }
 
 // TODO: add Sensible defaults, such as textStyle?
 //    private TextStyle textStyle;
@@ -191,7 +173,7 @@ public class PdfLayoutMgr {
             pageNum = pn;
         }
 
-        private void fillRect(final float xVal, final float yVal, final float w, final float h,
+        void fillRect(final float xVal, final float yVal, final float w, final float h,
                              final Color c, final float z) {
             items.add(FillRect.of(xVal, yVal, w, h, c, lastOrd++, z));
         }
@@ -220,7 +202,7 @@ public class PdfLayoutMgr {
                               final float yb, final LineStyle ls, final float z) {
             items.add(DrawLine.of(xa, ya, xb, yb, ls, lastOrd++, z));
         }
-        private void drawLine(final float xa, final float ya, final float xb, final float yb,
+        void drawLine(final float xa, final float ya, final float xb, final float yb,
                               final LineStyle ls) {
             drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
         }
@@ -362,12 +344,6 @@ public class PdfLayoutMgr {
         }
     }
 
-    static class PageBufferAndY {
-        public final PageBuffer pb;
-        public final float y;
-        public PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
-    }
-
     private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
     private final PDDocument doc;
 
@@ -375,6 +351,8 @@ public class PdfLayoutMgr {
     private int unCommittedPageIdx = 0;
 
     private final PDColorSpace colorSpace;
+
+    List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
     private PdfLayoutMgr(PDColorSpace cs) throws IOException {
         doc = new PDDocument();
@@ -407,16 +385,16 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    PageBufferAndY appropriatePage(float y) {
+    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been created by calling newPage().");
         }
         int idx = unCommittedPageIdx;
         // Get the first possible page
 
-        while (y < minY) {
+        while (y < lp.yPageBottom()) {
             // logger.info("Adjusting y.  Was: " + y + " about to add " + printAreaHeight);
-            y += printAreaHeight; // y could even be negative.  Just keep moving to the top of the next
+            y += lp.printAreaHeight(); // y could even be negative.  Just keep moving to the top of the next
             // page until it's in the printable area.
             idx++;
             if (pages.size() <= idx) {
@@ -424,7 +402,7 @@ public class PdfLayoutMgr {
             }
         }
         PageBuffer ps = pages.get(idx);
-        return new PageBufferAndY(ps, y);
+        return new LogicalPage.PageBufferAndY(ps, y);
     }
 
     /**
@@ -438,14 +416,19 @@ public class PdfLayoutMgr {
     // TODO: Add feature for different paper size or orientation for each group of logical pages.
     /**
      Tells this PdfLayoutMgr that you want to start a new logical page (which may be broken across
-     two or more physical pages).
+     two or more physical pages) in the requested page orientation.
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public LogicalPage logicalPageStart() {
+    public LogicalPage logicalPageStart(LogicalPage.Orientation o) {
         PageBuffer pb = new PageBuffer(pages.size() + 1);
         pages.add(pb);
-        return LogicalPage.of(this);
+        return LogicalPage.of(this, o);
     }
+
+    /**
+     Get a new logical page (which may be broken across two or more physical pages) in Landscape orientation.
+     */
+    public LogicalPage logicalPageStart() { return logicalPageStart(LogicalPage.Orientation.LANDSCAPE); }
 
 //    void addLogicalPage(PageBuffer pb) {
 //        pages.add(pb);
@@ -467,13 +450,17 @@ public class PdfLayoutMgr {
         while (unCommittedPageIdx < pages.size()) {
             PDPage pdPage = new PDPage();
             pdPage.setMediaBox(PDPage.PAGE_SIZE_LETTER);
-            pdPage.setRotation(90);
+            if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
+                pdPage.setRotation(90);
+            }
             PDPageContentStream stream = null;
             try {
                 stream = new PDPageContentStream(doc, pdPage);
                 doc.addPage(pdPage);
 
-                stream.concatenate2CTM(0, 1, -1, 0, pageWidth, 0);
+                if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
+                    stream.concatenate2CTM(0, 1, -1, 0, lp.pageWidth(), 0);
+                }
                 stream.setStrokingColorSpace(colorSpace);
                 stream.setNonStrokingColorSpace(colorSpace);
 
@@ -510,77 +497,6 @@ public class PdfLayoutMgr {
         return doc.hashCode() + pages.hashCode();
     }
 
-    /**
-     Must draw from higher to lower.  Thus y1 must be >= y2 (remember, higher y values
-     are up).
-     @param x1 first x-value
-     @param y1 first (upper) y-value
-     @param x2 second x-value
-     @param y2 second (lower or same) y-value
-     */
-    void putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
-        if (y1 < y2) { throw new IllegalStateException("y1 param must be >= y2 param"); }
-        // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = appropriatePage(y1);
-        PageBufferAndY pby2 = appropriatePage(y2);
-        if (pby1.equals(pby2)) {
-            pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
-        } else {
-            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
-            final float xDiff = x2 - x1;
-            final float yDiff = y1 - y2;
-            // totalY
-
-            PageBuffer currPage = pby1.pb;
-            // The first x and y are correct for the first page.  The second x and y will need to
-            // be adjusted below.
-            float xa = x1, ya = y1, xb = 0, yb = 0;
-
-            for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
-                if (pageNum > 1) {
-                    // The x-value at the start of the new page will be the same as
-                    // it was on the bottom of the previous page.
-                    xa = xb;
-                }
-
-                if (pby1.pb.pageNum < currPage.pageNum) {
-                    // On all except the first page the first y will start at the top of the page.
-                    ya = maxY;
-                } else { // equals, because can never be greater than
-                    ya = pby1.y;
-                }
-
-                if (pageNum == totalPages) {
-                    xb = x2;
-                    // the second Y must be adjusted by the height of the pages already printed.
-                    yb = pby2.y;
-                } else {
-                    // On all except the last page, the second-y will end at the bottom of the page.
-                    yb = minY;
-
-                    // This represents the x-value of the line at the bottom of one page and later
-                    // becomes the x-value for the top of the next page.  It should work whether
-                    // slope is negative or positive, because the sign of xDiff will reflect the
-                    // slope.
-                    //
-                    // x1 is the starting point.
-                    // xDiff is the total deltaX over all pages so it needs to be scaled by:
-                    // (ya - yb) / yDiff is the proportion of the line shown on this page.
-                    xb = (xa + (xDiff * ((ya - yb)/yDiff)));
-                }
-
-                currPage.drawLine(xa, ya, xb, yb, ls);
-
-                // pageNum is one-based while get is zero-based, so passing get the current
-                // pageNum actually gets the next page.  Don't get another one after we already
-                // processed the last page!
-                if (pageNum < totalPages) {
-                    currPage = pages.get(currPage.pageNum);
-                }
-            }
-        }
-    }
-
 //    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
 ////        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 ////                           Utils.toString(c) + ")");
@@ -588,52 +504,6 @@ public class PdfLayoutMgr {
 //        return XyOffset.of(outerTopLeft.x() + outerDimensions.x(),
 //                           outerTopLeft.y() - outerDimensions.y());
 //    }
-
-    void putRect(final float left, final float topY, final float width,
-                        final float maxHeight, final Color c) {
-        float bottomY = topY - maxHeight;
-
-        if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
-        // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = appropriatePage(topY);
-        PageBufferAndY pby2 = appropriatePage(bottomY);
-        if (pby1.equals(pby2)) {
-            pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
-        } else {
-            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
-
-            PageBuffer currPage = pby1.pb;
-            // The first x and y are correct for the first page.  The second x and y will need to
-            // be adjusted below.
-            float ya = topY, yb = 0;
-
-            for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
-                if (pby1.pb.pageNum < currPage.pageNum) {
-                    // On all except the first page the first y will start at the top of the page.
-                    ya = maxY;
-                } else { // equals, because can never be greater than
-                    ya = pby1.y;
-                }
-
-                if (pageNum == totalPages) {
-                    // the second Y must be adjusted by the height of the pages already printed.
-                    yb = pby2.y;
-                } else {
-                    // On all except the last page, the second-y will end at the bottom of the page.
-                    yb = minY;
-                }
-
-                currPage.fillRect(left, yb, width, ya - yb, c, -1);
-
-                // pageNum is one-based while get is zero-based, so passing get the current
-                // pageNum actually gets the next page.  Don't get another one after we already
-                // processed the last page!
-                if (pageNum < totalPages) {
-                    currPage = pages.get(currPage.pageNum);
-                }
-            }
-        }
-    }
 
 //    /**
 //     Puts text on the page.
@@ -975,7 +845,7 @@ public class PdfLayoutMgr {
      character (e.g. Kanji) which does not have an appropriate substitute in Windows-1252 will be
      mapped to the bullet character (a round dot).</p>
      
-     <p>This transliteration covers the modern alphabets of the following languages:<br />
+     <p>This transliteration covers the modern alphabets of the following languages:<br>
      
      Afrikaans (af),
      Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo),

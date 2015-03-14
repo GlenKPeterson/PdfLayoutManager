@@ -1,5 +1,6 @@
 package com.planbase.pdf.layoutmanager;
 
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 
 import java.awt.Color;
@@ -13,21 +14,48 @@ import java.util.TreeSet;
  * this Logical Page / Document Section.
  */
 public class LogicalPage { // AKA Document Section
-    private PdfLayoutMgr mgr;
+    public enum Orientation { PORTRAIT, LANDSCAPE; }
+
+    private final PdfLayoutMgr mgr;
+    private final boolean portrait;
     // borderItems apply to a logical section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     boolean valid = true;
 
-    LogicalPage(PdfLayoutMgr m) { mgr = m;}
+    /** The Y-value for the top margin of the page (in document units) */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public float yPageTop() { return 755; }
+    /** The Y-value for the bottom margin of the page (in document units) */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public float yPageBottom() { return portrait ? 0 : 230; }
 
-    public static LogicalPage of(PdfLayoutMgr m) { return new LogicalPage(m); }
+    /** Height of the printable area (in document units) */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public float printAreaHeight() { return yPageTop() - yPageBottom(); }
+    /** Width of the printable area (in document units) */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public float pageWidth() {
+        return portrait ? PDPage.PAGE_SIZE_LETTER.getWidth()
+                : PDPage.PAGE_SIZE_LETTER.getHeight();
+    }
+
+    private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
+
+    public static LogicalPage of(PdfLayoutMgr m) { return new LogicalPage(m, false); }
+    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
+        return new LogicalPage(m, orientation == Orientation.PORTRAIT);
+    }
+
+    /** The orientation of this logical page grouping */
+    public Orientation orientation() { return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE; }
 
     public TableBuilder tableBuilder(XyOffset tl) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         return TableBuilder.of(this, tl);
     }
 
+    /** Ends this logical page grouping and invalidates it for further operations. */
     public PdfLayoutMgr commit() throws IOException {
         mgr.logicalPageEnd(this);
         valid = false;
@@ -36,7 +64,7 @@ public class LogicalPage { // AKA Document Section
 
     LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(y);
+        PageBufferAndY pby = mgr.appropriatePage(this, y);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
         return this;
     }
@@ -44,7 +72,7 @@ public class LogicalPage { // AKA Document Section
     LogicalPage drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(yVal);
+        PageBufferAndY pby = mgr.appropriatePage(this, yVal);
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawJpeg(xVal, pby.y, sj, mgr);
         return this;
@@ -53,7 +81,7 @@ public class LogicalPage { // AKA Document Section
     LogicalPage drawPng(final float xVal, final float yVal, final ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PdfLayoutMgr.PageBufferAndY pby = mgr.appropriatePage(yVal);
+        PageBufferAndY pby = mgr.appropriatePage(this, yVal);
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawPng(xVal, pby.y, sj, mgr);
         return this;
@@ -63,16 +91,133 @@ public class LogicalPage { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
-        mgr.putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);
+        final float left = outerTopLeft.x();
+        final float topY = outerTopLeft.y();
+        final float width = outerDimensions.x();
+        final float maxHeight = outerDimensions.y();
+        final float bottomY = topY - maxHeight;
+
+        if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
+        // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
+        PageBufferAndY pby1 = mgr.appropriatePage(this, topY);
+        PageBufferAndY pby2 = mgr.appropriatePage(this, bottomY);
+        if (pby1.equals(pby2)) {
+            pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
+        } else {
+            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
+
+            PdfLayoutMgr.PageBuffer currPage = pby1.pb;
+            // The first x and y are correct for the first page.  The second x and y will need to
+            // be adjusted below.
+            float ya = topY, yb = 0;
+
+            for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
+                if (pby1.pb.pageNum < currPage.pageNum) {
+                    // On all except the first page the first y will start at the top of the page.
+                    ya = yPageTop();
+                } else { // equals, because can never be greater than
+                    ya = pby1.y;
+                }
+
+                if (pageNum == totalPages) {
+                    // the second Y must be adjusted by the height of the pages already printed.
+                    yb = pby2.y;
+                } else {
+                    // On all except the last page, the second-y will end at the bottom of the page.
+                    yb = yPageBottom();
+                }
+
+                currPage.fillRect(left, yb, width, ya - yb, c, -1);
+
+                // pageNum is one-based while get is zero-based, so passing get the current
+                // pageNum actually gets the next page.  Don't get another one after we already
+                // processed the last page!
+                if (pageNum < totalPages) {
+                    currPage = mgr.pages().get(currPage.pageNum);
+                }
+            }
+        }
+
         return this;
     }
 
+    /**
+     Must draw from higher to lower.  Thus y1 must be &gt;= y2 (remember, higher y values
+     are up).
+     @param x1 first x-value
+     @param y1 first (upper) y-value
+     @param x2 second x-value
+     @param y2 second (lower or same) y-value
+     */
     public LogicalPage putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        mgr.putLine(x1, y1, x2, y2, ls);
+//        mgr.putLine(x1, y1, x2, y2, ls);
+
+        if (y1 < y2) { throw new IllegalStateException("y1 param must be >= y2 param"); }
+        // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
+        PageBufferAndY pby1 = mgr.appropriatePage(this, y1);
+        PageBufferAndY pby2 = mgr.appropriatePage(this, y2);
+        if (pby1.equals(pby2)) {
+            pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
+        } else {
+            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
+            final float xDiff = x2 - x1;
+            final float yDiff = y1 - y2;
+            // totalY
+
+            PdfLayoutMgr.PageBuffer currPage = pby1.pb;
+            // The first x and y are correct for the first page.  The second x and y will need to
+            // be adjusted below.
+            float xa = x1, ya = y1, xb = 0, yb = 0;
+
+            for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
+                if (pageNum > 1) {
+                    // The x-value at the start of the new page will be the same as
+                    // it was on the bottom of the previous page.
+                    xa = xb;
+                }
+
+                if (pby1.pb.pageNum < currPage.pageNum) {
+                    // On all except the first page the first y will start at the top of the page.
+                    ya = yPageTop();
+                } else { // equals, because can never be greater than
+                    ya = pby1.y;
+                }
+
+                if (pageNum == totalPages) {
+                    xb = x2;
+                    // the second Y must be adjusted by the height of the pages already printed.
+                    yb = pby2.y;
+                } else {
+                    // On all except the last page, the second-y will end at the bottom of the page.
+                    yb = yPageBottom();
+
+                    // This represents the x-value of the line at the bottom of one page and later
+                    // becomes the x-value for the top of the next page.  It should work whether
+                    // slope is negative or positive, because the sign of xDiff will reflect the
+                    // slope.
+                    //
+                    // x1 is the starting point.
+                    // xDiff is the total deltaX over all pages so it needs to be scaled by:
+                    // (ya - yb) / yDiff is the proportion of the line shown on this page.
+                    xb = (xa + (xDiff * ((ya - yb)/yDiff)));
+                }
+
+                currPage.drawLine(xa, ya, xb, yb, ls);
+
+                // pageNum is one-based while get is zero-based, so passing get the current
+                // pageNum actually gets the next page.  Don't get another one after we already
+                // processed the last page!
+                if (pageNum < totalPages) {
+                    currPage = mgr.pages().get(currPage.pageNum);
+                }
+            }
+        }
+
         return this;
     }
 
+    /** You can draw a cell without a table (for a heading, or paragraph of same-format text, or whatever). */
     public XyOffset putCell(final float topLeftX, final float topLeftY, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
@@ -164,5 +309,11 @@ public class LogicalPage { // AKA Document Section
                                TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
+    }
+
+    static class PageBufferAndY {
+        public final PdfLayoutMgr.PageBuffer pb;
+        public final float y;
+        public PageBufferAndY(PdfLayoutMgr.PageBuffer p, float theY) { pb = p; y = theY; }
     }
 }
