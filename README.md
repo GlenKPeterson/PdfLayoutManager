@@ -1,6 +1,6 @@
 PdfLayoutManager
 ================
-A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables.
+A wrapper for PDFBox to add line-breaking, page-breaking, and tables.
 Uses a box-model (like HTML) for styles.
 Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
