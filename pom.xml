@@ -6,6 +6,9 @@ For adding to Sonatype OSSRH, need to issue:
 mvn clean package
 mvn javadoc:jar
 mvn source:jar
+
+See also:
+http://central.sonatype.org/pages/apache-maven.html
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
