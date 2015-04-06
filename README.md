@@ -16,7 +16,7 @@ Download / Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>0.3.1</version>
     </dependency>
 
 Actual files are here:
@@ -34,6 +34,9 @@ A jar file can be built with `mvn clean package` and ends up in the `target/` su
 
 Recent Changes
 ==============
+***Version 0.3.1***
+Upgraded PdfBox dependency to 1.8.9
+
 **2015-03-14 Portrait Orientation**
 ***Version 0.3.0-SNAPSHOT***
 Added Portrait page orientation (previously only Landscape was available).  Orientation applies to a LogicalPage
@@ -61,14 +64,9 @@ Version 0.1: Initial working and documented version
 
 Intended API Changes
 ====================
-Make the positive Y axis go down instead of up.  This will match how PDF files work and allow us to replace the XyOffset
-class with XyDim.  One less class, one less perspective to worry about.  Also, this adds consistency to the API, thus
-facilitating reuse.  When this happens, clients will have to redo 2-3 lines of code where they calculate page dimensions
-and change `y +=` to `y -=`.
-
 Be a little more careful about making things inside the PdfLayoutMgr class private.  Some older code in there is working
-and needs a cleanup before this can happen.  If you follow the sample code in test/java/TestPdfLayoutMgr and don't
-try accessing default/package-scoped methods, you should not need to make any changes.
+and needs a cleanup before this can happen.  If users follow the sample code in test/java/TestPdfLayoutMgr and don't
+try accessing default/package-scoped methods, they should not need to make any changes when this cleanup happens.
 
 License
 =======
