@@ -18,6 +18,8 @@ import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
@@ -25,9 +27,7 @@ import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -903,4 +903,11 @@ public class PdfLayoutMgr {
         return sB.toString();
     }
 
+    public PDFont loadTTFFont(InputStream fontStream) throws IOException {
+        return PDTrueTypeFont.loadTTF(doc, fontStream);
+    }
+
+    public PDFont loadTTFFont(File fontFile) throws IOException {
+        return loadTTFFont(new FileInputStream(fontFile));
+    }
 }
