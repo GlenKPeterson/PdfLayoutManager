@@ -43,7 +43,7 @@ Afrikaans (af), Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl
 
 In addition, PdfLayoutManager uses Romanized substitutions for the Cyrillic characters of the modern Russian (ru) alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and 'Shch' for Щ.
 
-This character set is good enough for many purposes. If a character is not supported, it is converted to a bullet, so that the omission is politely, professionally visible.  [Transliteration Details...](src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L841)
+This character set is good enough for many purposes. If a character is not supported, it is converted to a bullet, so that the omission is politely, professionally visible.  See: [Transliteration Details](src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L841)
 
 
 ***Q: I want different fonts and more characters!***
