@@ -52,7 +52,7 @@ This character set is good enough for many purposes. If a character is not suppo
 
 Last time I looked, PDFBox had hard-coded a character encoding that made it difficult for me to work with alternative character encodings. What they did might be correct, but I looked at it, got confused and frustrated, then gave up. Another volunteer started playing with this and gave up too.
 
-That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reason they can charge money for their products is because this problem is so hard.  Still, I hope we can tackle this problem some day and develop a quality solution.
+That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reasons they can charge money for their products is because this problem is so hard.  Still, I hope we can tackle this problem some day and develop a quality solution.
 
 ***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
 
