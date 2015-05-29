@@ -62,9 +62,11 @@ That said, this is definitely a solvable problem. There is a broad spectrum of f
 
 ***Q: Will PdfLayoutManager ever support cropping the contents of a fixed-size box?***
 
-**A:** If the contents are all little things, we could just show as many little letters or images as completely fit, then no more (truncate the list of contents).  But if the contents are big compared to the bounding box, we either have to show none of them, or crop the individual images or letters.  The PDF spec mentions something about a "clipping path" that might be a way to trim overflow, if it's user-accessible.  I'm not currently aware of PDFBox support for this (if it's even possible).  I guess showing none could work, but I'm not in a rush to implement that since it's conceptually so different from how the rest of PdfLayoutManager works.
+**A:** If the contents are big compared to the bounding box, we either have to show none of them, or crop the individual images or letters.  The PDF spec mentions something about a "clipping path" that might be usable for trimming overflow if you turn it on, render your object, then turn it off again.  I'm not currently aware of PDFBox support for this (if it's even possible).
 
-Maybe some day I'll provide some sample code so you can do this yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager so that others can benefit!
+If the contents are all little things, we could just show as many little letters or images as completely fit, then no more (truncate the list of contents).  Showing none could make truncation work for big objects too, but I'm not in a rush to implement that since it's conceptually so different from the very reason for the existence of PdfLayoutManager.
+
+Maybe some day I'll provide some sample code so you can do truncation yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager (at least to this doc) so that others can benefit!
 
 Recent Changes
 ==============
