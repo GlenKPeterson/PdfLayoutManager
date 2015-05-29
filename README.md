@@ -62,7 +62,7 @@ That said, this is definitely a solvable problem. There is a broad spectrum of f
 
 ***Q: Will PdfLayoutManager ever support cropping the contents of a fixed-size box?***
 
-**A:** If the contents are big compared to the bounding box, we either have to show none of them, or crop the individual images or letters.  The PDF spec mentions something about a "clipping path" that might be usable for trimming overflow if you turn it on, render your object, then turn it off again.  I'm not currently aware of PDFBox support for this (if it's even possible).
+**A:** If individual letters or images have a dimension which is bigger than the same dimension of their bounding box, we either have to suppress their display, or crop them.  The PDF spec mentions something about a "clipping path" that might be usable for cropping overflow if you turn it on, render your object, then turn it off again.  I'm not currently aware of PDFBox support for this (if it's even possible).
 
 If the contents are all little things, we could just show as many little letters or images as completely fit, then no more (truncate the list of contents).  Showing none could make truncation work for big objects too, but I'm not in a rush to implement that since it's conceptually so different from the very reason for the existence of PdfLayoutManager.
 
