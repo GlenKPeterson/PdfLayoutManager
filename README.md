@@ -50,6 +50,8 @@ This character set is good enough for many purposes. If a character is not suppo
 
 **A:** Fonts that support a wide range of characters tend to be large: 10MB or more. Embedding such a font in every PDF file is totally unacceptable for most people who have to build PDF files on the fly for users to download, or to send in email. To avoid this, we would have to keep track of what characters are used, then embed an appropriate subset of a font in the resulting PDF.  Different fonts are already divided into subsets, but not necessarily the same subsets.  Almost no font has every character, and it would be your responsibility to provide fonts, and maybe fallback fonts that cover all the characters you might possibly need.
 
+If we did support this, I don't know how much it would slow down PDF creation.  Maybe we'd have a separate project that just maps characters to font fragments.  You'd run that first, then pass the ideally formatted/partitioned output to PdfLayoutManger to use on-the-fly without much performance cost.  That still requires you to do a lot of work, or at least develop an understanding of a number of underlying character/font issues that our character-set limitations allow us to ignore.
+
 Last time I looked, PDFBox had hard-coded a character encoding that made it difficult for me to work with alternative character encodings. What they did might be correct, but I looked at it, got confused and frustrated, then gave up. Another volunteer started playing with this and gave up too.
 
 That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reasons they can charge money for their products is because this problem is so hard.  Still, I hope we can tackle this problem some day and develop a quality solution.
@@ -58,7 +60,7 @@ That said, this is definitely a solvable problem. There is a broad spectrum of f
 
 **A:** PdfLayoutManager was intended to provide html-table-like flowing of text and resizing of cells to fit whatever you put in them, even across multiple pages.  If you don't need that, use PDFBox directly.  If you need other features of PdfLayoutManager, there is a minHeight() setting on table rows.  Combined with padding and alignment, that may get you what you need to layout things that will always fit in the box.
 
-***Q: Will PdfLayoutManager ever support truncating the contents of a fixed-size box?***
+***Q: Will PdfLayoutManager ever support cropping the contents of a fixed-size box?***
 
 **A:** If the contents are all little things, we could just show as many little letters or images as completely fit, then no more (truncate the list of contents).  But if the contents are big compared to the bounding box, we either have to show none of them, or crop the individual images or letters.  I'm not currently aware if PDFBox or the PDF spec has cropping built in.  I guess showing none could work, but I'm not in a rush to implement that since it's conceptually so different from how the rest of PefLayoutManager works.
 
