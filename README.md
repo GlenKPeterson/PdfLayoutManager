@@ -56,11 +56,11 @@ That said, this is definitely a solvable problem. There is a broad spectrum of f
 
 ***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
 
-**A:** PdfLayoutManager was intended to provide html-table-like flowing of text and resizing of cells to fit whatever you put in them, even across multiple pages.  If you don't need that, use PDFBox directly.  I'm not currently aware if PDFBox or the PDF spec has cropping built in, so we may only be able to decide not to display something that does not completely fit in the box size you specify.
+**A:** PdfLayoutManager was intended to provide html-table-like flowing of text and resizing of cells to fit whatever you put in them, even across multiple pages.  If you don't need that, use PDFBox directly.  There is a minHeight() setting on table rows.  Combined with padding, that may get you what you need in some circumstances.
 
-If the contents are all little things, you can just show as many little letters or images as completely fit, then no more.  But if the contents are big things, you either have to show none of them, or crop the individual images or letters.  I guess showing none could work, but I'm not in a rush to implement that since it's conceptually so different from how the rest of PefLayoutManager works.
+If the contents are all little things, you can just show as many little letters or images as completely fit, then no more (truncate the list of contents).  But if the contents are big compared to the bounding box, you either have to show none of them, or crop the individual images or letters.  I'm not currently aware if PDFBox or the PDF spec has cropping built in.  I guess showing none could work, but I'm not in a rush to implement that since it's conceptually so different from how the rest of PefLayoutManager works.
 
-Maybe I'll provide some sample code so you can do this yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager so that others can benefit!
+Maybe some day I'll provide some sample code so you can do this yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager so that others can benefit!
 
 Recent Changes
 ==============
