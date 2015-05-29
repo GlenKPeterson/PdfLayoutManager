@@ -10,7 +10,7 @@ The unit tests may be monolithic, but they provide a good usage example:
 
 https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/TestPdfLayoutMgr.java
 
-Download / Maven Dependency
+Maven Dependency
 ===========================
 
     <dependency>
@@ -30,7 +30,37 @@ API documentation can be built with `mvn javadoc:javadoc` and is then found at `
 
 A sample PDF named `test.pdf` shows up in the root folder of this project when you run `mvn test`.
 
-A jar file can be built with `mvn clean package` and ends up in the `target/` sub-folder.
+A jar file can be built with `mvn clean package` and ends up in the `target/` sub-folder.  Or type `mvn clean install` to build and install into your local maven repository.
+
+Q&A
+===
+
+***Q: What languages/character sets does PdfLayoutManager support?***
+
+**A:** The PDF spec guarantees support for [WinAnsiEncoding AKA Windows Code Page 1252](http://en.wikipedia.org/wiki/Windows-1252) and maybe four PDType1Fonts fonts without any font embedding.  WinAnsi includes the following languages:
+
+Afrikaans (af), Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo), Finnish (fi), French (fr), Galician (gl), German (de), Icelandic (is), Irish (ga), Italian (it), Norwegian (no), Portuguese (pt), Scottish (gd), Spanish (es), and Swedish (sv)
+
+In addition, PdfLayoutManager uses Romanized substitutions for the Cyrillic characters of the modern Russian (ru) alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and 'Shch' for Щ.
+
+This character set is good enough for many purposes. If a character is not supported, it is converted to a bullet, so that the problem is politely, professionally visible.  [Transliteration Details...](src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L841)
+
+
+***Q: I want different fonts and more characters!***
+
+**A:** Fonts that support a wide range of characters tend to be large: 10MB or more. Embedding such a font in every PDF file is totally unacceptable for most people who have to build PDF files on the fly for users to download, or to send in email. To avoid this, we would have to keep track of what characters are used, then embed an appropriate subset of a font in the resulting PDF.  Different fonts are already divided into subsets, but not necessarily the same subsets.  Almost no font has every character, and it would be your responsibility to provide fonts, and maybe fallback fonts that cover all the characters you might possibly need.
+
+Last time I looked, PDFBox had hard-coded a character encoding that made it difficult for me to work with alternative character encodings. What they did might be correct, but I looked at it, got confused and frustrated, then gave up. Another volunteer started playing with this and gave up too.
+
+That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reason they can charge money for their products is because this problem is so hard.  Still, I hope we can tackle this problem some day and develop a quality solution.
+
+***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
+
+**A:** PdfLayoutManager was intended to provide html-table-like flowing of text and resizing of cells to fit whatever you put in them, even across multiple pages.  If you don't need that, use PDFBox directly.  I'm not currently aware if PDFBox or the PDF spec has cropping built in, so we may only be able to decide not to display something that does not completely fit in the box size you specify.
+
+If the contents are all little things, you can just show as many little letters or images as completely fit, then no more.  But if the contents are big things, you either have to show none of them, or crop the individual images or letters.  I guess showing none could work, but I'm not in a rush to implement that since it's conceptually so different from how the rest of PefLayoutManager works.
+
+Maybe I'll provide some sample code so you can do this yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager so that others can benefit!
 
 Recent Changes
 ==============
