@@ -96,7 +96,7 @@ public class TestPdfLayoutMgr {
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
                 .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
+                        Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
                 .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
                 .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell()
                 .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
@@ -112,14 +112,14 @@ public class TestPdfLayoutMgr {
         XyOffset xyb = lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yPageTop()))
                 .addCellWidths(Arrays.asList(100f, 100f, 100f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
-                                        Color.YELLOW.brighter()))
+                        Color.YELLOW.brighter()))
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2),
-                                                      Color.decode("#3366cc"),
-                                                      BorderStyle.of(Color.BLACK)))
+                        Color.decode("#3366cc"),
+                        BorderStyle.of(Color.BLACK)))
                 .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                                                      Color.decode("#ccffcc"),
-                                                      BorderStyle.of(Color.DARK_GRAY)))
+                        Color.decode("#ccffcc"),
+                        BorderStyle.of(Color.DARK_GRAY)))
                 .minRowHeight(100f)
                 .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
                 .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1", "Line two", "Line three").buildCell()
@@ -138,14 +138,14 @@ public class TestPdfLayoutMgr {
         lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
                 .addCellWidths(Arrays.asList(100f, 100f, 100f))
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
-                                        Color.YELLOW.brighter()))
+                        Color.YELLOW.brighter()))
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2),
-                                                      Color.decode("#3366cc"),
-                                                      BorderStyle.of(Color.BLACK)))
+                Color.decode("#3366cc"),
+                BorderStyle.of(Color.BLACK)))
                 .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                                                      Color.decode("#ccffcc"),
-                                                      BorderStyle.of(Color.DARK_GRAY)))
+                Color.decode("#ccffcc"),
+                BorderStyle.of(Color.DARK_GRAY)))
                 .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
                 .rowBuilder().cellBuilder().align(CellStyle.Align.BOTTOM_RIGHT).add("Line 1").buildCell()
                 .cellBuilder().align(CellStyle.Align.BOTTOM_CENTER).add("Line 1", "Line two").buildCell()
@@ -167,7 +167,7 @@ public class TestPdfLayoutMgr {
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.BOTTOM_CENTER, Padding.of(2), Color.decode("#3366cc"), BorderStyle.of(Color.BLACK)))
                 .rowBuilder().addTextCells("First", "Second", "Third").buildRow().buildPart()
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                                                      Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
+                Color.decode("#ccffcc"), BorderStyle.of(Color.DARK_GRAY))).minRowHeight(120f)
                 .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, Color.BLACK))
                 .rowBuilder().cellBuilder().align(CellStyle.Align.TOP_LEFT).add("Line 1", "Line two", "Line three").buildCell()
                 .cellBuilder().align(CellStyle.Align.TOP_CENTER).add("Line 1", "Line two", "Line three").buildCell()
@@ -185,8 +185,8 @@ public class TestPdfLayoutMgr {
                 .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
                         Color.YELLOW.brighter()))
                 .partBuilder().cellStyle(CellStyle.of(CellStyle.Align.MIDDLE_CENTER, Padding.of(2),
-                        Color.decode("#3366cc"),
-                        BorderStyle.of(Color.BLACK)))
+                Color.decode("#3366cc"),
+                BorderStyle.of(Color.BLACK)))
                 .rowBuilder().addTextCells("Lower-Right").buildRow().buildPart()
                 .buildTable();
 
@@ -198,7 +198,7 @@ public class TestPdfLayoutMgr {
         CellStyle pageHeadCellStyle = CellStyle.of(CellStyle.Align.TOP_CENTER, null, null, null);
 
         lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
-                                      Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page Three"));
+                Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle, "Test Logical Page Three"));
 
 //        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
@@ -206,11 +206,11 @@ public class TestPdfLayoutMgr {
         float y = lp.yPageTop();
 
         y = lp.putRow(pMargin, y,
-                           Cell.of(headingCell, colWidths[0], heading,
-                                   "Transliterated Russian (with un-transliterated Chinese below)"),
-                           Cell.of(headingCellR, colWidths[1], heading, "US English"),
-                           Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
-                           Cell.of(headingCellR, colWidths[3], heading, "German"));
+                Cell.of(headingCell, colWidths[0], heading,
+                        "Transliterated Russian (with un-transliterated Chinese below)"),
+                Cell.of(headingCellR, colWidths[1], heading, "US English"),
+                Cell.of(headingCellR, colWidths[2], heading, "Finnish"),
+                Cell.of(headingCellR, colWidths[3], heading, "German"));
 
         File f = new File("target/test-classes/melon.jpg");
         System.out.println(f.getAbsolutePath());
@@ -245,32 +245,32 @@ public class TestPdfLayoutMgr {
                                 "Chinese will not print.  The substitution character is a bullet, so below should be lots of bullets.",
                                 null,
                                 "起來！不願做奴隸的人們！ " +
-                                "把我們的血肉，築成我們新的長城！ " +
-                                "中華民族到了最危險的時候， " +
-                                "每個人被迫著發出最後的吼聲。 " +
-                                "起來！起來！起來！ " +
-                                "我們萬眾一心， " +
-                                "冒著敵人的炮火，前進！ " +
-                                "冒著敵人的炮火，前進！ " +
-                                "前進！前進！進！",
+                                        "把我們的血肉，築成我們新的長城！ " +
+                                        "中華民族到了最危險的時候， " +
+                                        "每個人被迫著發出最後的吼聲。 " +
+                                        "起來！起來！起來！ " +
+                                        "我們萬眾一心， " +
+                                        "冒著敵人的炮火，前進！ " +
+                                        "冒著敵人的炮火，前進！ " +
+                                        "前進！前進！進！",
                                 null,
                                 "Here is a picture with the default and other sizes.  Though it shows up several times, the image data is only attached to the file once and reused."))
                         .add(ScaledJpeg.of(melonPic),
-                             ScaledJpeg.of(melonPic, 50, 50),
-                             ScaledJpeg.of(melonPic, 50, 50),
-                             ScaledJpeg.of(melonPic, 170, 100))
+                                ScaledJpeg.of(melonPic, 50, 50),
+                                ScaledJpeg.of(melonPic, 50, 50),
+                                ScaledJpeg.of(melonPic, 170, 100))
                         .build(),
                 Cell.builder(regularCell, colWidths[1])
                         .add(regular, Arrays.asList(
                                 // Flowing text
                                 "O say can you see by the dawn's early light, " +
-                                "What so proudly we hailed at the twilight's last gleaming, " +
-                                "Whose broad stripes and bright stars through the perilous fight, " +
-                                "O'er the ramparts we watched, were so gallantly streaming? " +
-                                "And the rockets' red glare, the bombs bursting in air, " +
-                                "Gave proof through the night that our flag was still there; " +
-                                "O say does that star-spangled banner yet wave, " +
-                                "O'er the land of the free and the home of the brave? ",
+                                        "What so proudly we hailed at the twilight's last gleaming, " +
+                                        "Whose broad stripes and bright stars through the perilous fight, " +
+                                        "O'er the ramparts we watched, were so gallantly streaming? " +
+                                        "And the rockets' red glare, the bombs bursting in air, " +
+                                        "Gave proof through the night that our flag was still there; " +
+                                        "O say does that star-spangled banner yet wave, " +
+                                        "O'er the land of the free and the home of the brave? ",
                                 // Tiny space
                                 null,
                                 // Set line breaks:
@@ -293,75 +293,75 @@ public class TestPdfLayoutMgr {
                                 null,
                                 // Flowing text
                                 "And where is that band who so vauntingly swore " +
-                                "That the havoc of war and the battle's confusion, " +
-                                "A home and a country, should leave us no more? " +
-                                "Their blood has washed out their foul footsteps' pollution. " +
-                                "No refuge could save the hireling and slave " +
-                                "From the terror of flight, or the gloom of the grave: " +
-                                "And the star-spangled banner in triumph doth wave, " +
-                                "O'er the land of the free and the home of the brave. " +
-                                null,
+                                        "That the havoc of war and the battle's confusion, " +
+                                        "A home and a country, should leave us no more? " +
+                                        "Their blood has washed out their foul footsteps' pollution. " +
+                                        "No refuge could save the hireling and slave " +
+                                        "From the terror of flight, or the gloom of the grave: " +
+                                        "And the star-spangled banner in triumph doth wave, " +
+                                        "O'er the land of the free and the home of the brave. " +
+                                        null,
                                 "O thus be it ever, when freemen shall stand " +
-                                "Between their loved home and the war's desolation. " +
-                                "Blest with vict'ry and peace, may the Heav'n rescued land " +
-                                "Praise the Power that hath made and preserved us a nation! " +
-                                "Then conquer we must, when our cause it is just, " +
-                                "And this be our motto: \"In God is our trust.\" " +
-                                "And the star-spangled banner in triumph shall wave " +
-                                "O'er the land of the free and the home of the brave!"))
+                                        "Between their loved home and the war's desolation. " +
+                                        "Blest with vict'ry and peace, may the Heav'n rescued land " +
+                                        "Praise the Power that hath made and preserved us a nation! " +
+                                        "Then conquer we must, when our cause it is just, " +
+                                        "And this be our motto: \"In God is our trust.\" " +
+                                        "And the star-spangled banner in triumph shall wave " +
+                                        "O'er the land of the free and the home of the brave!"))
                         .build(),
                 Cell.builder(regularCell, colWidths[2])
                         .add(regular, Arrays.asList(
                                 "Maamme",
                                 null,
                                 "Monument to the Vårt Land poem in Helsinki. " +
-                                "Oi maamme, Suomi, synnyinmaa, " +
-                                "soi, sana kultainen! " +
-                                "Ei laaksoa, ei kukkulaa, " +
-                                "ei vettä, rantaa rakkaampaa " +
-                                "kuin kotimaa tää pohjoinen, " +
-                                "maa kallis isien. " +
-                                "Sun kukoistukses kuorestaan " +
-                                "kerrankin puhkeaa; " +
-                                "viel' lempemme saa nousemaan " +
-                                "sun toivos, riemus loistossaan, " +
-                                "ja kerran laulus, synnyinmaa " +
-                                "korkeemman kaiun saa. ",
+                                        "Oi maamme, Suomi, synnyinmaa, " +
+                                        "soi, sana kultainen! " +
+                                        "Ei laaksoa, ei kukkulaa, " +
+                                        "ei vettä, rantaa rakkaampaa " +
+                                        "kuin kotimaa tää pohjoinen, " +
+                                        "maa kallis isien. " +
+                                        "Sun kukoistukses kuorestaan " +
+                                        "kerrankin puhkeaa; " +
+                                        "viel' lempemme saa nousemaan " +
+                                        "sun toivos, riemus loistossaan, " +
+                                        "ja kerran laulus, synnyinmaa " +
+                                        "korkeemman kaiun saa. ",
                                 null,
                                 "Vårt land ",
                                 null,
                                 "(the original, by Johan Ludvig Runeberg) " +
-                                "Vårt land, vårt land, vårt fosterland, " +
-                                "ljud högt, o dyra ord! " +
-                                "Ej lyfts en höjd mot himlens rand, " +
-                                "ej sänks en dal, ej sköljs en strand, " +
-                                "mer älskad än vår bygd i nord, " +
-                                "än våra fäders jord! " +
-                                "Din blomning, sluten än i knopp, " +
-                                "Skall mogna ur sitt tvång; " +
-                                "Se, ur vår kärlek skall gå opp " +
-                                "Ditt ljus, din glans, din fröjd, ditt hopp. " +
-                                "Och högre klinga skall en gång " +
-                                "Vår fosterländska sång."))
+                                        "Vårt land, vårt land, vårt fosterland, " +
+                                        "ljud högt, o dyra ord! " +
+                                        "Ej lyfts en höjd mot himlens rand, " +
+                                        "ej sänks en dal, ej sköljs en strand, " +
+                                        "mer älskad än vår bygd i nord, " +
+                                        "än våra fäders jord! " +
+                                        "Din blomning, sluten än i knopp, " +
+                                        "Skall mogna ur sitt tvång; " +
+                                        "Se, ur vår kärlek skall gå opp " +
+                                        "Ditt ljus, din glans, din fröjd, ditt hopp. " +
+                                        "Och högre klinga skall en gång " +
+                                        "Vår fosterländska sång."))
                         .build(),
                 Cell.builder(regularCell, colWidths[3])
                         .add(regular, Arrays.asList(
                                 // Older first 2 verses obsolete.
                                 "Einigkeit und Recht und Freiheit " +
-                                "Für das deutsche Vaterland! " +
-                                "Danach lasst uns alle streben " +
-                                "Brüderlich mit Herz und Hand! " +
-                                "Einigkeit und Recht und Freiheit " +
-                                "Sind des Glückes Unterpfand;" +
-                                "Blüh' im Glanze dieses Glückes, " +
-                                "  Blühe, deutsches Vaterland!"))
+                                        "Für das deutsche Vaterland! " +
+                                        "Danach lasst uns alle streben " +
+                                        "Brüderlich mit Herz und Hand! " +
+                                        "Einigkeit und Recht und Freiheit " +
+                                        "Sind des Glückes Unterpfand;" +
+                                        "Blüh' im Glanze dieses Glückes, " +
+                                        "  Blühe, deutsches Vaterland!"))
                         .build());
 
         lp.putRow(pMargin, y,
-                  Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
-                  Cell.of(regularCell, colWidths[1], regular, "On the second page"),
-                  Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
-                  Cell.of(regularCell, colWidths[3], regular, "That's it!"));
+                Cell.of(regularCell, colWidths[0], regular, "Another row of cells"),
+                Cell.of(regularCell, colWidths[1], regular, "On the second page"),
+                Cell.of(regularCell, colWidths[2], regular, "Just like any other page"),
+                Cell.of(regularCell, colWidths[3], regular, "That's it!"));
         lp.commit();
 
         final LineStyle lineStyle = LineStyle.of(Color.BLACK, 1);
@@ -369,8 +369,8 @@ public class TestPdfLayoutMgr {
         lp = pageMgr.logicalPageStart();
 
         lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
-                                 Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                         "Test Logical Page Four"));
+                Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
+                        "Test Logical Page Four"));
 
         // Make a big 3-page X in a box.  Notice that we code it as though it's on one page, and the API
         // adds two more pages as needed.  This is a great test for how geometric shapes break across pages.
