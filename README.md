@@ -70,6 +70,10 @@ Maybe some day I'll provide some sample code so you can do truncation yourself. 
 
 Recent Changes
 ==============
+***Version 0.3.2***
+Added doc.close() inside the PdfLayoutMgr.save() method to ensure we free resources.  Thank you @kbdguy for pointing
+this out!  Upgraded PdfBox dependency to 1.8.10.
+
 ***Version 0.3.1***
 Upgraded PdfBox dependency to 1.8.9
 

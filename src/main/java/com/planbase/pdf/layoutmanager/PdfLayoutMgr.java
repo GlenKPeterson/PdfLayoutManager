@@ -410,6 +410,7 @@ public class PdfLayoutMgr {
     */
     public void save(OutputStream os) throws IOException, COSVisitorException {
         doc.save(os);
+        doc.close();
     }
 
     // TODO: Add logicalPage() method and call pages.add() lazily for the first item actually shown on a page, and logicalPageEnd called before a save.
