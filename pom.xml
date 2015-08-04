@@ -10,6 +10,31 @@ http://central.sonatype.org/pages/apache-maven.html
 
 To see updated versions available: http://mojo.codehaus.org/versions-maven-plugin/
 versions:display-dependency-updates
+
+NOTE: This assumes gpg is running as a daemon/service with a settings.xml file in
+this directory like the following (you'll have to replace the question marks):
+
+<settings>
+  <profiles>
+    <profile>
+      <id>oss.sonatype.org</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <gpg.executable>gpg2</gpg.executable>
+      </properties>
+    </profile>
+  </profiles>
+  <servers>
+    <server>
+      <id>oss.sonatype.org</id>
+      <username>?????</username>
+      <password>?????</password>
+    </server>
+  </servers>
+</settings>
+
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
