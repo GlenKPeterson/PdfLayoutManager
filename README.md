@@ -6,9 +6,7 @@ Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 Usage Example
 =============
-The unit tests may be monolithic, but they provide a good usage example:
-
-https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/test/java/TestPdfLayoutMgr.java
+This unit test is the usage example: [TestPdfLayoutMgr.java](blob/master/src/test/java/TestPdfLayoutMgr.java)
 
 Maven Dependency
 ===========================
