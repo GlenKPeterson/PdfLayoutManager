@@ -16,11 +16,8 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.3.1</version>
+        <version>0.3.2</version>
     </dependency>
-
-Actual files are here:
-https://oss.sonatype.org/content/repositories/snapshots/com/planbase/pdf/PdfLayoutManager/0.2.2-SNAPSHOT/
 
 Building from Source
 ====================
@@ -72,7 +69,8 @@ Recent Changes
 ==============
 ***Version 0.3.2***
 Added doc.close() inside the PdfLayoutMgr.save() method to ensure we free resources.  Thank you @kbdguy for pointing
-this out!  Upgraded PdfBox dependency to 1.8.10.
+this out!  Upgraded PdfBox dependency to 1.8.10.  Possibly figured out how to deploy to Nexus Sonatype so you don't
+have to build from source any more!
 
 ***Version 0.3.1***
 Upgraded PdfBox dependency to 1.8.9
