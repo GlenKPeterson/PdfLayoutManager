@@ -1,4 +1,5 @@
 .idea/
 PdfLayoutManager.iml
 target/
+settings.xml
 test.pdf
