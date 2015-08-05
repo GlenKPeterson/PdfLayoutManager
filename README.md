@@ -8,10 +8,10 @@ Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 Usage Example
 =============
-This unit test is the usage example: [TestPdfLayoutMgr.java](src/test/java/TestPdfLayoutMgr.java)
+See: [TestPdfLayoutMgr.java](src/test/java/TestPdfLayoutMgr.java)
 
 Maven Dependency
-===========================
+================
 
     <dependency>
         <groupId>com.planbase.pdf</groupId>
@@ -29,7 +29,7 @@ A sample PDF named `test.pdf` shows up in the root folder of this project when y
 
 A jar file can be built with `mvn clean package` and ends up in the `target/` sub-folder.  Or type `mvn clean install` to build and install into your local maven repository.
 
-Q&A
+FAQ
 ===
 
 ***Q: What languages/character sets does PdfLayoutManager support?***
