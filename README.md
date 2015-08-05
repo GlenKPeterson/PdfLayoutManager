@@ -4,6 +4,8 @@ A wrapper for PDFBox to add line-breaking, page-breaking, and tables.
 Uses a box-model (like HTML) for styles.
 Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
+![Sample Output](sampleScreenShot.png)
+
 Usage Example
 =============
 This unit test is the usage example: [TestPdfLayoutMgr.java](src/test/java/TestPdfLayoutMgr.java)
