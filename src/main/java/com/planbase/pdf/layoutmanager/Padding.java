@@ -22,8 +22,8 @@ public class Padding {
     /**
      Default padding of 1.5, 1.5, 2. 1.5 (top, right, bottom, left)
      */
-    public static final Padding DEFAULT_TEXT_PADDING = Padding.of(1.5f, 1.5f, 2f, 1.5f);
-    public static final Padding NO_PADDING = Padding.of(0f, 0f, 0f, 0f);
+    public static final Padding DEFAULT_TEXT_PADDING = new Padding(1.5f, 1.5f, 2f, 1.5f);
+    public static final Padding NO_PADDING = new Padding(0f, 0f, 0f, 0f);
 
     private final float top;
     private final float right;
@@ -66,15 +66,10 @@ public class Padding {
 //    public XyOffset topLeftPadOffset() { return XyOffset.of(left, -top); }
 //    public XyOffset botRightPadOffset() { return XyOffset.of(right, -bottom); }
 
-    @Override
-    public boolean equals(Object other) {
-        // Cheapest operation first...
+    @Override public boolean equals(Object other) {
+        // Cheapest operations first...
         if (this == other) { return true; }
-        if ( (other == null) ||
-             !(other instanceof Padding) ||
-             (this.hashCode() != other.hashCode()) ) {
-            return false;
-        }
+        if ( !(other instanceof Padding) ) { return false; }
         // Details...
         final Padding that = (Padding) other;
 
@@ -84,9 +79,12 @@ public class Padding {
                (this.left == that.left);
     }
 
-    @Override
-    public int hashCode() {
-        return (int) ((top + right + bottom + left) * 10);
+    @Override public int hashCode() {
+        // There is generally no reason to ever have padding amounts that differ by less than 0.1
+        // which in HTML-land would be a tenth of a pixel.  Since we're adding four roughly equal
+        // values, if only one is off by 0.1, that becomes 0.025, hence multiplying times 40 instead
+        // of times 10.
+        return (int) ((top + right + bottom + left) * 40);
     }
 
     @Override

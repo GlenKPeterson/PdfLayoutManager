@@ -67,6 +67,11 @@ Maybe some day I'll provide some sample code so you can do truncation yourself. 
 
 Recent Changes
 ==============
+***Version 0.3.3***
+Fixed Padding.of() static constructor issue reported by @enm260 and added unit tests for Padding.
+Also slightly changed how Padding.hashCode was calculated.
+Building PdfLayoutManager now requires org.organicdesign.testUtils.TestUtils as a test dependency.
+
 ***Version 0.3.2***
 Added doc.close() inside the PdfLayoutMgr.save() method to ensure we free resources.  Thank you @kbdguy for pointing
 this out!  Upgraded PdfBox dependency to 1.8.10.  Possibly figured out how to deploy to Nexus Sonatype so you don't
