@@ -12,12 +12,13 @@ See: [TestPdfLayoutMgr.java](src/test/java/TestPdfLayoutMgr.java)
 
 Maven Dependency
 ================
-
+```xml
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.3.2</version>
+        <version>0.3.3</version>
     </dependency>
+```
 
 Building from Source
 ====================
