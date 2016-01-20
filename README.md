@@ -54,7 +54,7 @@ Last I checked, PDFBox had hard-coded a character encoding that made it difficul
 
 That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reasons they can charge money for their products is because this problem is so hard.
 
-*UPDATE 2016-01-20:* PDFBox (which this project is built on top of) 2.0 claims to have full Unicode support, which previous versions did not have.  It's currently in Release-Candidate 3.  I haven't had a chance to try it yet.  Here's the fixed issue that I think should make what you want possible: https://issues.apache.org/jira/browse/PDFBOX-922
+**UPDATE 2016-01-20:** PDFBox (which this project is built on top of) 2.0 claims to have Unicode support, which previous versions did not have.  It's currently in Release-Candidate 3.  I haven't had a chance to try it yet.  Here's the fixed issue that I think should make what you want possible: https://issues.apache.org/jira/browse/PDFBOX-922
 
 ***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
 
