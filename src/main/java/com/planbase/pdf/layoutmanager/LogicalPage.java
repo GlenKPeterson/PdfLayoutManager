@@ -36,8 +36,8 @@ public class LogicalPage { // AKA Document Section
     /** Width of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() {
-        return portrait ? PDPage.PAGE_SIZE_LETTER.getWidth()
-                : PDPage.PAGE_SIZE_LETTER.getHeight();
+        return portrait ? PDPage.PAGE_SIZE_A4.getWidth()
+                : PDPage.PAGE_SIZE_A4.getHeight();
     }
 
     private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
