@@ -450,7 +450,7 @@ public class PdfLayoutMgr {
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
             PDPage pdPage = new PDPage();
-            pdPage.setMediaBox(PDPage.PAGE_SIZE_LETTER);
+            pdPage.setMediaBox(PDPage.PAGE_SIZE_A4);
             if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
                 pdPage.setRotation(90);
             }
