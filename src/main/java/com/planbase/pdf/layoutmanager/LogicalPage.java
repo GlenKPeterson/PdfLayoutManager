@@ -1,6 +1,5 @@
 package com.planbase.pdf.layoutmanager;
 
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 
 import java.awt.Color;
@@ -22,13 +21,16 @@ public class LogicalPage { // AKA Document Section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     boolean valid = true;
-
+    
+    private float topMargin = 37;
+    private float bottomMargin = 0;
+    
     /** The Y-value for the top margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return 755; }
+    public float yPageTop() { return return mgr.getMediaBox().getHeight() - topMargin; }
     /** The Y-value for the bottom margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageBottom() { return portrait ? 0 : 230; }
+    public float yPageBottom() { return portrait ? bottomMargin : 230; }
 
     /** Height of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
@@ -36,8 +38,8 @@ public class LogicalPage { // AKA Document Section
     /** Width of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() {
-        return portrait ? PDPage.PAGE_SIZE_A4.getWidth()
-                : PDPage.PAGE_SIZE_A4.getHeight();
+        return portrait ? mgr.getMediaBox().getWidth()
+                : mgr.getMediaBox().getHeight();
     }
 
     private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
@@ -286,6 +288,14 @@ public class LogicalPage { // AKA Document Section
         XyDim innerDim = cell.calcDimensions(outerWidth);
         return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
     }
+    
+    public void setTopMargin(float topMargin) {
+		this.topMargin = topMargin;
+	}
+    
+	public void setBottomMargin(float bottomMargin) {
+		this.bottomMargin = bottomMargin;
+	}
 
     void commitBorderItems(PDPageContentStream stream) throws IOException {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
