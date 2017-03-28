@@ -17,6 +17,7 @@ package com.planbase.pdf.layoutmanager;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
@@ -351,12 +352,20 @@ public class PdfLayoutMgr {
     private int unCommittedPageIdx = 0;
 
     private final PDColorSpace colorSpace;
+    private PDRectangle mediaBox;
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
     private PdfLayoutMgr(PDColorSpace cs) throws IOException {
         doc = new PDDocument();
         colorSpace = cs;
+        mediaBox = PDPage.PAGE_SIZE_LETTER;
+    }
+ 
+    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
+        doc = new PDDocument();
+        colorSpace = cs;
+        mediaBox = mb;
     }
 
     /**
@@ -377,6 +386,16 @@ public class PdfLayoutMgr {
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr() throws IOException {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE);
+    }
+ 
+    /**
+    Creates a new PdfLayoutMgr with the PDDeviceRGB color space and a given mediaBox.
+    @return a new Page Manager with an RGB color space
+    @throws IOException
+    */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public static PdfLayoutMgr newRgbPageMgr(PDRectangle mediaBox) throws IOException {
+        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, mediaBox);
     }
 
     /**
@@ -450,7 +469,7 @@ public class PdfLayoutMgr {
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
             PDPage pdPage = new PDPage();
-            pdPage.setMediaBox(PDPage.PAGE_SIZE_A4);
+            pdPage.setMediaBox(this.mediaBox);
             if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
                 pdPage.setRotation(90);
             }
@@ -904,4 +923,7 @@ public class PdfLayoutMgr {
         return sB.toString();
     }
 
+    public PDRectangle getMediaBox() {
+     return this.mediaBox;
+    }
 }
