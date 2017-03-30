@@ -352,7 +352,7 @@ public class PdfLayoutMgr {
     private int unCommittedPageIdx = 0;
 
     private final PDColorSpace colorSpace;
-    private PDRectangle mediaBox;
+    private final PDRectangle mediaBox;
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
@@ -389,13 +389,31 @@ public class PdfLayoutMgr {
     }
  
     /**
-    Creates a new PdfLayoutMgr with the PDDeviceRGB color space and a given mediaBox.
-    @return a new Page Manager with an RGB color space
+    Creates a new PdfLayoutMgr with the PDDeviceRGB color space and a mediaBox.
+    @return a new Page Manager with an RGB color space and a mediaBox
     @throws IOException
     */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr(PDRectangle mediaBox) throws IOException {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, mediaBox);
+    }
+ 
+    /**
+    Creates a new PdfLayoutMgr with a custom PDDeviceRGB color space and a given mediaBox.
+    @return a new Page Manager with an RGB color space and a mediaBox
+    @throws IOException
+    */
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public static PdfLayoutMgr newRgbPageMgr(PDColorSpace cs, PDRectangle mediaBox) throws IOException {
+        return new PdfLayoutMgr(cs, mediaBox);
+    }
+    
+    /**
+     Returns the pages dimension given the defined PDRectangle mediaBox
+     * @return an XyDim
+     */
+    public XyDim pageDim() {
+        return XyDim.of(this.mediaBox.getWidth(), this.mediaBox.getHeight());
     }
 
     /**
@@ -468,8 +486,7 @@ public class PdfLayoutMgr {
 
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
-            PDPage pdPage = new PDPage();
-            pdPage.setMediaBox(this.mediaBox);
+            PDPage pdPage = new PDPage(this.mediaBox);
             if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
                 pdPage.setRotation(90);
             }
@@ -921,9 +938,5 @@ public class PdfLayoutMgr {
             sB.append(in.subSequence(idx, in.length()));
         }
         return sB.toString();
-    }
-
-    public PDRectangle getMediaBox() {
-     return this.mediaBox;
     }
 }
