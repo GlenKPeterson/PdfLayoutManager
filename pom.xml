@@ -38,7 +38,7 @@ this directory like the following (you'll have to replace the question marks):
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
-	<version>0.3.3</version>
+	<version>0.3.4</version>
 	<packaging>jar</packaging>
 
 	<name>PdfLayoutManager</name>
@@ -71,8 +71,8 @@ this directory like the following (you'll have to replace the question marks):
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 					<compilerArgs>
 						<arg>-Xlint</arg>
 					</compilerArgs>
@@ -147,7 +147,7 @@ this directory like the following (you'll have to replace the question marks):
 		<dependency>
 			<groupId>org.organicdesign.testUtils</groupId>
 			<artifactId>TestUtils</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.6</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

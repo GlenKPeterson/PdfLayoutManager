@@ -8,7 +8,7 @@ Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 Usage Example
 =============
-See: [TestPdfLayoutMgr.java](src/test/java/TestPdfLayoutMgr.java)
+See: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMgr.java)
 
 Maven Dependency
 ================
@@ -16,13 +16,13 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.3.3</version>
+        <version>0.3.4</version>
     </dependency>
 ```
 
 Building from Source
 ====================
-Requires Maven 3 and Java JDK 1.5 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
+Requires Maven 3 and Java JDK 1.6 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
 
 API documentation can be built with `mvn javadoc:javadoc` and is then found at `target/site/apidocs/index.html`
 
@@ -76,6 +76,12 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***Version 0.3.4***
+Minimum Java version is now officially 1.6.
+Removed main() method in unit test (you can run junit instead).
+Added some tests for default values before potentially merging @Kevindum's changes.
+Upgraded TestUtils package to 0.0.6.
+
 ***Version 0.3.3***
 Fixed Padding.of() static constructor issue reported by @enm260 and added unit tests for Padding.
 Also slightly changed how Padding.hashCode was calculated.
@@ -117,8 +123,10 @@ Version 0.1: Initial working and documented version
 Intended API Changes
 ====================
 Be a little more careful about making things inside the PdfLayoutMgr class private.  Some older code in there is working
-and needs a cleanup before this can happen.  If users follow the sample code in test/java/TestPdfLayoutMgr and don't
+and needs a cleanup before this can happen.  If users follow the sample code in test/java/TestManualllyPdfLayoutMgr and don't
 try accessing default/package-scoped methods, they should not need to make any changes when this cleanup happens.
+
+ - Consider rapping checked exceptions for functional programmers.
 
 License
 =======

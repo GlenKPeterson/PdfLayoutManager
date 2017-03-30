@@ -38,14 +38,14 @@ import java.util.List;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
 import static java.awt.Color.*;
 
-public class TestPdfLayoutMgr {
+public class TestManualllyPdfLayoutMgr {
 
-    public static void main(String... args) throws IOException, COSVisitorException {
-        new TestPdfLayoutMgr().testPdf();
-    }
+//    public static void main(String... args) throws IOException, COSVisitorException {
+//        new TestManualllyPdfLayoutMgr().testPdf();
+//    }
 
     /** Just a convenience abbreviation for Arrays.asList() */
-    public static <T> List<T> vec(T... ts) { return Arrays.asList(ts); }
+    private static <T> List<T> vec(T... ts) { return Arrays.asList(ts); }
 
     @Test
     public void testPdf() throws IOException, COSVisitorException {
