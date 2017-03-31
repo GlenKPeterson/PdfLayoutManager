@@ -1,6 +1,5 @@
 package com.planbase.pdf.layoutmanager;
 
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 
 import java.awt.Color;
@@ -22,10 +21,10 @@ public class LogicalPage { // AKA Document Section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     boolean valid = true;
-
+    
     /** The Y-value for the top margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return 755; }
+    public float yPageTop() { return mgr.pageHeight() - 37; }
     /** The Y-value for the bottom margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float yPageBottom() { return portrait ? 0 : 230; }
@@ -36,8 +35,8 @@ public class LogicalPage { // AKA Document Section
     /** Width of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() {
-        return portrait ? PDPage.PAGE_SIZE_LETTER.getWidth()
-                : PDPage.PAGE_SIZE_LETTER.getHeight();
+        return portrait ? mgr.pageWidth()
+                : mgr.pageHeight();
     }
 
     private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
