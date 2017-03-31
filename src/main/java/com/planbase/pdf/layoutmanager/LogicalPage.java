@@ -17,21 +17,17 @@ public class LogicalPage { // AKA Document Section
 
     private final PdfLayoutMgr mgr;
     private final boolean portrait;
-    private final XyDim pageDim;
     // borderItems apply to a logical section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     boolean valid = true;
     
-    private float topMargin = 37;
-    private float bottomMargin = 0;
-    
     /** The Y-value for the top margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return pageDim.y() - topMargin; }
+    public float yPageTop() { return mgr.pageHeight() - 37; }
     /** The Y-value for the bottom margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageBottom() { return portrait ? bottomMargin : 230; }
+    public float yPageBottom() { return portrait ? 0 : 230; }
 
     /** Height of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
@@ -39,11 +35,11 @@ public class LogicalPage { // AKA Document Section
     /** Width of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() {
-        return portrait ? pageDim.x()
-                : pageDim.y();
+        return portrait ? mgr.pageWidth()
+                : mgr.pageHeight();
     }
 
-    private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; pageDim = m.pageDim(); }
+    private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
 
     public static LogicalPage of(PdfLayoutMgr m) { return new LogicalPage(m, false); }
     public static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
@@ -89,22 +85,6 @@ public class LogicalPage { // AKA Document Section
         pby.pb.drawPng(xVal, pby.y, sj, mgr);
         return this;
     }
-
-    public void topMargin(float topMargin) {
-	this.topMargin = topMargin;
-    }
-    
-    public float topMargin() {
-	return topMargin;
-    }
-    
-    public void bottomMargin(float bottomMargin) {
-	this.bottomMargin = bottomMargin;
-    }
-    
-    public float bottomMargin() {
-	return bottomMargin;
-    }	
 
     public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
