@@ -409,11 +409,19 @@ public class PdfLayoutMgr {
     }
     
     /**
-     Returns the pages dimension given the defined PDRectangle mediaBox
-     * @return an XyDim
+     Returns the page width given the defined PDRectangle mediaBox
+     * @return a float
      */
-    public XyDim pageDim() {
-        return XyDim.of(this.mediaBox.getWidth(), this.mediaBox.getHeight());
+    public float pageWidth() {
+        return this.mediaBox.getWidth();
+    }
+
+    /**
+    Returns the page height given the defined PDRectangle mediaBox
+    * @return a float
+    */
+    public float pageHeight() {
+        return this.mediaBox.getHeight();
     }
 
     /**
