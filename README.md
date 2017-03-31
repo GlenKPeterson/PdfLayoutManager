@@ -6,9 +6,11 @@ Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 ![Sample Output](sampleScreenShot.png)
 
-Usage Example
-=============
-See: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMgr.java)
+Usage
+=====
+Example: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMgr.java)
+
+[API Docs](https://glenkpeterson.github.io/PdfLayoutManager/apidocs/)
 
 Maven Dependency
 ================
