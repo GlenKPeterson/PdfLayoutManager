@@ -352,20 +352,15 @@ public class PdfLayoutMgr {
     private int unCommittedPageIdx = 0;
 
     private final PDColorSpace colorSpace;
-    private final PDRectangle mediaBox;
+    private final PDRectangle pageSize;
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
-    private PdfLayoutMgr(PDColorSpace cs) throws IOException {
-        doc = new PDDocument();
-        colorSpace = cs;
-        mediaBox = PDPage.PAGE_SIZE_LETTER;
-    }
- 
     private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
         doc = new PDDocument();
         colorSpace = cs;
-        mediaBox = mb;
+        pageSize = (mb == null) ? PDPage.PAGE_SIZE_LETTER
+                                : mb;
     }
 
     /**
@@ -375,7 +370,18 @@ public class PdfLayoutMgr {
      @throws IOException
      */
     public static PdfLayoutMgr of(PDColorSpace cs) throws IOException {
-        return new PdfLayoutMgr(cs);
+        return new PdfLayoutMgr(cs, null);
+    }
+
+    /**
+     Returns a new PdfLayoutMgr with the given color space and page size.
+     @param cs the color-space.
+     @param pageSize the page size
+     @return a new PdfLayoutMgr
+     @throws IOException
+     */
+    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) throws IOException {
+        return new PdfLayoutMgr(cs, pageSize);
     }
 
     /**
@@ -385,44 +391,14 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr() throws IOException {
-        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE);
-    }
- 
-    /**
-    Creates a new PdfLayoutMgr with the PDDeviceRGB color space and a mediaBox.
-    @return a new Page Manager with an RGB color space and a mediaBox
-    @throws IOException
-    */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static PdfLayoutMgr newRgbPageMgr(PDRectangle mediaBox) throws IOException {
-        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, mediaBox);
-    }
- 
-    /**
-    Creates a new PdfLayoutMgr with a custom PDDeviceRGB color space and a given mediaBox.
-    @return a new Page Manager with an RGB color space and a mediaBox
-    @throws IOException
-    */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static PdfLayoutMgr newRgbPageMgr(PDColorSpace cs, PDRectangle mediaBox) throws IOException {
-        return new PdfLayoutMgr(cs, mediaBox);
-    }
-    
-    /**
-     Returns the page width given the defined PDRectangle mediaBox
-     * @return a float
-     */
-    public float pageWidth() {
-        return this.mediaBox.getWidth();
+        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null);
     }
 
-    /**
-    Returns the page height given the defined PDRectangle mediaBox
-    * @return a float
-    */
-    public float pageHeight() {
-        return this.mediaBox.getHeight();
-    }
+    /** Returns the page width given the defined PDRectangle pageSize */
+    public float pageWidth() { return pageSize.getWidth(); }
+
+    /** Returns the page height given the defined PDRectangle pageSize */
+    public float pageHeight() { return pageSize.getHeight(); }
 
     /**
      Returns the correct page for the given value of y.  This lets the user use any Y value and
@@ -494,7 +470,7 @@ public class PdfLayoutMgr {
 
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
-            PDPage pdPage = new PDPage(this.mediaBox);
+            PDPage pdPage = new PDPage(pageSize);
             if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
                 pdPage.setRotation(90);
             }

@@ -66,12 +66,15 @@ public class TextStyle {
         avgCharWidth = avgFontWidth * fontSize;
     }
 
+    /** Creates a TextStyle with the given font, size, color, and a leadingFactor of 0.5. */
     public static TextStyle of(PDType1Font f, float sz, Color tc) {
         return new TextStyle(f, sz, tc, 0.5f);
     }
-    
+
     /**
-     The leading factor defines the actual leading based on the font descent.
+     Creates a TextStyle with the given font, size, color, and leadingFactor.
+     The leading factor defines the actual leading (vertical space between lines) based on the
+     font descent (how far letters like g, q, j, etc. go below the baseline of letters like m).
      A leadingFactor of 1 will result of a leading equal to the descent, while a leadingFactor
      of 2 will result of a leading equal to twice the descent etc...
      */

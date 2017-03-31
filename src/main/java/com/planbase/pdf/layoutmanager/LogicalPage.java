@@ -21,10 +21,12 @@ public class LogicalPage { // AKA Document Section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     boolean valid = true;
-    
+
+    // TODO: This has an assumed margin.  Probably want to return mgr.pageHeight() but that's a breaking change.
     /** The Y-value for the top margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float yPageTop() { return mgr.pageHeight() - 37; }
+
     /** The Y-value for the bottom margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float yPageBottom() { return portrait ? 0 : 230; }
@@ -36,7 +38,7 @@ public class LogicalPage { // AKA Document Section
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float pageWidth() {
         return portrait ? mgr.pageWidth()
-                : mgr.pageHeight();
+                        : mgr.pageHeight();
     }
 
     private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
