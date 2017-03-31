@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+// TODO: This is LogicalPage test and should be renamed to that.
 public class PdfLayoutMgrTest {
     @Test public void testBasics() throws IOException {
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();

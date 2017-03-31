@@ -36,7 +36,7 @@ public class TextStyle {
     private final float descent;
     private final float leading;
 
-    private TextStyle(PDType1Font f, float sz, Color tc) {
+    private TextStyle(PDType1Font f, float sz, Color tc, float leadingFactor) {
         if (f == null) { throw new IllegalArgumentException("Font must not be null"); }
         if (tc == null) { tc = Color.BLACK; }
 
@@ -53,7 +53,7 @@ public class TextStyle {
         // default leading.
         ascent = rawAscent * factor;
         descent = rawDescent * -factor;
-        leading = descent / 2;
+        leading = descent * leadingFactor;
         // height = ascent + descent + leading;
 
         float avgFontWidth = 500;
@@ -66,8 +66,20 @@ public class TextStyle {
         avgCharWidth = avgFontWidth * fontSize;
     }
 
+    /** Creates a TextStyle with the given font, size, color, and a leadingFactor of 0.5. */
     public static TextStyle of(PDType1Font f, float sz, Color tc) {
-        return new TextStyle(f, sz, tc);
+        return new TextStyle(f, sz, tc, 0.5f);
+    }
+
+    /**
+     Creates a TextStyle with the given font, size, color, and leadingFactor.
+     The leading factor defines the actual leading (vertical space between lines) based on the
+     font descent (how far letters like g, q, j, etc. go below the baseline of letters like m).
+     A leadingFactor of 1 will result of a leading equal to the descent, while a leadingFactor
+     of 2 will result of a leading equal to twice the descent etc...
+     */
+    public static TextStyle of(PDType1Font f, float sz, Color tc, float leadingFactor) {
+        return new TextStyle(f, sz, tc, leadingFactor);
     }
 
     /**

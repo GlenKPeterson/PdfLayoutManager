@@ -17,6 +17,7 @@ package com.planbase.pdf.layoutmanager;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
@@ -351,12 +352,15 @@ public class PdfLayoutMgr {
     private int unCommittedPageIdx = 0;
 
     private final PDColorSpace colorSpace;
+    private final PDRectangle pageSize;
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
-    private PdfLayoutMgr(PDColorSpace cs) throws IOException {
+    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
         doc = new PDDocument();
         colorSpace = cs;
+        pageSize = (mb == null) ? PDPage.PAGE_SIZE_LETTER
+                                : mb;
     }
 
     /**
@@ -366,7 +370,18 @@ public class PdfLayoutMgr {
      @throws IOException
      */
     public static PdfLayoutMgr of(PDColorSpace cs) throws IOException {
-        return new PdfLayoutMgr(cs);
+        return new PdfLayoutMgr(cs, null);
+    }
+
+    /**
+     Returns a new PdfLayoutMgr with the given color space and page size.
+     @param cs the color-space.
+     @param pageSize the page size
+     @return a new PdfLayoutMgr
+     @throws IOException
+     */
+    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) throws IOException {
+        return new PdfLayoutMgr(cs, pageSize);
     }
 
     /**
@@ -376,8 +391,14 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr() throws IOException {
-        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE);
+        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null);
     }
+
+    /** Returns the page width given the defined PDRectangle pageSize */
+    public float pageWidth() { return pageSize.getWidth(); }
+
+    /** Returns the page height given the defined PDRectangle pageSize */
+    public float pageHeight() { return pageSize.getHeight(); }
 
     /**
      Returns the correct page for the given value of y.  This lets the user use any Y value and
@@ -449,8 +470,7 @@ public class PdfLayoutMgr {
 
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
-            PDPage pdPage = new PDPage();
-            pdPage.setMediaBox(PDPage.PAGE_SIZE_LETTER);
+            PDPage pdPage = new PDPage(pageSize);
             if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
                 pdPage.setRotation(90);
             }
@@ -903,5 +923,4 @@ public class PdfLayoutMgr {
         }
         return sB.toString();
     }
-
 }
