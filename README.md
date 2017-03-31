@@ -16,7 +16,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.3.4</version>
+        <version>0.4.0</version>
     </dependency>
 ```
 
@@ -76,6 +76,12 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***Version 0.4.0***
+Merged @Kevindum's changes:
+ - Custom page sizes: `PdfLayoutMgr.of(PDColorSpace cs, PDRectangle pageSize))`
+ - Variable leading: `TextStyle.of(PDType1Font f, float sz, Color tc, float leadingFactor)`
+Nice work @Kevindum - thank you!
+
 ***Version 0.3.4***
 Minimum Java version is now officially 1.6.
 Removed main() method in unit test (you can run junit instead).

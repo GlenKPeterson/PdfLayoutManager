@@ -376,7 +376,8 @@ public class PdfLayoutMgr {
     /**
      Returns a new PdfLayoutMgr with the given color space and page size.
      @param cs the color-space.
-     @param pageSize the page size
+     @param pageSize the page size.  There are a bunch of presets in
+     org.apache.pdfbox.pdmodel.PDPage like PAGE_SIZE_LETTER, PAGE_SIZE_A1, and PAGE_SIZE_A4.
      @return a new PdfLayoutMgr
      @throws IOException
      */
