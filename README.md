@@ -18,7 +18,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
     </dependency>
 ```
 
