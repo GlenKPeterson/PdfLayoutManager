@@ -12,6 +12,14 @@ Example: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMg
 
 [API Docs](https://glenkpeterson.github.io/PdfLayoutManager/apidocs/)
 
+# WARNING ABOUT VERSION 0.5.0 (as of 2017-05-29)
+PdfLayoutManager 0.5.0 is just released with PDFBox 2.0.6. Outside of character encoding things look like they are working correctly. But the character encoding is a bit of an unknown.
+
+I think the character encoding issues in an old (pre 2.0) version of PDFBox have been fixed. So I removed my Transliteration code for Russian which also converted any "High ANSI characters" to lower ANSI equivalents, or to bullets if no equivalent was available. If you get exceptions about character support, you now need to load a font that includes those characters, or trap them yourself. Here's how to load a font: https://pdfbox.apache.org/1.8/cookbook/workingwithfonts.html
+
+Here's how I used to trap them (incomplete and no longer working with the new version of PDFBox):
+https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L892
+
 Maven Dependency
 ================
 ```xml
