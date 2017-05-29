@@ -76,7 +76,7 @@ public class Text implements Renderable {
         float y = 0;
         float maxX = x;
         Text txt = this;
-        String row = PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
+        String row = txt.text(); //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
 
         String text = substrNoLeadingWhitespace(row, 0);
         int charWidthGuess = txt.avgCharsForWidth(maxWidth);

@@ -15,6 +15,7 @@
 package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,12 +32,12 @@ public class PdfLayoutMgrTest {
         // these variable.
         assertEquals(755.0, lp.yPageTop(), 0.000000001);
         assertEquals(230, lp.yPageBottom(), 0.000000001);
-        assertEquals(PDPage.PAGE_SIZE_LETTER.getHeight(), lp.pageWidth(), 0.000000001);
+        assertEquals(PDRectangle.LETTER.getHeight(), lp.pageWidth(), 0.000000001);
 
         lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
 
         assertEquals(755.0, lp.yPageTop(), 0.000000001);
         assertEquals(0.0, lp.yPageBottom(), 0.000000001);
-        assertEquals(PDPage.PAGE_SIZE_LETTER.getWidth(), lp.pageWidth(), 0.000000001);
+        assertEquals(PDRectangle.LETTER.getWidth(), lp.pageWidth(), 0.000000001);
     }
 }

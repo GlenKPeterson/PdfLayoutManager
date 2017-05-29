@@ -14,15 +14,16 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDPixelMap;
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.util.Matrix;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -120,17 +121,17 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawJpeg, and DrawJpeg
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDJpeg> jpegMap = new HashMap<BufferedImage,PDJpeg>();
+    private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<BufferedImage,PDImageXObject>();
 
-    private PDJpeg ensureCached(final ScaledJpeg sj) {
+    private PDImageXObject ensureCached(final ScaledJpeg sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
-        PDJpeg temp = jpegMap.get(bufferedImage);
+        PDImageXObject temp = jpegMap.get(bufferedImage);
         if (temp == null) {
             try {
-                temp = new PDJpeg(doc, bufferedImage);
+                temp = JPEGFactory.createFromImage(doc, bufferedImage);
             } catch (IOException ioe) {
                  // can there ever be an exception here?  Doesn't it get written later?
-                throw new IllegalStateException("Caught exception creating a PDJpeg from a bufferedImage", ioe);
+                throw new IllegalStateException("Caught exception creating a PDImageXObject from a bufferedImage", ioe);
             }
             jpegMap.put(bufferedImage, temp);
         }
@@ -143,17 +144,17 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawPng, and DrawPng
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDPixelMap> pngMap = new HashMap<BufferedImage,PDPixelMap>();
+    private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<BufferedImage,PDImageXObject>();
 
-    private PDPixelMap ensureCached(final ScaledPng sj) {
+    private PDImageXObject ensureCached(final ScaledPng sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
-        PDPixelMap temp = pngMap.get(bufferedImage);
+        PDImageXObject temp = pngMap.get(bufferedImage);
         if (temp == null) {
             try {
-                temp = new PDPixelMap(doc, bufferedImage);
+                temp = LosslessFactory.createFromImage(doc, bufferedImage);
             } catch (IOException ioe) {
                  // can there ever be an exception here?  Doesn't it get written later?
-                throw new IllegalStateException("Caught exception creating a PDPixelMap from a bufferedImage", ioe);
+                throw new IllegalStateException("Caught exception creating a PDImageXObject from a bufferedImage", ioe);
             }
             pngMap.put(bufferedImage, temp);
         }
@@ -241,7 +242,9 @@ public class PdfLayoutMgr {
             public void commit(PDPageContentStream stream) throws IOException {
                 stream.setStrokingColor(style.color());
                 stream.setLineWidth(style.width());
-                stream.drawLine(x1, y1, x2, y2);
+                stream.moveTo(x1, y1);
+                stream.lineTo(x2, y2);
+                stream.stroke();
             }
         }
 
@@ -260,7 +263,8 @@ public class PdfLayoutMgr {
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 stream.setNonStrokingColor(color);
-                stream.fillRect(x, y, width, height);
+                stream.addRect(x, y, width, height);
+                stream.fill();
             }
         }
 
@@ -282,15 +286,15 @@ public class PdfLayoutMgr {
                 stream.beginText();
                 stream.setNonStrokingColor(style.textColor());
                 stream.setFont(style.font(), style.fontSize());
-                stream.moveTextPositionByAmount(x, y);
-                stream.drawString(t);
+                stream.newLineAtOffset(x, y);
+                stream.showText(t);
                 stream.endText();
             }
         }
 
         private static class DrawPng extends PdfItem {
             private final float x, y;
-            private final PDPixelMap png;
+            private final PDImageXObject png;
             private final ScaledPng scaledPng;
 
             // private Log logger = LogFactory.getLog(DrawPng.class);
@@ -312,13 +316,13 @@ public class PdfLayoutMgr {
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(png, x, y);
                 XyDim dim = scaledPng.dimensions();
-                stream.drawXObject(png, x, y, dim.x(), dim.y());
+                stream.drawImage(png, x, y, dim.x(), dim.y());
             }
         }
 
         private static class DrawJpeg extends PdfItem {
             private final float x, y;
-            private final PDJpeg jpeg;
+            private final PDImageXObject jpeg;
             private final ScaledJpeg scaledJpeg;
 
             // private Log logger = LogFactory.getLog(DrawJpeg.class);
@@ -340,7 +344,7 @@ public class PdfLayoutMgr {
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(jpeg, x, y);
                 XyDim dim = scaledJpeg.dimensions();
-                stream.drawXObject(jpeg, x, y, dim.x(), dim.y());
+                stream.drawImage(jpeg, x, y, dim.x(), dim.y());
             }
         }
     }
@@ -359,7 +363,7 @@ public class PdfLayoutMgr {
     private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
         doc = new PDDocument();
         colorSpace = cs;
-        pageSize = (mb == null) ? PDPage.PAGE_SIZE_LETTER
+        pageSize = (mb == null) ? PDRectangle.LETTER
                                 : mb;
     }
 
@@ -430,7 +434,7 @@ public class PdfLayoutMgr {
     /**
     Call this to commit the PDF information to the underlying stream after it is completely built.
     */
-    public void save(OutputStream os) throws IOException, COSVisitorException {
+    public void save(OutputStream os) throws IOException {
         doc.save(os);
         doc.close();
     }
@@ -481,10 +485,10 @@ public class PdfLayoutMgr {
                 doc.addPage(pdPage);
 
                 if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
-                    stream.concatenate2CTM(0, 1, -1, 0, lp.pageWidth(), 0);
+                    stream.transform(new Matrix(0, 1, -1, 0, lp.pageWidth(), 0));
                 }
-                stream.setStrokingColorSpace(colorSpace);
-                stream.setNonStrokingColorSpace(colorSpace);
+                stream.setStrokingColor(colorSpace.getInitialColor());
+                stream.setNonStrokingColor(colorSpace.getInitialColor());
 
                 PageBuffer pb = pages.get(unCommittedPageIdx);
                 pb.commit(stream);

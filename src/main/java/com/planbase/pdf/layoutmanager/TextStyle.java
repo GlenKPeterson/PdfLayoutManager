@@ -59,7 +59,7 @@ public class TextStyle {
         float avgFontWidth = 500;
         try {
             avgFontWidth = font.getAverageFontWidth();
-        } catch (IOException ioe) {
+        } catch (Exception ioe) {
             //throw new IllegalStateException("IOException probably means an issue reading font metrics from the underlying font file used in this PDF", ioe);
             ; // just use default if there's an exception.
         }

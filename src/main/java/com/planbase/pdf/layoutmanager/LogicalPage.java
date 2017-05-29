@@ -1,6 +1,6 @@
 package com.planbase.pdf.layoutmanager;
 
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.awt.Color;
 import java.io.IOException;

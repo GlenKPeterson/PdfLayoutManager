@@ -14,9 +14,9 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import java.io.IOException;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
+import java.io.IOException;
 
 /**
 Represents items to be later drawn to the page of a PDF file.  The z-index allows items to be drawn

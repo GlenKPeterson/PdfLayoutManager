@@ -78,6 +78,9 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***Version 0.5.0***
+Upgraded to PdfBox 2.0.6 and removed Russian transliteration (because PDF box handles strange characters better).
+
 ***Version 0.4.0***
 Merged @Kevindum's changes:
  - Custom page sizes: `PdfLayoutMgr.of(PDColorSpace cs, PDRectangle pageSize))`

@@ -22,7 +22,6 @@ import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledJpeg;
 import com.planbase.pdf.layoutmanager.TextStyle;
 import com.planbase.pdf.layoutmanager.XyOffset;
-import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
 
@@ -48,7 +47,7 @@ public class TestManualllyPdfLayoutMgr {
     private static <T> List<T> vec(T... ts) { return Arrays.asList(ts); }
 
     @Test
-    public void testPdf() throws IOException, COSVisitorException {
+    public void testPdf() throws IOException {
         // Nothing happens without a PdfLayoutMgr.
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
@@ -268,44 +267,57 @@ public class TestManualllyPdfLayoutMgr {
         y = lp.putRow(pMargin, y,
                       Cell.builder(regularCell, colWidths[0])
                           .add(regular,
-                               vec("Россия – священная наша держава,",
-                                   "Россия – любимая наша страна.",
-                                   "Могучая воля, великая слава –",
-                                   "Твоё достоянье на все времена!",
-                                   null,
-                                   "Chorus:",
-                                   null,
-                                   "Славься, Отечество наше свободное, Братских народов союз" +
-                                   " вековой, Предками данная мудрость народная! Славься, страна!" +
-                                   " Мы гордимся тобой!",
-                                   null,
-                                   "От южных морей до полярного края Раскинулись наши леса и" +
-                                   " поля. Одна ты на свете! Одна ты такая – Хранимая Богом " +
-                                   "родная земля!",
-                                   null,
-                                   "Chorus:",
-                                   null,
-                                   "Широкий простор для мечты и для жизни",
-                                   "Грядущие нам открывают года.",
-                                   "Нам силу даёт наша верность Отчизне.",
-                                   "Так было, так есть и так будет всегда!",
-                                   null,
-                                   "Chorus",
-                                   null,
-                                   null,
-                                   null,
-                                   "Chinese will not print.  The substitution character is a" +
-                                   " bullet, so below should be lots of bullets.",
-                                   null,
-                                   "起來！不願做奴隸的人們！ " +
-                                   "把我們的血肉，築成我們新的長城！ " +
-                                   "中華民族到了最危險的時候， " +
-                                   "每個人被迫著發出最後的吼聲。 " +
-                                   "起來！起來！起來！ " +
-                                   "我們萬眾一心， " +
-                                   "冒著敵人的炮火，前進！ " +
-                                   "冒著敵人的炮火，前進！ " +
-                                   "前進！前進！進！",
+                               vec("This used to have Russian and Chinese text.",
+                                   "The Russian was transliterated and the",
+                                   "Chinese was turned into bullets.",
+                                   "PDFBox 2.x, now handles many characters better,",
+                                   "but throws exceptions for",
+                                   "characters it doesn't understand.",
+                                   "Truth be told, I don't understand so well how",
+                                   "it works, but I think if you get an exception,",
+                                   "you need to load a font like:",
+                                   "PDFont font = PDTrueTypeFont.loadTTF(document, \"Arial.ttf\");",
+                                   "See:",
+                                   "https://pdfbox.apache.org/1.8/cookbook/",
+                                   "workingwithfonts.html",
+//                                   "Россия – священная наша держава,",
+//                                   "Россия – любимая наша страна.",
+//                                   "Могучая воля, великая слава –",
+//                                   "Твоё достоянье на все времена!",
+//                                   null,
+//                                   "Chorus:",
+//                                   null,
+//                                   "Славься, Отечество наше свободное, Братских народов союз" +
+//                                   " вековой, Предками данная мудрость народная! Славься, страна!" +
+//                                   " Мы гордимся тобой!",
+//                                   null,
+//                                   "От южных морей до полярного края Раскинулись наши леса и" +
+//                                   " поля. Одна ты на свете! Одна ты такая – Хранимая Богом " +
+//                                   "родная земля!",
+//                                   null,
+//                                   "Chorus:",
+//                                   null,
+//                                   "Широкий простор для мечты и для жизни",
+//                                   "Грядущие нам открывают года.",
+//                                   "Нам силу даёт наша верность Отчизне.",
+//                                   "Так было, так есть и так будет всегда!",
+//                                   null,
+//                                   "Chorus",
+//                                   null,
+//                                   null,
+//                                   null,
+//                                   "Chinese will not print.  The substitution character is a" +
+//                                   " bullet, so below should be lots of bullets.",
+//                                   null,
+//                                   "起來！不願做奴隸的人們！ " +
+//                                   "把我們的血肉，築成我們新的長城！ " +
+//                                   "中華民族到了最危險的時候， " +
+//                                   "每個人被迫著發出最後的吼聲。 " +
+//                                   "起來！起來！起來！ " +
+//                                   "我們萬眾一心， " +
+//                                   "冒著敵人的炮火，前進！ " +
+//                                   "冒著敵人的炮火，前進！ " +
+//                                   "前進！前進！進！",
                                    null,
                                    "Here is a picture with the default and other sizes.  Though" +
                                    " it shows up several times, the image data is only attached" +
