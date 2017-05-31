@@ -1,26 +1,40 @@
 package com.planbase.pdf.layoutmanager;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * Something that can be built into a table cell, or just something rendered within a box model (like HTML) where
- * the table-free cell is the box.
+ Something that can be built into a table cell, OR just something rendered within a box model
+ (like HTML) where the table-free cell is the box.
  */
 public interface CellBuilder {
-    public CellBuilder cellStyle(CellStyle cs);
+    /** Creates a new CellBuilder with the given CellStyle */
+    CellBuilder cellStyle(CellStyle cs);
 
-    public CellBuilder align(CellStyle.Align align);
+    /** Creates a new CellBuilder with the given alignment */
+    CellBuilder align(CellStyle.Align align);
 
-    public CellBuilder textStyle(TextStyle x);
+    /** Creates a new CellBuilder with the given TextStyle */
+    CellBuilder textStyle(TextStyle x);
 
-    // This is a builder which is not Renderable.  No way to add something to itself *here*.
-    public CellBuilder add(Renderable... rs);
+    /**
+     Adds the given {@link Renderable} content to this cell.
+     To add multiple Renderables at once, use {@link #addAll(Collection)} instead.
+     */
+    CellBuilder add(Renderable rs);
 
-    public CellBuilder add(List<Renderable> js);
+    /**
+     Adds the given list of {@link Renderable} content to this cell.
+     */
+    CellBuilder addAll(Collection<? extends Renderable> js);
 
-    /** Must have textStyle set properly (or inherited) before calling this */
-    public CellBuilder add(String... ss);
+    /**
+     Adds text, but you must have textStyle set properly (or inherited) before calling this.
+     */
+    CellBuilder addStrs(String... ss);
 
-    public CellBuilder add(TextStyle ts, List<String> ls);
+    /** Adds a list of text with the given textStyle */
+    CellBuilder add(TextStyle ts, Iterable<String> ls);
 
+    /** Returns the width of the cell being built. */
+    float width();
 }

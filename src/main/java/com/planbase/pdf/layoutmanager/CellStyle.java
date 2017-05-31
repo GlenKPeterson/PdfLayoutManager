@@ -159,6 +159,9 @@ public class CellStyle {
     public CellStyle borderStyle(BorderStyle bs) {
         return new Builder(this).borderStyle(bs).build();
     }
+    public Cell.Builder cellBuilder(float w) {
+        return Cell.builder(this, w);
+    }
 
     public static Builder builder() { return new Builder(); }
 

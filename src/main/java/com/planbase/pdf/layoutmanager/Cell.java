@@ -15,6 +15,7 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -145,25 +146,27 @@ public class Cell implements Renderable {
         return pcr;
     }
 
-    public XyDim calcDimensions(final float maxWidth) {
+    /** {@inheritDoc} */
+    @Override public XyDim calcDimensions(final float maxWidth) {
         // I think zero or negative width cells might be OK to ignore.  I'd like to try to make
         // Text.calcDimensionsForReal() handle this situation before throwing an error here.
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
 //        }
         XyDim blockDim = ensurePreCalcRows(maxWidth).blockDim;
-        XyDim ret = ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
+        return ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
 //        System.out.println("Cell.calcDimensions(" + maxWidth + ") blockDim=" + blockDim +
 //                           " returns " + ret);
-        return ret;
     }
 
     /*
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
+
+    {@inheritDoc}
     */
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, final XyDim outerDimensions,
-                           boolean allPages) {
+    @Override public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
+                                     final XyDim outerDimensions, boolean allPages) {
 //        System.out.println("Cell.render(" + this.toString());
 //        new Exception().printStackTrace();
 
@@ -276,20 +279,29 @@ public class Cell implements Renderable {
         // Is this necessary?
 //        public Builder width(float w) { width = w; return this; }
 
-        public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+        /** {@inheritDoc} */
+        @Override public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
 
-        public Builder align(CellStyle.Align align) { cellStyle = cellStyle.align(align); return this;}
+        /** {@inheritDoc} */
+        @Override public Builder align(CellStyle.Align align) {
+            cellStyle = cellStyle.align(align); return this;
+        }
 
-        public Builder textStyle(TextStyle x) { textStyle = x; return this; }
+        /** {@inheritDoc} */
+        @Override public Builder textStyle(TextStyle x) { textStyle = x; return this; }
 
-        // This is a builder which is not Renderable.  No way to add something to itself *here*.
-        public Builder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
+        /** {@inheritDoc} */
+        @Override public Builder add(Renderable rs) {
+            Collections.addAll(rows, rs); return this;
+        }
 
-        public Builder add(List<Renderable> js) {
+        /** {@inheritDoc} */
+        @Override public Builder addAll(Collection<? extends Renderable> js) {
             if (js != null) { rows.addAll(js); } return this;
         }
 
-        public Builder add(TextStyle ts, List<String> ls) {
+        /** {@inheritDoc} */
+        @Override public Builder add(TextStyle ts, Iterable<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
                     rows.add(Text.of(ts, s));
@@ -298,7 +310,8 @@ public class Cell implements Renderable {
             return this;
         }
 
-        public Builder add(String... ss) {
+        /** {@inheritDoc} */
+        @Override public Builder addStrs(String... ss) {
             if (textStyle == null) {
                 throw new IllegalStateException("Must set a default text style before adding raw strings");
             }
@@ -311,12 +324,16 @@ public class Cell implements Renderable {
 
         public Cell build() { return new Cell(cellStyle, width, rows); }
 
+        /** {@inheritDoc} */
+        @Override  public float width() { return width; }
+
 // Replaced with TableRow.CellBuilder.buildCell()
 //        public TableRowBuilder buildCell() {
 //            Cell c = new Cell(cellStyle, width, rows);
 //            return trb.addCell(c);
 //        }
 
+        /** {@inheritDoc} */
         @Override public String toString() {
             StringBuilder sB = new StringBuilder("Cell.Builder(").append(cellStyle).append(" width=")
                     .append(width).append(" rows=[");
@@ -329,6 +346,7 @@ public class Cell implements Renderable {
         }
     }
 
+    /** {@inheritDoc} */
     @Override public String toString() {
         StringBuilder sB = new StringBuilder("Cell(").append(cellStyle).append(" width=")
                 .append(width).append(" rows=[");

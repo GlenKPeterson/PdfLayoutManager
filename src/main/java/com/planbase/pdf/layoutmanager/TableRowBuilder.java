@@ -14,6 +14,7 @@
 package com.planbase.pdf.layoutmanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -168,7 +169,7 @@ public class TableRowBuilder {
     public class RowCellBuilder implements CellBuilder {
 
         private final TableRowBuilder tableRowBuilder;
-        private float width; // Both require this.
+        private final float width; // Both require this.
         private CellStyle cellStyle; // Both require this.
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
@@ -183,26 +184,37 @@ public class TableRowBuilder {
         // is put into getting the width and column correct.
         // public TableRowCellBuilder width(float w) { width = w; return this; }
 
-        public RowCellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
 
-        public RowCellBuilder borderStyle(BorderStyle bs) { cellStyle = cellStyle.borderStyle(bs); return this;}
+        public RowCellBuilder borderStyle(BorderStyle bs) {
+            cellStyle = cellStyle.borderStyle(bs); return this;
+        }
 
-        public RowCellBuilder align(CellStyle.Align align) {
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder align(CellStyle.Align align) {
             cellStyle = cellStyle.align(align); return this;
         }
 
-        public RowCellBuilder textStyle(TextStyle x) { textStyle = x; return this; }
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder textStyle(TextStyle x) { textStyle = x; return this; }
 
-        // Do we want to (and how could we?) prevent adding a cell to itself?
-        public RowCellBuilder add(Renderable... rs) { Collections.addAll(rows, rs); return this; }
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder add(Renderable rs) {
+            // TODO: Is this correct???  Adding rows and returning a row cell builder???
+            Collections.addAll(rows, rs); return this;
+        }
 
-        public RowCellBuilder add(List<Renderable> js) {
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder addAll(Collection<? extends Renderable> js) {
             if (js != null) { rows.addAll(js); } return this;
         }
 
-        public RowCellBuilder add(String... ss) {
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder addStrs(String... ss) {
             if (textStyle == null) {
-                throw new IllegalStateException("Must set a default text style before adding raw strings");
+                throw new IllegalStateException("Must set a default text style before adding" +
+                                                " raw strings");
             }
             for (String s : ss) {
                 rows.add(Text.of(textStyle, s));
@@ -210,7 +222,8 @@ public class TableRowBuilder {
             return this;
         }
 
-        public RowCellBuilder add(TextStyle ts, List<String> ls) {
+        /** {@inheritDoc} */
+        @Override public RowCellBuilder add(TextStyle ts, Iterable<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
                     rows.add(Text.of(ts, s));
@@ -223,6 +236,9 @@ public class TableRowBuilder {
             Cell c = Cell.of(cellStyle, width, rows);
             return tableRowBuilder.addCellAt(c, colIdx);
         }
+
+        /** {@inheritDoc} */
+        @Override  public float width() { return width; }
 
         @Override public String toString() {
             return new StringBuilder("RowCellBuilder(").append(tableRowBuilder).append(" colIdx=")

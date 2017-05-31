@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.0</version>
+        <version>0.5.1</version>
     </dependency>
 ```
 
@@ -86,6 +86,17 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***Version 0.5.1***
+ - Added `CellBuilder.width()`.
+ - Made some changes to comply with Bloch's Item 41, "never export two overloadings with the same number of parameters"
+     - Changed `CellBuilder.add(Renderable...)` to `CellBuilder.add(Renderable)` (without the varargs).
+     - Renamed `CellBuilder.add(String...)` to `CellBuilder.addStrs(String...)`.
+     - Broadened type of `CellBuilder.add(List<Renderable>)` and renamed to `CellBuilder.addAll(Collection<? extends Renderable>)`
+ - Added some @Override and @inheritDoc annotations.
+ - Added `CellStyle.cellBuilder(float width)` to create a builder from a cell style.
+ - Changed sign-artifacts phase from verify (which happens before install) to deploy (which happens after)
+ - Regenerated JavaDocs.
+
 ***Version 0.5.0***
 Upgraded to PdfBox 2.0.6 and removed Russian transliteration (because PDF box handles strange characters better).
 
