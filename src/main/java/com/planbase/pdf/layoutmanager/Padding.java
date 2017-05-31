@@ -34,8 +34,8 @@ public class Padding {
     }
     /** Like HTML it's top, right, bottom, left */
     public static Padding of(float t, float r, float b, float l) {
-        if ((t == 0f) && (r == 0f) && (b == 0f) && (l == 0f)) { return NO_PADDING; }
-        if ((t == 1.5f) && (r == 1.5f) && (b == 2f) && (l == 1.5f)) {
+        if (NO_PADDING != null && ((t == 0f) && (r == 0f) && (b == 0f) && (l == 0f))) { return NO_PADDING; }
+        if (DEFAULT_TEXT_PADDING != null && ((t == 1.5f) && (r == 1.5f) && (b == 2f) && (l == 1.5f))) {
             return DEFAULT_TEXT_PADDING;
         }
         return new Padding(t, r, b, l);
