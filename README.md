@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.1</version>
+        <version>0.6.0-ALPHA</version>
     </dependency>
 ```
 
@@ -86,6 +86,10 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***0.6.0-ALPHA***
+ - Changed LogicalPage.yPageTop() to return correct and reasonable values based on page orientation (previously only checked pageHeight assuming portrait).
+   It still assumes a hard-coded marginBodyTop of 37.
+
 ***Version 0.5.1***
  - Added `CellBuilder.width()`.
  - Made some changes to comply with Bloch's Item 41, "never export two overloadings with the same number of parameters"

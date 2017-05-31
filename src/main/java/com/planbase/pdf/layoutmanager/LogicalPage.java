@@ -8,11 +8,34 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Maybe better called a "DocumentSection" this represents a group of Renderables that logically belong on the same
- * page, but may spill over multiple subsequent pages as necessary in order to fit.  Headers and footers are tied to
- * this Logical Page / Document Section.
+ Maybe better called a "DocumentSection" this represents a group of Renderables that logically
+ belong on the same page, but may spill over multiple subsequent pages as necessary in order to
+ fit.  Headers and footers are tied to this Logical Page / Document Section.
+
+ <pre><code>
+ +---------------------+ -.
+ | M  Margin Header  M |  |
+ | a +-------------+ a |   > Margin body top
+ | r |    Header   | r |  |
+ | g +-------------+ g | -'
+ |   |             |   |
+ | B |             | B |
+ | o |     Body    | o |
+ | d |             | d |
+ | y |             | y |
+ |   +-------------+   | -.
+ | L |    Footer   | R |  |
+ | e +-------------+ t |   > Margin body bottom
+ | f  Margin Footer    |  |
+ +---------------------+ -'
+(0,0)
+ </code></pre>
  */
 public class LogicalPage { // AKA Document Section
+    // These can be made configurable some day.  But until then, they are named.
+    private static final float marginBodyTop = 37f;
+//    private static final float marginBodyBottom = 37f;
+
     public enum Orientation { PORTRAIT, LANDSCAPE; }
 
     private final PdfLayoutMgr mgr;
@@ -22,14 +45,18 @@ public class LogicalPage { // AKA Document Section
     private int borderOrd = 0;
     boolean valid = true;
 
-    // TODO: This has an assumed margin.  Probably want to return mgr.pageHeight() but that's a breaking change.
     /** The Y-value for the top margin of the page (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return mgr.pageHeight() - 37; }
+    public float yPageTop() {
+        return (portrait ? mgr.pageHeight()
+                         : mgr.pageWidth()) - marginBodyTop;
+    }
 
     /** The Y-value for the bottom margin of the page (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float yPageBottom() { return portrait ? 0 : 230; }
+    // TODO: Change to something more like this to accept different page sizes and orientations.
+//        return PDRectangle.LETTER.getHeight() - (portrait ? mgr.pageHeight()
+//                                                                  : mgr.pageWidth());
+//}
 
     /** Height of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
@@ -280,7 +307,6 @@ public class LogicalPage { // AKA Document Section
      @param cell the cell containing the styling and text to render.
      @return the bottom Y-value of the rendered cell (on all pages).
      */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         float outerWidth = cell.width();

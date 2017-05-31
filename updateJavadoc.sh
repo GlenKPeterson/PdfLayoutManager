@@ -17,12 +17,11 @@ do
   if [ ! -f "$oldfile" ]
   then
     echo "Added $oldfile"
-    echo -n >$oldfile
     cp -fu $newfile $oldfile
   elif [ ! -f "$newfile" ]
   then
     echo "Deleted $newfile"
-    rm $newfile
+    rm $oldfile
   else
     echo "cp -fu $newfile $oldfile"
     cp -fu $newfile $oldfile
