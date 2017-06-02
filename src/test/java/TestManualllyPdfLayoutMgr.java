@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DOC_UNITS_PER_INCH;
 import static java.awt.Color.*;
 
 public class TestManualllyPdfLayoutMgr {
@@ -55,7 +56,7 @@ public class TestManualllyPdfLayoutMgr {
         // printers. A typical monitor has 72 dots per inch, so you can think of these as pixels
         // even though they aren't.  Things can be aligned right, center, top, or anywhere within
         // a "pixel".
-        final float pMargin = 40;
+        final float pMargin = DOC_UNITS_PER_INCH / 2;
 
         // A LogicalPage is a group of pages with the same settings.  When your contents scroll off
         // the bottom of a page, a new page is automatically created for you with the settings taken
@@ -99,7 +100,7 @@ public class TestManualllyPdfLayoutMgr {
         // Draw the first table with lots of extra room to show off the vertical and horizontal
         // alignment.
         XyOffset xya =
-                lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
+                lp.tableBuilder(XyOffset.of(40f, lp.yBodyTop()))
                   .addCellWidths(vec(120f, 120f, 120f))
                   .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
@@ -132,7 +133,7 @@ public class TestManualllyPdfLayoutMgr {
         // The second table uses the x and y offsets from the previous table to position it to the
         // right of the first.
         XyOffset xyb =
-                lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yPageTop()))
+                lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yBodyTop()))
                   .addCellWidths(vec(100f, 100f, 100f))
                   .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
@@ -196,7 +197,7 @@ public class TestManualllyPdfLayoutMgr {
 
         // Let's do a portrait page now.  I just copied this from the previous page.
         lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
-        lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
+        lp.tableBuilder(XyOffset.of(40f, lp.yBodyTop()))
           .addCellWidths(vec(120f, 120f, 120f))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2), decode("#3366cc"),
@@ -226,7 +227,7 @@ public class TestManualllyPdfLayoutMgr {
 
         // Where's the lower-right-hand corner?  Put a cell there.
         lp.tableBuilder(XyOffset.of(lp.pageWidth() - (100 + pMargin),
-                                    lp.yPageBottom() + 15 + pMargin))
+                                    lp.yBodyBottom() + 15 + pMargin))
           .addCellWidths(vec(100f))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
                                   YELLOW.brighter()))
@@ -244,14 +245,14 @@ public class TestManualllyPdfLayoutMgr {
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(TOP_CENTER, null, null, null);
 
-        lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
+        lp.putCellAsHeaderFooter(pMargin, lp.yBodyTop() + 10,
                                  Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
                                          "Test Logical Page Three"));
 
 //        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
         // We're going to reset and reuse this y variable.
-        float y = lp.yPageTop();
+        float y = lp.yBodyTop();
 
         y = lp.putRow(pMargin, y,
                       Cell.of(headingCell, colWidths[0], heading,
@@ -280,6 +281,10 @@ public class TestManualllyPdfLayoutMgr {
                                    "See:",
                                    "https://pdfbox.apache.org/1.8/cookbook/",
                                    "workingwithfonts.html",
+                                   "",
+                                   "here",
+                                   "are",
+                                   "more lines",
 //                                   "Россия – священная наша держава,",
 //                                   "Россия – любимая наша страна.",
 //                                   "Могучая воля, великая слава –",
@@ -340,7 +345,7 @@ public class TestManualllyPdfLayoutMgr {
                                    "O say does that star-spangled banner yet wave, " +
                                    "O'er the land of the free and the home of the brave? ",
                                    // Tiny space
-                                   null,
+                                   "",
                                    // Set line breaks:
                                    "On the shore dimly seen through the mists of the deep, ",
                                    "Where the foe's haughty host in dread silence reposes, ",
@@ -376,7 +381,12 @@ public class TestManualllyPdfLayoutMgr {
                                    "Then conquer we must, when our cause it is just, " +
                                    "And this be our motto: \"In God is our trust.\" " +
                                    "And the star-spangled banner in triumph shall wave " +
-                                   "O'er the land of the free and the home of the brave!"))
+                                   "O'er the land of the free and the home of the brave!",
+                                   "",
+                                   "more",
+                                   "lines",
+                                   "to",
+                                   "test"))
                           .build(),
                       Cell.builder(regularCell, colWidths[2])
                           .add(regular,
@@ -436,7 +446,7 @@ public class TestManualllyPdfLayoutMgr {
 
         lp = pageMgr.logicalPageStart();
 
-        lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
+        lp.putCellAsHeaderFooter(pMargin, lp.yBodyTop() + 10,
                                  Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
                                          "Test Logical Page Four"));
 
@@ -445,18 +455,18 @@ public class TestManualllyPdfLayoutMgr {
         // across pages.
 
         // top lne
-        lp.putLine(pMargin, lp.yPageTop(), pageRMargin, lp.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yBodyTop(), pageRMargin, lp.yBodyTop(), lineStyle);
         // left line
-        lp.putLine(pMargin, lp.yPageTop(), pMargin, -lp.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
         // 3-page-long X
-        lp.putLine(pMargin, lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
+        lp.putLine(pMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         // middle line
         lp.putLine(pMargin, 0, pageRMargin, 0, lineStyle);
-        lp.putLine(pageRMargin, lp.yPageTop(), pMargin, -lp.yPageTop(), lineStyle);
+        lp.putLine(pageRMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
         // right line
-        lp.putLine(pageRMargin, lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
+        lp.putLine(pageRMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         // bottom line
-        lp.putLine(pMargin, -lp.yPageTop(), pageRMargin, -lp.yPageTop(), lineStyle);
+        lp.putLine(pMargin, -lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         lp.commit();
 
         // All done - write it out!

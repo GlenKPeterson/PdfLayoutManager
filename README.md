@@ -87,8 +87,11 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 Recent Changes
 ==============
 ***0.6.0-ALPHA***
- - Changed LogicalPage.yPageTop() to return correct and reasonable values based on page orientation (previously only checked pageHeight assuming portrait).
-   It still assumes a hard-coded marginBodyTop of 37.
+ - Renamed LogicalPage yPageTop() to yBodyTop() and yPageBottom() to yBodyBottom() and fixed them
+   to return correct and reasonable values based on page orientation (previously only checked
+   pageHeight assuming portrait).
+ - Added new static factory for LogicalPage to specify MarginBodyTop and MarginBodyBottom
+ (see ASCII-art image in JavaDoc).  The defaults are the same as the previously hard-coded values.
 
 ***Version 0.5.1***
  - Added `CellBuilder.width()`.

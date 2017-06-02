@@ -418,9 +418,9 @@ public class PdfLayoutMgr {
         int idx = unCommittedPageIdx;
         // Get the first possible page
 
-        while (y < lp.yPageBottom()) {
-            // logger.info("Adjusting y.  Was: " + y + " about to add " + printAreaHeight);
-            y += lp.printAreaHeight(); // y could even be negative.  Just keep moving to the top of the next
+        while (y < lp.yBodyBottom()) {
+            // logger.info("Adjusting y.  Was: " + y + " about to add " + bodyHeight);
+            y += lp.bodyHeight(); // y could even be negative.  Just keep moving to the top of the next
             // page until it's in the printable area.
             idx++;
             if (pages.size() <= idx) {
@@ -485,7 +485,7 @@ public class PdfLayoutMgr {
                 doc.addPage(pdPage);
 
                 if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
-                    stream.transform(new Matrix(0, 1, -1, 0, lp.pageWidth(), 0));
+                    stream.transform(new Matrix(0, 1, -1, 0, pageWidth(), 0));
                 }
                 stream.setStrokingColor(colorSpace.getInitialColor());
                 stream.setNonStrokingColor(colorSpace.getInitialColor());

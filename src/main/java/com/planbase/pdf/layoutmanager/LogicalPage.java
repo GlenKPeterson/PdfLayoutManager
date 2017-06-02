@@ -15,17 +15,17 @@ import java.util.TreeSet;
  <pre><code>
  +---------------------+ -.
  | M  Margin Header  M |  |
- | a +-------------+ a |   > Margin body top
+ | a +-------------+ a |   &gt; Margin body top
  | r |    Header   | r |  |
- | g +-------------+ g | -'
+ | g +-------------+ g | -'  &lt;- yBodyTop()
  |   |             |   |
  | B |             | B |
  | o |     Body    | o |
  | d |             | d |
  | y |             | y |
- |   +-------------+   | -.
+ |   +-------------+   | -.  &lt;- yBodyBottom()
  | L |    Footer   | R |  |
- | e +-------------+ t |   > Margin body bottom
+ | e +-------------+ t |   &gt; Margin body bottom
  | f  Margin Footer    |  |
  +---------------------+ -'
 (0,0)
@@ -33,46 +33,83 @@ import java.util.TreeSet;
  */
 public class LogicalPage { // AKA Document Section
     // These can be made configurable some day.  But until then, they are named.
-    private static final float marginBodyTop = 37f;
-//    private static final float marginBodyBottom = 37f;
 
     public enum Orientation { PORTRAIT, LANDSCAPE; }
 
+    // Some printers need at least 1/2" of margin (36 "pixels") in order to accept a print job.
+    // This amount seems to accommodate all printers.
+    static final float DEFAULT_MARGIN = 37f;
+
     private final PdfLayoutMgr mgr;
     private final boolean portrait;
+    private final float marginBodyTop;
+    private final float marginBodyBottom;
     // borderItems apply to a logical section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
-    boolean valid = true;
+    private boolean valid = true;
 
-    /** The Y-value for the top margin of the page (in document units) */
-    public float yPageTop() {
+    /** The Y-value for top of the body section (in document units) */
+    public float yBodyTop() {
         return (portrait ? mgr.pageHeight()
-                         : mgr.pageWidth()) - marginBodyTop;
+                         : mgr.pageWidth() ) - marginBodyTop;
     }
 
-    /** The Y-value for the bottom margin of the page (in document units) */
-    public float yPageBottom() { return portrait ? 0 : 230; }
-    // TODO: Change to something more like this to accept different page sizes and orientations.
-//        return PDRectangle.LETTER.getHeight() - (portrait ? mgr.pageHeight()
-//                                                                  : mgr.pageWidth());
-//}
+    /**
+     The Y-value for the bottom of the body section (in document units).  The bottom of the page is
+     always zero, so this is always equivalent to the margin body bottom.
+     */
+    public float yBodyBottom() { return marginBodyBottom; }
 
-    /** Height of the printable area (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float printAreaHeight() { return yPageTop() - yPageBottom(); }
-    /** Width of the printable area (in document units) */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    /** Height (dimension, not offset) of the body section (in document units) */
+    @SuppressWarnings("WeakerAccess") // part of public interface
+    public float bodyHeight() { return yBodyTop() - yBodyBottom(); }
+
+    /**
+     Width of the entire page (in document units).  This is the short dimension for portrait,
+     the long dimension for landscape.
+     */
     public float pageWidth() {
         return portrait ? mgr.pageWidth()
                         : mgr.pageHeight();
     }
 
-    private LogicalPage(PdfLayoutMgr m, boolean p) { mgr = m; portrait = p; }
+    private LogicalPage(PdfLayoutMgr m, boolean p, float t, float b) {
+        mgr = m; portrait = p; marginBodyTop = t; marginBodyBottom = b;
+    }
 
-    public static LogicalPage of(PdfLayoutMgr m) { return new LogicalPage(m, false); }
+    /**
+     Create a landscape LogicalPage with default margins for body top and bottom.
+     @param m the PdfLayoutMgr you are using.
+     @return a new LogicalPage with the given settings.
+     */
+    public static LogicalPage of(PdfLayoutMgr m) {
+        return new LogicalPage(m, false, DEFAULT_MARGIN, DEFAULT_MARGIN);
+    }
+
+    /**
+     Create a LogicalPage with default margins for body top and bottom.
+     @param m the PdfLayoutMgr you are using.
+     @param orientation page orientation for this logical page grouping.
+     @return a new LogicalPage with the given settings.
+     */
     public static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
-        return new LogicalPage(m, orientation == Orientation.PORTRAIT);
+        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
+                               DEFAULT_MARGIN, DEFAULT_MARGIN);
+    }
+
+    /**
+     The full factory.
+     @param m the PdfLayoutMgr you are using.
+     @param orientation page orientation for this logical page grouping.
+     @param marginBodyTop The distance from the top of the page to the top of the body
+     @param marginBodyBottom The distance from the bottom of the page to the bottom of the body
+     @return a new LogicalPage with the given settings.
+     */
+    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
+                                 float marginBodyTop, float marginBodyBottom) {
+        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
+                               marginBodyTop, marginBodyBottom);
     }
 
     /** The orientation of this logical page grouping */
@@ -142,7 +179,7 @@ public class LogicalPage { // AKA Document Section
             for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
                 if (pby1.pb.pageNum < currPage.pageNum) {
                     // On all except the first page the first y will start at the top of the page.
-                    ya = yPageTop();
+                    ya = yBodyTop();
                 } else { // equals, because can never be greater than
                     ya = pby1.y;
                 }
@@ -152,7 +189,7 @@ public class LogicalPage { // AKA Document Section
                     yb = pby2.y;
                 } else {
                     // On all except the last page, the second-y will end at the bottom of the page.
-                    yb = yPageBottom();
+                    yb = yBodyBottom();
                 }
 
                 currPage.fillRect(left, yb, width, ya - yb, c, -1);
@@ -207,7 +244,7 @@ public class LogicalPage { // AKA Document Section
 
                 if (pby1.pb.pageNum < currPage.pageNum) {
                     // On all except the first page the first y will start at the top of the page.
-                    ya = yPageTop();
+                    ya = yBodyTop();
                 } else { // equals, because can never be greater than
                     ya = pby1.y;
                 }
@@ -218,7 +255,7 @@ public class LogicalPage { // AKA Document Section
                     yb = pby2.y;
                 } else {
                     // On all except the last page, the second-y will end at the bottom of the page.
-                    yb = yPageBottom();
+                    yb = yBodyBottom();
 
                     // This represents the x-value of the line at the bottom of one page and later
                     // becomes the x-value for the top of the next page.  It should work whether
@@ -301,11 +338,16 @@ public class LogicalPage { // AKA Document Section
     }
 
     /**
-     For header or footer text on all pages in this logical page grouping.
-     @param x the x-value on all pages.
-     @param origY the y-value on all pages (probably outside the normal margins)
-     @param cell the cell containing the styling and text to render.
-     @return the bottom Y-value of the rendered cell (on all pages).
+     Header and footer in this case means anything that doesn't have to appear within the body
+     of the page.  Most commonly used for headers and footers, but could be watermarks, background
+     images, or anything outside the normal page flow.  I believe these get drawn first so
+     the body text will render over the top of them.  Items put here will *not* wrap to the next
+     page.
+
+     @param x the x-value on all pages (often set outside the normal margins)
+     @param origY the y-value on all pages (often set outside the normal margins)
+     @param cell the cell containing the styling and text to render
+     @return the bottom Y-value of the rendered cell (on all pages)
      */
     public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
