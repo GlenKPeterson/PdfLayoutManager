@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.0-ALPHA</version>
+        <version>0.6.1-ALPHA</version>
     </dependency>
 ```
 
@@ -86,6 +86,16 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***0.6.1-ALPHA***
+ - Added PdfLayoutMgr.loadTrueTypeFont() to give access to the PDFBox 2.0 improved font loading capabilities.
+ - Changed TextStyle to take a PDFont instead of the more specific PDType1Font
+ - Bundled LiberationMono-Bold font in the test resources (for testing).
+   I'm pretty sure this is excluded from the JAR file, it's just to prove that font loading works.
+   If I'm doing something wrong, I hope someone will tell me and/or provide a liberal open-source font with a small file size as a substitute.
+   RedHat or whoever else is responsible for this font is not endorsing, supporting, or probably even aware of this project.
+   I appreciate their work and will give them credit if I can figure out who they are.
+   Any font would do, I just picked this one because of the small file size and (presumably) open-source license.
+
 ***0.6.0-ALPHA***
  - Renamed LogicalPage yPageTop() to yBodyTop() and yPageBottom() to yBodyBottom() and fixed them
    to return correct and reasonable values based on page orientation (previously only checked

@@ -20,8 +20,10 @@ import com.planbase.pdf.layoutmanager.LogicalPage;
 import com.planbase.pdf.layoutmanager.Padding;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledJpeg;
+import com.planbase.pdf.layoutmanager.Text;
 import com.planbase.pdf.layoutmanager.TextStyle;
 import com.planbase.pdf.layoutmanager.XyOffset;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
 
@@ -197,7 +199,7 @@ public class TestManualllyPdfLayoutMgr {
 
         // Let's do a portrait page now.  I just copied this from the previous page.
         lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
-        lp.tableBuilder(XyOffset.of(40f, lp.yBodyTop()))
+        XyOffset xyOff = lp.tableBuilder(XyOffset.of(40f, lp.yBodyTop()))
           .addCellWidths(vec(120f, 120f, 120f))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2), decode("#3366cc"),
@@ -224,6 +226,15 @@ public class TestManualllyPdfLayoutMgr {
           .buildRow()
           .buildPart()
           .buildTable();
+
+        // This was very hastily added to this test to prove that font loading works (it does).
+        File fontFile = new File("target/test-classes/LiberationMono-Bold.ttf");
+        PDType0Font liberationFont = pageMgr.loadTrueTypeFont(fontFile);
+        lp.putCell(xyOff.x(), xyOff.y(),
+                   Cell.of(CellStyle.of(MIDDLE_CENTER, Padding.of(2), decode("#ccffcc"),
+                                        BorderStyle.of(DARK_GRAY)), 200f,
+                           Text.of(TextStyle.of(liberationFont, 12f, BLACK),
+                                   "Hello Liberation Mono Bold Font!")));
 
         // Where's the lower-right-hand corner?  Put a cell there.
         lp.tableBuilder(XyOffset.of(lp.pageWidth() - (100 + pMargin),

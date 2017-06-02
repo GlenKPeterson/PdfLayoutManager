@@ -18,6 +18,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDTrueTypeFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
@@ -27,6 +30,7 @@ import org.apache.pdfbox.util.Matrix;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -460,6 +464,17 @@ public class PdfLayoutMgr {
 //    void addLogicalPage(PageBuffer pb) {
 //        pages.add(pb);
 //    }
+
+    /**
+     Loads a TrueType font (and embeds it into the document?) from the given file into a
+     PDType0Font object.
+     @param fontFile
+     @return
+     @throws IOException
+     */
+    public PDType0Font loadTrueTypeFont(File fontFile) throws IOException {
+        return PDType0Font.load(doc, fontFile);
+    }
 
     /**
      Call this when you are through with your current set of pages to commit all pending text and

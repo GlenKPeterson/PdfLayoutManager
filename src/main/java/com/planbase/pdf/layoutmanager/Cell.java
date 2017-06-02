@@ -62,54 +62,54 @@ public class Cell implements Renderable {
     }
 
     /**
-     Creates a new cell.
+     Creates a new cell with the given style and width.
 
      @param w the width (height will be calculated based on how objects can be rendered within this
          width).
      @param cs the cell style
      @return a cell suitable for rendering.
      */
-    public static Cell of(CellStyle cs, float w) { //, final Object... r) {
-        return new Cell(cs, w, Collections.<Renderable>emptyList());
+    public static Cell of(CellStyle cs, float width) { //, final Object... r) {
+        return new Cell(cs, width, Collections.<Renderable>emptyList());
 //                        (r == null) ? Collections.emptyList()
 //                                    : Arrays.asList(r));
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, TextStyle ts, String s) {
+    public static Cell of(CellStyle cs, float width, TextStyle ts, String s) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(Text.of(ts, s));
-        return new Cell(cs, w, ls);
+        return new Cell(cs, width, ls);
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, Text t) {
+    public static Cell of(CellStyle cs, float width, Text t) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(t);
-        return new Cell(cs, w, ls);
+        return new Cell(cs, width, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, ScaledJpeg j) {
+    public static Cell of(CellStyle cs, float width, ScaledJpeg j) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(j);
-        return new Cell(cs, w, ls);
+        return new Cell(cs, width, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, Renderable r) {
+    public static Cell of(CellStyle cs, float width, Renderable r) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(r);
-        return new Cell(cs, w, ls);
+        return new Cell(cs, width, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, List<Renderable> ls) {
-        return new Cell(cs, w, ls);
+    public static Cell of(CellStyle cs, float width, List<Renderable> ls) {
+        return new Cell(cs, width, ls);
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, Cell c) {
+    public static Cell of(CellStyle cs, float width, Cell c) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(c);
-        return new Cell(cs, w, ls);
+        return new Cell(cs, width, ls);
     }
 
     public CellStyle cellStyle() { return cellStyle; }
