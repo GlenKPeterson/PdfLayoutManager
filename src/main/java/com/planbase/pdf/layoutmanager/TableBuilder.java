@@ -63,8 +63,8 @@ public class TableBuilder implements Renderable {
         XyDim maxDim = XyDim.ZERO;
         for (TablePart part : parts) {
             XyDim wh = part.calcDimensions();
-            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
-                              maxDim.y() + wh.y());
+            maxDim = XyDim.of(Math.max(wh.width(), maxDim.width()),
+                              maxDim.height() + wh.height());
         }
         return maxDim;
     }

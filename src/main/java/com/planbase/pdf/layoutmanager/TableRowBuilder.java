@@ -132,21 +132,21 @@ public class TableRowBuilder {
         // Similar to PdfLayoutMgr.putRow().  Should be combined?
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Math.max(maxDim.y(), wh.y()));
+            maxDim = XyDim.of(wh.width() + maxDim.width(),
+                              Math.max(maxDim.height(), wh.height()));
         }
         return maxDim;
     }
 
     public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
                            boolean allPages) {
-        XyDim maxDim = XyDim.ZERO.y(minRowHeight);
+        XyDim maxDim = XyDim.ZERO.height(minRowHeight);
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(maxDim.x() + cell.width(),
-                              Math.max(maxDim.y(), wh.y()));
+            maxDim = XyDim.of(maxDim.width() + cell.width(),
+                              Math.max(maxDim.height(), wh.height()));
         }
-        float maxHeight = maxDim.y();
+        float maxHeight = maxDim.height();
 
         float x = outerTopLeft.x();
         for (Cell cell : cells) {

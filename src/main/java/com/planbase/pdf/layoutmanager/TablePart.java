@@ -81,8 +81,8 @@ public class TablePart {
         XyDim maxDim = XyDim.ZERO;
         for (TableRowBuilder row : rows) {
             XyDim wh = row.calcDimensions();
-            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
-                              maxDim.y() + wh.y());
+            maxDim = XyDim.of(Math.max(wh.width(), maxDim.width()),
+                              maxDim.height() + wh.height());
         }
         return maxDim;
     }

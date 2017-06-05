@@ -50,13 +50,13 @@ public class Padding {
     public XyDim botRightPadDim() { return XyDim.of(right, bottom); }
 
     public XyDim subtractFrom(XyDim outer) {
-        return XyDim.of(outer.x() - (left + right),
-                        outer.y() - (top + bottom));
+        return XyDim.of(outer.width() - (left + right),
+                        outer.height() - (top + bottom));
     }
 
     public XyDim addTo(XyDim outer) {
-        return XyDim.of(outer.x() + (left + right),
-                        outer.y() + (top + bottom));
+        return XyDim.of(outer.width() + (left + right),
+                        outer.height() + (top + bottom));
     }
 
     public XyOffset applyTopLeft(XyOffset orig) {

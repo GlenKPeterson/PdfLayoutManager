@@ -54,7 +54,7 @@ public class TestManualllyPdfLayoutMgr {
         // Nothing happens without a PdfLayoutMgr.
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
-        // One inch is 72 document units.  40 is about a half-inch - enough margin to satisfy most
+        // One inch is 72 document units.  36 is about a half-inch - enough margin to satisfy most
         // printers. A typical monitor has 72 dots per inch, so you can think of these as pixels
         // even though they aren't.  Things can be aligned right, center, top, or anywhere within
         // a "pixel".

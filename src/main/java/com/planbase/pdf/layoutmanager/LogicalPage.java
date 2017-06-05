@@ -1,6 +1,7 @@
 package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -8,28 +9,50 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- Maybe better called a "DocumentSection" this represents a group of Renderables that logically
+ <p>Maybe better called a "DocumentSection" this represents a group of Renderables that logically
  belong on the same page, but may spill over multiple subsequent pages as necessary in order to
- fit.  Headers and footers are tied to this Logical Page / Document Section.
+ fit.  Headers and footers are tied to this Logical Page / Document Section.</p>
 
+ <p>Here is a typical page layout:</p>
  <pre><code>
  +---------------------+ -.
  | M  Margin Header  M |  |
  | a +-------------+ a |   &gt; Margin body top
  | r |    Header   | r |  |
- | g +-------------+ g | -'  &lt;- yBodyTop()
+ | g +-------------+ g | -'
  |   |             |   |
  | B |             | B |
  | o |     Body    | o |
  | d |             | d |
  | y |             | y |
- |   +-------------+   | -.  &lt;- yBodyBottom()
+ |   +-------------+   | -.
  | L |    Footer   | R |  |
  | e +-------------+ t |   &gt; Margin body bottom
  | f  Margin Footer    |  |
  +---------------------+ -'
+ </code></pre>
+
+ <p>Here is our model</p>
+ <pre><code>
+  +--------------------+
+  |                    |
+  |                    |
+  |   +------------+   | &lt;- yBodyTop()
+  |   |           h|   |
+  |   |           e|   |
+  |   |           i|   |
+  |   |    Body   g|   |
+  |   |           h|   |
+  |   |w i d t h  t|   |
+  |   #------------+   | &lt;- yBodyBottom()
+  |   ^                |
+  | Body               |
+  | Offset             |
+  #--------------------+
 (0,0)
  </code></pre>
+
+ <p>Put header/footer content wherever you want.  We move the body as a unit as needed.</p>
  */
 public class LogicalPage { // AKA Document Section
     // These can be made configurable some day.  But until then, they are named.
@@ -39,52 +62,44 @@ public class LogicalPage { // AKA Document Section
     // Some printers need at least 1/2" of margin (36 "pixels") in order to accept a print job.
     // This amount seems to accommodate all printers.
     static final float DEFAULT_MARGIN = 37f;
+//    private static final XyOffset DEFAULT_OFFSET = XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN);
+    private static final XyDim DEFAULT_DOUBLE_MARGIN_DIM =
+            XyDim.of(DEFAULT_MARGIN * 2, DEFAULT_MARGIN * 2);
 
     private final PdfLayoutMgr mgr;
     private final boolean portrait;
-    private final float marginBodyTop;
-    private final float marginBodyBottom;
+    private final PDRectangle bodyRect;
     // borderItems apply to a logical section
     private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
     private int borderOrd = 0;
     private boolean valid = true;
 
-    /** The Y-value for top of the body section (in document units) */
-    public float yBodyTop() {
-        return (portrait ? mgr.pageHeight()
-                         : mgr.pageWidth() ) - marginBodyTop;
-    }
-
     /**
-     The Y-value for the bottom of the body section (in document units).  The bottom of the page is
-     always zero, so this is always equivalent to the margin body bottom.
+     Private constructor
+     @param m the PdfLayoutMgr this will work on.
+     @param p portrait if true, landscape otherwise.
+     @param bodyOff the offset (in document units) from the upper-left hand corner of the page to
+     the start of the body area.
+     @param bodyDim the dimensions of the body area.
      */
-    public float yBodyBottom() { return marginBodyBottom; }
-
-    /** Height (dimension, not offset) of the body section (in document units) */
-    @SuppressWarnings("WeakerAccess") // part of public interface
-    public float bodyHeight() { return yBodyTop() - yBodyBottom(); }
-
-    /**
-     Width of the entire page (in document units).  This is the short dimension for portrait,
-     the long dimension for landscape.
-     */
-    public float pageWidth() {
-        return portrait ? mgr.pageWidth()
-                        : mgr.pageHeight();
-    }
-
-    private LogicalPage(PdfLayoutMgr m, boolean p, float t, float b) {
-        mgr = m; portrait = p; marginBodyTop = t; marginBodyBottom = b;
+    private LogicalPage(PdfLayoutMgr m, boolean p, XyOffset bodyOff, XyDim bodyDim) {
+        mgr = m; portrait = p;
+        bodyRect = new PDRectangle(bodyOff.x(), bodyOff.y(), bodyDim.width(), bodyDim.height());
     }
 
     /**
-     Create a landscape LogicalPage with default margins for body top and bottom.
+     The full factory.
      @param m the PdfLayoutMgr you are using.
+     @param orientation page orientation for this logical page grouping.
+     @param bodyOff the offset (in document units) from the lower-left hand corner of the page to
+     the lower-left of the body area.
+     @param bodyDim the dimensions of the body area.
      @return a new LogicalPage with the given settings.
      */
-    public static LogicalPage of(PdfLayoutMgr m) {
-        return new LogicalPage(m, false, DEFAULT_MARGIN, DEFAULT_MARGIN);
+    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
+                                 XyOffset bodyOff, XyDim bodyDim) {
+        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
+                               bodyOff, bodyDim);
     }
 
     /**
@@ -94,26 +109,51 @@ public class LogicalPage { // AKA Document Section
      @return a new LogicalPage with the given settings.
      */
     public static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
+
         return new LogicalPage(m, orientation == Orientation.PORTRAIT,
-                               DEFAULT_MARGIN, DEFAULT_MARGIN);
+                               XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN),
+                               (orientation == Orientation.PORTRAIT)
+                               ? m.pageDim().minus(DEFAULT_DOUBLE_MARGIN_DIM)
+                               : m.pageDim().swapWh().minus(DEFAULT_DOUBLE_MARGIN_DIM));
     }
 
     /**
-     The full factory.
+     Create a landscape LogicalPage with default margins.
      @param m the PdfLayoutMgr you are using.
-     @param orientation page orientation for this logical page grouping.
-     @param marginBodyTop The distance from the top of the page to the top of the body
-     @param marginBodyBottom The distance from the bottom of the page to the bottom of the body
-     @return a new LogicalPage with the given settings.
+     @return a new LogicalPage with all defaults.
      */
-    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
-                                 float marginBodyTop, float marginBodyBottom) {
-        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
-                               marginBodyTop, marginBodyBottom);
+    public static LogicalPage of(PdfLayoutMgr m) { return of(m, Orientation.LANDSCAPE); }
+
+    // ===================================== Instance Methods =====================================
+
+    /** The Y-value for top of the body section (in document units) */
+    public float yBodyTop() {
+        return bodyRect.getUpperRightY();
+    }
+
+    /**
+     The Y-value for the bottom of the body section (in document units).  The bottom of the page is
+     always zero, so this is always equivalent to the margin body bottom.
+     */
+    public float yBodyBottom() { return bodyRect.getLowerLeftY(); }
+
+    /** Height (dimension, not offset) of the body section (in document units) */
+    @SuppressWarnings("WeakerAccess") // part of public interface
+    public float bodyHeight() { return bodyRect.getHeight(); }
+
+    /**
+     Width of the entire page (in document units).  This is the short dimension for portrait,
+     the long dimension for landscape.
+     */
+    public float pageWidth() {
+        return portrait ? mgr.pageDim().width()
+                        : mgr.pageDim().height();
     }
 
     /** The orientation of this logical page grouping */
-    public Orientation orientation() { return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE; }
+    public Orientation orientation() {
+        return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE;
+    }
 
     public TableBuilder tableBuilder(XyOffset tl) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
@@ -158,8 +198,8 @@ public class LogicalPage { // AKA Document Section
 //                           Utils.toString(c) + ")");
         final float left = outerTopLeft.x();
         final float topY = outerTopLeft.y();
-        final float width = outerDimensions.x();
-        final float maxHeight = outerDimensions.y();
+        final float width = outerDimensions.width();
+        final float maxHeight = outerDimensions.height();
         final float bottomY = topY - maxHeight;
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
@@ -288,13 +328,13 @@ public class LogicalPage { // AKA Document Section
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
         XyDim maxDim = XyDim.ZERO;
         XyDim wh = cell.calcDimensions(cell.width());
-        maxDim = XyDim.of(wh.x() + maxDim.x(), Math.max(maxDim.y(), wh.y()));
-        float maxHeight = maxDim.y();
+        maxDim = XyDim.of(wh.width() + maxDim.width(), Math.max(maxDim.height(), wh.height()));
+        float maxHeight = maxDim.height();
 
         // render the row with that maxHeight.
         cell.render(this, XyOffset.of(topLeftX, topLeftY), XyDim.of(cell.width(), maxHeight), false);
 
-        return XyOffset.of(topLeftX + wh.x(), topLeftY - wh.y());
+        return XyOffset.of(topLeftX + wh.width(), topLeftY - wh.height());
     }
 
 
@@ -320,10 +360,10 @@ public class LogicalPage { // AKA Document Section
         XyDim maxDim = XyDim.ZERO;
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Math.max(maxDim.y(), wh.y()));
+            maxDim = XyDim.of(wh.width() + maxDim.width(),
+                              Math.max(maxDim.height(), wh.height()));
         }
-        float maxHeight = maxDim.y();
+        float maxHeight = maxDim.height();
 
 //        System.out.println("putRow: maxHeight=" + maxHeight);
 
@@ -353,7 +393,7 @@ public class LogicalPage { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         float outerWidth = cell.width();
         XyDim innerDim = cell.calcDimensions(outerWidth);
-        return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
+        return cell.render(this, XyOffset.of(x, origY), innerDim.width(outerWidth), true).y();
     }
 
     void commitBorderItems(PDPageContentStream stream) throws IOException {

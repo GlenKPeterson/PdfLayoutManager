@@ -126,8 +126,8 @@ public class Cell implements Renderable {
         }
         for (Renderable row : rows) {
             XyDim rowDim = (row == null) ? XyDim.ZERO : row.calcDimensions(innerWidth);
-            blockDim = XyDim.of(Math.max(blockDim.x(), rowDim.x()),
-                                blockDim.y() + rowDim.y());
+            blockDim = XyDim.of(Math.max(blockDim.width(), rowDim.width()),
+                                blockDim.height() + rowDim.height());
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
 //            System.out.println("\tactualDim = " + actualDim);
@@ -170,7 +170,7 @@ public class Cell implements Renderable {
 //        System.out.println("Cell.render(" + this.toString());
 //        new Exception().printStackTrace();
 
-        float maxWidth = outerDimensions.x();
+        float maxWidth = outerDimensions.width();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
         final Padding padding = cellStyle.padding();
         // XyDim outerDimensions = padding.addTo(pcrs.blockDim);
@@ -214,7 +214,7 @@ public class Cell implements Renderable {
                 continue;
             }
             PreCalcRow pcr = pcrs.rows.get(i);
-            float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
+            float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.width(), pcr.blockDim.width());
             outerLowerRight = row.render(lp,
                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset),
                                          pcr.blockDim, allPages);
@@ -226,8 +226,8 @@ public class Cell implements Renderable {
         if (border != null) {
             float origX = outerTopLeft.x();
             float origY = outerTopLeft.y();
-            float rightX = outerTopLeft.x() + outerDimensions.x();
-            float bottomY = outerTopLeft.y() - outerDimensions.y();
+            float rightX = outerTopLeft.x() + outerDimensions.width();
+            float bottomY = outerTopLeft.y() - outerDimensions.height();
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
                 lp.putLine(origX, origY, rightX, origY, border.top());

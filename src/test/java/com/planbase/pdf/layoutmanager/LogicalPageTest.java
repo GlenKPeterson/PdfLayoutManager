@@ -78,11 +78,31 @@ public class LogicalPageTest {
         float bottomM = 60f;
         // Make a new manager for a new test.
         pageMgr = PdfLayoutMgr.of(PDDeviceGray.INSTANCE, A6);
-        lp = LogicalPage.of(pageMgr, PORTRAIT, topM, bottomM);
+        lp = LogicalPage.of(pageMgr, PORTRAIT, XyOffset.of(DEFAULT_MARGIN, bottomM),
+                            pageMgr.pageDim().minus(XyDim.of(DEFAULT_MARGIN * 2, topM + bottomM)));
 
         assertEquals(A6.getHeight() - topM, lp.yBodyTop(), 0.000000001);
         assertEquals(bottomM, lp.yBodyBottom(), 0.000000001);
         assertEquals(A6.getWidth(), lp.pageWidth(), 0.000000001);
         assertEquals(A6.getHeight() - (topM + bottomM), lp.bodyHeight(), 0.000000001);
+
+        // Write to nothing to suppress the "stream not committed" warning
+        lp.commit();
+        pageMgr.save(new ByteArrayOutputStream());
+
+        // Make a new manager for a new test.
+        pageMgr = PdfLayoutMgr.of(PDDeviceGray.INSTANCE, A6);
+        lp = LogicalPage.of(pageMgr, LANDSCAPE, XyOffset.of(DEFAULT_MARGIN, bottomM),
+                            pageMgr.pageDim().swapWh()
+                                   .minus(XyDim.of(DEFAULT_MARGIN * 2, topM + bottomM)));
+
+        assertEquals(A6.getWidth() - topM, lp.yBodyTop(), 0.000000001);
+        assertEquals(bottomM, lp.yBodyBottom(), 0.000000001);
+        assertEquals(A6.getHeight(), lp.pageWidth(), 0.000000001);
+        assertEquals(A6.getWidth() - (topM + bottomM), lp.bodyHeight(), 0.000000001);
+
+        // Write to nothing to suppress the "stream not committed" warning
+        lp.commit();
+        pageMgr.save(new ByteArrayOutputStream());
     }
 }

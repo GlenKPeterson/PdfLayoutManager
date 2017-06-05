@@ -182,7 +182,7 @@ public class Text implements Renderable {
 //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
 //                           ", outerDimensions=" + outerDimensions);
 
-        float maxWidth = outerDimensions.x();
+        float maxWidth = outerDimensions.width();
         WrappedBlock wb = ensureWrappedBlock(maxWidth);
 
         float x = outerTopLeft.x();
@@ -207,8 +207,8 @@ public class Text implements Renderable {
             y -= textStyle.descent();
             y -= textStyle.leading();
         }
-        return XyOffset.of(outerTopLeft.x() + wb.blockDim.x(),
-                           outerTopLeft.y() - wb.blockDim.y());
+        return XyOffset.of(outerTopLeft.x() + wb.blockDim.width(),
+                           outerTopLeft.y() - wb.blockDim.height());
     }
 
     private static String substrNoLeadingWhitespace(final String text, int startIdx) {
