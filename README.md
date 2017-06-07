@@ -84,6 +84,13 @@ Maybe some day I'll provide some sample code so you can do truncation yourself. 
 
 The text wrapping algorithm picks a slightly long starting guess for where to wrap the text, then steps backward looking for whitespace. If it doesn't find any whitspace, it splits the first line at it's original guess length and continues trying to wrap the rest of the text on the next line.
 
+0.6 Migration
+======
+* replace `.yPageBottom()` with `.yBodyBottom()`
+* `xyDim.y()` is now `xyDim.height()` (replace manually)
+* `xyDim.x()` is now `xyDim.width()` (replace manually)
+* If you usee `cellbuilder.add()` and there are errors, try replacing with `.addStrs(`
+
 Recent Changes
 ==============
 ***0.6.1-ALPHA***
@@ -95,6 +102,8 @@ Recent Changes
    RedHat or whoever else is responsible for this font is not endorsing, supporting, or probably even aware of this project.
    I appreciate their work and will give them credit if I can figure out who they are.
    Any font would do, I just picked this one because of the small file size and (presumably) open-source license.
+ - Added PdfLayoutMgr.pageReactor to (so far) move body content left and right on alternate pages.
+ - Added Paguro and bumped minimum Java version from 1.6 to 1.8.
 
 ***0.6.0-ALPHA***
  - Renamed LogicalPage yPageTop() to yBodyTop() and yPageBottom() to yBodyBottom() and fixed them

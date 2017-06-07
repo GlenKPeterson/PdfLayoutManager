@@ -25,6 +25,8 @@ import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.util.Matrix;
+import org.organicdesign.fp.function.Fn1;
+import org.organicdesign.fp.oneOf.Option;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -122,7 +124,7 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawJpeg, and DrawJpeg
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<BufferedImage,PDImageXObject>();
+    private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<>();
 
     private PDImageXObject ensureCached(final ScaledJpeg sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
@@ -145,7 +147,7 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawPng, and DrawPng
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<BufferedImage,PDImageXObject>();
+    private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<>();
 
     private PDImageXObject ensureCached(final ScaledPng sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
@@ -163,22 +165,24 @@ public class PdfLayoutMgr {
     }
 
     /**
-     * Please don't access this class directly if you don't have to.  It's a little bit like a model for stuff that
-     * needs to be drawn on a page, but much more like a heap of random functionality that sort of landed in an
-     * inner class.  This will probably be refactored away in future releases.
+     Caches the contents of a page for later drawing.  Inner classes are what's added to the cache
+     and what controlls the drawing.  Don't access this class directly if you don't have to.
      */
+    // TODO: Should this be in its own file, or in LogicalPage?
     static class PageBuffer {
-        public final int pageNum;
+        final int pageNum;
+        // The x-offset for the body section of this page (left-margin-ish)
+        final float xOff;
         private long lastOrd = 0;
-        private final Set<PdfItem> items = new TreeSet<PdfItem>();
+        private final Set<PdfItem> items = new TreeSet<>();
 
-        private PageBuffer(int pn) {
+        private PageBuffer(int pn, Option<Fn1<Integer,Float>> pr) {
             pageNum = pn;
-        }
+            xOff = pr.match(r -> r.apply(pageNum),
+                            () -> 0f); }
 
-        void fillRect(final float xVal, final float yVal, final float w, final float h,
-                             final Color c, final float z) {
-            items.add(FillRect.of(xVal, yVal, w, h, c, lastOrd++, z));
+        void fillRect(float x, float y, float width, float height, Color c, float zIdx) {
+            items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
         }
 
 //        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
@@ -191,32 +195,26 @@ public class PdfLayoutMgr {
 //            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
-        void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                      final PdfLayoutMgr mgr) {
-            items.add(DrawJpeg.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+        void drawJpeg(float x, float y, ScaledJpeg sj, PdfLayoutMgr mgr) {
+            items.add(new DrawJpeg(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
-        void drawPng(final float xVal, final float yVal, final ScaledPng sj,
-                      final PdfLayoutMgr mgr) {
-            items.add(DrawPng.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+        void drawPng(float x, float y, ScaledPng sj, PdfLayoutMgr mgr) {
+            items.add(new DrawPng(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
-        private void drawLine(final float xa, final float ya, final float xb,
-                              final float yb, final LineStyle ls, final float z) {
-            items.add(DrawLine.of(xa, ya, xb, yb, ls, lastOrd++, z));
+        private void drawLine(float xa, float ya, float xb, float yb, LineStyle ls, float z) {
+            items.add(new DrawLine(xa + xOff, ya, xb + xOff, yb, ls, lastOrd++, z));
         }
-        void drawLine(final float xa, final float ya, final float xb, final float yb,
-                              final LineStyle ls) {
+        void drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
             drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
         }
 
-        private void drawStyledText(final float xCoord, final float yCoord, final String text,
-                                   TextStyle s, final float z) {
-            items.add(Text.of(xCoord, yCoord, text, s, lastOrd++, z));
+        private void drawStyledText(float x, float y, String text, TextStyle s, float z) {
+            items.add(new Text(x + xOff, y, text, s, lastOrd++, z));
         }
-        void drawStyledText(final float xCoord, final float yCoord, final String text,
-                                   TextStyle s) {
-            drawStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
+        void drawStyledText(float x, float y, String text, TextStyle s) {
+            drawStyledText(x, y, text, s, PdfItem.DEFAULT_Z_INDEX);
         }
 
         private void commit(PDPageContentStream stream) throws IOException {
@@ -228,19 +226,12 @@ public class PdfLayoutMgr {
         private static class DrawLine extends PdfItem {
             private final float x1, y1, x2, y2;
             private final LineStyle style;
-            private DrawLine(final float xa, final float ya, final float xb, final float yb,
-                             LineStyle s,
-                             final long ord, final float z) {
+            private DrawLine(float xa, float ya, float xb, float yb, LineStyle s,
+                             long ord, float z) {
                 super(ord, z);
                 x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
             }
-            public static DrawLine of(final float xa, final float ya, final float xb,
-                                      final float yb, LineStyle s,
-                                      final long ord, final float z) {
-                return new DrawLine(xa, ya, xb, yb, s, ord, z);
-            }
-            @Override
-            public void commit(PDPageContentStream stream) throws IOException {
+            @Override public void commit(PDPageContentStream stream) throws IOException {
                 stream.setStrokingColor(style.color());
                 stream.setLineWidth(style.width());
                 stream.moveTo(x1, y1);
@@ -252,17 +243,11 @@ public class PdfLayoutMgr {
         private static class FillRect extends PdfItem {
             private final float x, y, width, height;
             private final Color color;
-            private FillRect(final float xVal, final float yVal, final float w, final float h,
-                             final Color c, final long ord, final float z) {
+            private FillRect(float xVal, float yVal, float w, float h, Color c, long ord, float z) {
                 super(ord, z);
                 x = xVal; y = yVal; width = w; height = h; color = c;
             }
-            public static FillRect of(final float xVal, final float yVal, final float w,
-                                      final float h, final Color c, final long ord, final float z) {
-                return new FillRect(xVal, yVal, w, h, c, ord, z);
-            }
-            @Override
-            public void commit(PDPageContentStream stream) throws IOException {
+            @Override public void commit(PDPageContentStream stream) throws IOException {
                 stream.setNonStrokingColor(color);
                 stream.addRect(x, y, width, height);
                 stream.fill();
@@ -273,17 +258,12 @@ public class PdfLayoutMgr {
             public final float x, y;
             public final String t;
             public final TextStyle style;
-            private Text(final float xCoord, final float yCoord, final String text,
-                         TextStyle s, final long ord, final float z) {
+            Text(float xCoord, float yCoord, String text, TextStyle s,
+                 long ord, float z) {
                 super(ord, z);
                 x = xCoord; y = yCoord; t = text; style = s;
             }
-            public static Text of(final float xCoord, final float yCoord, final String text,
-                                  TextStyle s, final long ord, final float z) {
-                return new Text(xCoord, yCoord, text, s, ord, z);
-            }
-            @Override
-            public void commit(PDPageContentStream stream) throws IOException {
+            @Override public void commit(PDPageContentStream stream) throws IOException {
                 stream.beginText();
                 stream.setNonStrokingColor(style.textColor());
                 stream.setFont(style.font(), style.fontSize());
@@ -297,24 +277,14 @@ public class PdfLayoutMgr {
             private final float x, y;
             private final PDImageXObject png;
             private final ScaledPng scaledPng;
-
-            // private Log logger = LogFactory.getLog(DrawPng.class);
-
-            private DrawPng(final float xVal, final float yVal, final ScaledPng sj,
-                             final PdfLayoutMgr mgr,
-                             final long ord, final float z) {
+            private DrawPng(float xVal, float yVal, ScaledPng sj, PdfLayoutMgr mgr,
+                            long ord, float z) {
                 super(ord, z);
                 x = xVal; y = yVal;
                 png = mgr.ensureCached(sj);
                 scaledPng = sj;
             }
-            public static DrawPng of(final float xVal, final float yVal, final ScaledPng sj,
-                                      final PdfLayoutMgr mgr,
-                                      final long ord, final float z) {
-                return new DrawPng(xVal, yVal, sj, mgr, ord, z);
-            }
-            @Override
-            public void commit(PDPageContentStream stream) throws IOException {
+            @Override public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(png, x, y);
                 XyDim dim = scaledPng.dimensions();
                 stream.drawImage(png, x, y, dim.width(), dim.height());
@@ -325,24 +295,14 @@ public class PdfLayoutMgr {
             private final float x, y;
             private final PDImageXObject jpeg;
             private final ScaledJpeg scaledJpeg;
-
-            // private Log logger = LogFactory.getLog(DrawJpeg.class);
-
-            private DrawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
-                             final PdfLayoutMgr mgr,
-                             final long ord, final float z) {
+            private DrawJpeg(float xVal, float yVal, ScaledJpeg sj, PdfLayoutMgr mgr,
+                             long ord, float z) {
                 super(ord, z);
                 x = xVal; y = yVal;
                 jpeg = mgr.ensureCached(sj);
                 scaledJpeg = sj;
             }
-            public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
-                                      final PdfLayoutMgr mgr,
-                                      final long ord, final float z) {
-                return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
-            }
-            @Override
-            public void commit(PDPageContentStream stream) throws IOException {
+            @Override public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(jpeg, x, y);
                 XyDim dim = scaledJpeg.dimensions();
                 stream.drawImage(jpeg, x, y, dim.width(), dim.height());
@@ -350,8 +310,10 @@ public class PdfLayoutMgr {
         }
     }
 
-    private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
+    private final List<PageBuffer> pages = new ArrayList<>();
     private final PDDocument doc;
+    // Just to start, takes a page number and returns an x-offset for that page.
+    private Fn1<Integer,Float> pageReactor = null;
 
     // pages.size() counts the first page as 1, so 0 is the appropriate sentinel value
     private int unCommittedPageIdx = 0;
@@ -362,7 +324,7 @@ public class PdfLayoutMgr {
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
-    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
+    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) {
         doc = new PDDocument();
         colorSpace = cs;
         pageDim = XyDim.of((mb == null) ? PDRectangle.LETTER
@@ -373,9 +335,8 @@ public class PdfLayoutMgr {
      Returns a new PdfLayoutMgr with the given color space.
      @param cs the color-space.
      @return a new PdfLayoutMgr
-     @throws IOException
      */
-    public static PdfLayoutMgr of(PDColorSpace cs) throws IOException {
+    public static PdfLayoutMgr of(PDColorSpace cs) {
         return new PdfLayoutMgr(cs, null);
     }
 
@@ -385,19 +346,16 @@ public class PdfLayoutMgr {
      @param pageSize the page size.  There are a bunch of presets in
      org.apache.pdfbox.pdmodel.PDPage like PAGE_SIZE_LETTER, PAGE_SIZE_A1, and PAGE_SIZE_A4.
      @return a new PdfLayoutMgr
-     @throws IOException
      */
-    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) throws IOException {
+    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) {
         return new PdfLayoutMgr(cs, pageSize);
     }
 
     /**
      Creates a new PdfLayoutMgr with the PDDeviceRGB color space.
      @return a new Page Manager with an RGB color space
-     @throws IOException
      */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static PdfLayoutMgr newRgbPageMgr() throws IOException {
+    public static PdfLayoutMgr newRgbPageMgr() {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null);
     }
 
@@ -417,18 +375,18 @@ public class PdfLayoutMgr {
      */
     LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y) {
         if (pages.size() < 1) {
-            throw new IllegalStateException("Cannot work with the any pages until one has been created by calling newPage().");
+            throw new IllegalStateException("Cannot work with the any pages until one has been" +
+                                            " created by calling newPage().");
         }
         int idx = unCommittedPageIdx;
-        // Get the first possible page
 
+        // Get the first possible page.  Just keep moving to the top of the next page until it's in
+        // the printable area.
         while (y < lp.yBodyBottom()) {
-            // logger.info("Adjusting y.  Was: " + y + " about to add " + bodyHeight);
-            y += lp.bodyHeight(); // y could even be negative.  Just keep moving to the top of the next
-            // page until it's in the printable area.
+            y += lp.bodyHeight();
             idx++;
             if (pages.size() <= idx) {
-                pages.add(new PageBuffer(pages.size() + 1));
+                pages.add(new PageBuffer(pages.size() + 1, pageReactor()));
             }
         }
         PageBuffer ps = pages.get(idx);
@@ -449,27 +407,30 @@ public class PdfLayoutMgr {
      two or more physical pages) in the requested page orientation.
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public LogicalPage logicalPageStart(LogicalPage.Orientation o) {
-        PageBuffer pb = new PageBuffer(pages.size() + 1);
+    public LogicalPage logicalPageStart(LogicalPage.Orientation o,
+                                        Fn1<Integer,Float> pr) {
+        pageReactor = pr;
+        PageBuffer pb = new PageBuffer(pages.size() + 1, pageReactor());
         pages.add(pb);
         return LogicalPage.of(this, o);
     }
 
     /**
+     Tells this PdfLayoutMgr that you want to start a new logical page (which may be broken across
+     two or more physical pages) in the requested page orientation.
+     */
+    public LogicalPage logicalPageStart(LogicalPage.Orientation o) {
+        return logicalPageStart(o, null);
+    }
+
+    /**
      Get a new logical page (which may be broken across two or more physical pages) in Landscape orientation.
      */
-    public LogicalPage logicalPageStart() { return logicalPageStart(LANDSCAPE); }
-
-//    void addLogicalPage(PageBuffer pb) {
-//        pages.add(pb);
-//    }
+    public LogicalPage logicalPageStart() { return logicalPageStart(LANDSCAPE, null); }
 
     /**
      Loads a TrueType font (and embeds it into the document?) from the given file into a
      PDType0Font object.
-     @param fontFile
-     @return
-     @throws IOException
      */
     public PDType0Font loadTrueTypeFont(File fontFile) throws IOException {
         return PDType0Font.load(doc, fontFile);
@@ -484,7 +445,6 @@ public class PdfLayoutMgr {
 
      @throws IOException - if there is a failure writing to the underlying stream.
      */
-    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     void logicalPageEnd(LogicalPage lp) throws IOException {
 
         // Write out all uncommitted pages.
@@ -519,6 +479,14 @@ public class PdfLayoutMgr {
             }
             unCommittedPageIdx++;
         }
+    }
+
+    /** Sets the pageReactor function. */
+    public PdfLayoutMgr pageReactor(Fn1<Integer,Float> pr) { pageReactor = pr; return this; }
+
+    /** Returns the pageReactor function. */
+    public Option<Fn1<Integer,Float>> pageReactor() {
+        return pageReactor == null ? Option.none() : Option.of(pageReactor);
     }
 
     @Override

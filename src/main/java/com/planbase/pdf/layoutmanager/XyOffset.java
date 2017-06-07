@@ -14,6 +14,8 @@
 
 package com.planbase.pdf.layoutmanager;
 
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+
 /**
  Represents a 2D coordinate in terms of X and Y where negative y is down from the upper left-hand
  corner.  Do not confuse this with an XyDim which represents positive width and height.
@@ -24,11 +26,19 @@ public class XyOffset {
     };
     private final float x;
     private final float y;
+
     private XyOffset(float xCoord, float yCoord) { x = xCoord; y = yCoord; }
+
     public static XyOffset of(float x, float y) {
         if ((x == 0f) && (y == 0f)) { return ORIGIN; }
         return new XyOffset(x, y);
     }
+
+    public static XyOffset of(PDRectangle rect) {
+        if ((rect.getLowerLeftX() == 0f) && (rect.getLowerLeftY() == 0f)) { return ORIGIN; }
+        return new XyOffset(rect.getLowerLeftX(), rect.getLowerLeftY());
+    }
+
     public float x() { return x; }
     public float y() { return y; }
     public XyOffset x(float newX) { return of(newX, y); }

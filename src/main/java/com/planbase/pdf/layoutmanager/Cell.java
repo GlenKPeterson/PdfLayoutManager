@@ -64,9 +64,9 @@ public class Cell implements Renderable {
     /**
      Creates a new cell with the given style and width.
 
-     @param w the width (height will be calculated based on how objects can be rendered within this
-         width).
      @param cs the cell style
+     @param width the width (height will be calculated based on how objects can be rendered within
+     this width).
      @return a cell suitable for rendering.
      */
     public static Cell of(CellStyle cs, float width) { //, final Object... r) {

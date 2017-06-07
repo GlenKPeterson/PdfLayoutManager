@@ -71,8 +71,8 @@ this directory like the following (you'll have to replace the question marks):
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<compilerArgs>
 						<arg>-Xlint</arg>
 					</compilerArgs>
@@ -149,6 +149,11 @@ this directory like the following (you'll have to replace the question marks):
 			<artifactId>TestUtils</artifactId>
 			<version>0.0.6</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.organicdesign</groupId>
+			<artifactId>Paguro</artifactId>
+			<version>3.0.0-ALPHA</version>
 		</dependency>
 	</dependencies>
 	<distributionManagement>

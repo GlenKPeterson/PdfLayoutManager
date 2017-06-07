@@ -26,6 +26,7 @@ import com.planbase.pdf.layoutmanager.XyOffset;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
+import org.organicdesign.fp.oneOf.Or;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -39,6 +40,7 @@ import java.util.List;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DOC_UNITS_PER_INCH;
 import static java.awt.Color.*;
+import static junit.framework.TestCase.assertFalse;
 
 public class TestManualllyPdfLayoutMgr {
 
@@ -47,6 +49,7 @@ public class TestManualllyPdfLayoutMgr {
 //    }
 
     /** Just a convenience abbreviation for Arrays.asList() */
+    @SafeVarargs
     private static <T> List<T> vec(T... ts) { return Arrays.asList(ts); }
 
     @Test

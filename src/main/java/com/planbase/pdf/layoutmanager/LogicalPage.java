@@ -96,10 +96,9 @@ public class LogicalPage { // AKA Document Section
      @param bodyDim the dimensions of the body area.
      @return a new LogicalPage with the given settings.
      */
-    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
-                                 XyOffset bodyOff, XyDim bodyDim) {
-        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
-                               bodyOff, bodyDim);
+    static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
+                          XyOffset bodyOff, XyDim bodyDim) {
+        return new LogicalPage(m, orientation == Orientation.PORTRAIT, bodyOff, bodyDim);
     }
 
     /**
@@ -108,21 +107,13 @@ public class LogicalPage { // AKA Document Section
      @param orientation page orientation for this logical page grouping.
      @return a new LogicalPage with the given settings.
      */
-    public static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
+    static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
 
-        return new LogicalPage(m, orientation == Orientation.PORTRAIT,
-                               XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN),
-                               (orientation == Orientation.PORTRAIT)
-                               ? m.pageDim().minus(DEFAULT_DOUBLE_MARGIN_DIM)
-                               : m.pageDim().swapWh().minus(DEFAULT_DOUBLE_MARGIN_DIM));
+        return of(m, orientation, XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN),
+                  (orientation == Orientation.PORTRAIT)
+                  ? m.pageDim().minus(DEFAULT_DOUBLE_MARGIN_DIM)
+                  : m.pageDim().swapWh().minus(DEFAULT_DOUBLE_MARGIN_DIM));
     }
-
-    /**
-     Create a landscape LogicalPage with default margins.
-     @param m the PdfLayoutMgr you are using.
-     @return a new LogicalPage with all defaults.
-     */
-    public static LogicalPage of(PdfLayoutMgr m) { return of(m, Orientation.LANDSCAPE); }
 
     // ===================================== Instance Methods =====================================
 
@@ -174,25 +165,25 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    LogicalPage drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj) {
+    LogicalPage drawJpeg(float x, float y, ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, yVal);
+        PageBufferAndY pby = mgr.appropriatePage(this, y);
         // draw image based on baseline and decrement y appropriately for image.
-        pby.pb.drawJpeg(xVal, pby.y, sj, mgr);
+        pby.pb.drawJpeg(x, pby.y, sj, mgr);
         return this;
     }
 
-    LogicalPage drawPng(final float xVal, final float yVal, final ScaledPng sj) {
+    LogicalPage drawPng(float x, float y, ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, yVal);
+        PageBufferAndY pby = mgr.appropriatePage(this, y);
         // draw image based on baseline and decrement y appropriately for image.
-        pby.pb.drawPng(xVal, pby.y, sj, mgr);
+        pby.pb.drawPng(x, pby.y, sj, mgr);
         return this;
     }
 
-    public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
+    public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
@@ -254,7 +245,7 @@ public class LogicalPage { // AKA Document Section
      @param x2 second x-value
      @param y2 second (lower or same) y-value
      */
-    public LogicalPage putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
+    public LogicalPage putLine(float x1, float y1, float x2, float y2, final LineStyle ls) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        mgr.putLine(x1, y1, x2, y2, ls);
 
@@ -322,8 +313,11 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    /** You can draw a cell without a table (for a heading, or paragraph of same-format text, or whatever). */
-    public XyOffset putCell(final float topLeftX, final float topLeftY, Cell cell) {
+    /**
+     You can draw a cell without a table (for a heading, or paragraph of same-format text, or
+     whatever).
+     */
+    public XyOffset putCell(float x, float y, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
         XyDim maxDim = XyDim.ZERO;
@@ -332,11 +326,10 @@ public class LogicalPage { // AKA Document Section
         float maxHeight = maxDim.height();
 
         // render the row with that maxHeight.
-        cell.render(this, XyOffset.of(topLeftX, topLeftY), XyDim.of(cell.width(), maxHeight), false);
+        cell.render(this, XyOffset.of(x, y), XyDim.of(cell.width(), maxHeight), false);
 
-        return XyOffset.of(topLeftX + wh.width(), topLeftY - wh.height());
+        return XyOffset.of(x + wh.width(), y - wh.height());
     }
-
 
     public XyOffset addTable(TableBuilder tb) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
@@ -389,7 +382,7 @@ public class LogicalPage { // AKA Document Section
      @param cell the cell containing the styling and text to render
      @return the bottom Y-value of the rendered cell (on all pages)
      */
-    public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
+    public float putCellAsHeaderFooter(float x, float origY, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         float outerWidth = cell.width();
         XyDim innerDim = cell.calcDimensions(outerWidth);
@@ -403,26 +396,20 @@ public class LogicalPage { // AKA Document Section
         for (PdfItem item : borderItems) { item.commit(stream); }
     }
 
-    private void borderStyledText(final float xCoord, final float yCoord, final String text,
-                               TextStyle s, final float z) {
-        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        borderItems.add(PdfLayoutMgr.PageBuffer.Text.of(xCoord, yCoord, text, s, borderOrd++, z));
-    }
-
     /**
      Adds items to every page in page grouping.  You should not need to use this directly.  It only
-     has package scope so that Cell can access it for one thing.  It may become private in the
+     has package scope so that Text can access it for one thing.  It may become private in the
      future.
       */
-    void borderStyledText(final float xCoord, final float yCoord, final String text,
-                               TextStyle s) {
+    void borderStyledText(float xCoord, float yCoord, String text, TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
+        borderItems.add(new PdfLayoutMgr.PageBuffer.Text(xCoord, yCoord, text, s, borderOrd++,
+                                                         PdfItem.DEFAULT_Z_INDEX));
     }
 
     static class PageBufferAndY {
-        public final PdfLayoutMgr.PageBuffer pb;
-        public final float y;
-        public PageBufferAndY(PdfLayoutMgr.PageBuffer p, float theY) { pb = p; y = theY; }
+        final PdfLayoutMgr.PageBuffer pb;
+        final float y;
+        PageBufferAndY(PdfLayoutMgr.PageBuffer p, float theY) { pb = p; y = theY; }
     }
 }

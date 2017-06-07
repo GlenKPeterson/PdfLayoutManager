@@ -70,6 +70,11 @@ public class XyDim {
     /** Returns a PDRectangle with the given width and height (but no/0 offset) */
     public PDRectangle toRect() { return new PDRectangle(width, height); }
 
+//    /** Returns a PDRectangle with the given width and height (but no/0 offset) */
+//    public PDRectangle toRect(XyOffset off) {
+//        return new PDRectangle(off.x(), off.y(), width, height);
+//    }
+
     /** Subtracts the given XyDim from this one (remember, these can't be negative). */
     public XyDim minus(XyDim that) { return of(this.width - that.width(), this.height - that.height()); }
 

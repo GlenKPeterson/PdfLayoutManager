@@ -63,7 +63,7 @@ public class LogicalPageTest {
         assertEquals(A1.getWidth(), lp.pageWidth(), 0.000000001);
         assertEquals(A1.getHeight() - (DEFAULT_MARGIN * 2), lp.bodyHeight(), 0.000000001);
 
-        lp = LogicalPage.of(pageMgr);
+        lp = pageMgr.logicalPageStart();
 
         assertEquals(A1.getWidth() - DEFAULT_MARGIN, lp.yBodyTop(), 0.000000001);
         assertEquals(DEFAULT_MARGIN, lp.yBodyBottom(), 0.000000001);
