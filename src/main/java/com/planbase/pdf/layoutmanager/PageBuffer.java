@@ -25,10 +25,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- Caches the contents of a page for later drawing.  Inner classes are what's added to the cache
- and what controlls the drawing.  Don't access this class directly if you don't have to.
+ Caches the contents of a specific, single page for later drawing.  Inner classes are what's added
+ to the cache and what controlls the drawing.  You generally want to use {@link LogicalPage} when
+ you want automatic page-breaking.  PageBuffer is for when you want to force something onto a
+ specific page only.
  */
-class PageBuffer {
+class PageBuffer implements RenderTarget {
     final int pageNum;
     // The x-offset for the body section of this page (left-margin-ish)
     private final float xOff;
@@ -66,15 +68,21 @@ class PageBuffer {
     private void drawLine(float xa, float ya, float xb, float yb, LineStyle ls, float z) {
         items.add(new DrawLine(xa + xOff, ya, xb + xOff, yb, ls, lastOrd++, z));
     }
-    void drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
+    /** {@inheritDoc} */
+    @Override
+    public PageBuffer drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
         drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
+        return this;
     }
 
     private void drawStyledText(float x, float y, String text, TextStyle s, float z) {
         items.add(new Text(x + xOff, y, text, s, lastOrd++, z));
     }
-    void drawStyledText(float x, float y, String text, TextStyle s) {
+    /** {@inheritDoc} */
+    @Override
+    public PageBuffer drawStyledText(float x, float y, String text, TextStyle s) {
         drawStyledText(x, y, text, s, PdfItem.DEFAULT_Z_INDEX);
+        return this;
     }
 
     void commit(PDPageContentStream stream) throws IOException {

@@ -178,7 +178,7 @@ public class Cell implements Renderable {
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
 //            System.out.println("\tCell.render calling putRect...");
-            lp.putRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
+            lp.drawRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
 //            System.out.println("\tCell.render back from putRect");
         }
 
@@ -230,16 +230,16 @@ public class Cell implements Renderable {
             float bottomY = outerTopLeft.y() - outerDimensions.height();
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
-                lp.putLine(origX, origY, rightX, origY, border.top());
+                lp.drawLine(origX, origY, rightX, origY, border.top());
             }
             if (border.right() != null) {
-                lp.putLine(rightX, origY, rightX, bottomY, border.right());
+                lp.drawLine(rightX, origY, rightX, bottomY, border.right());
             }
             if (border.bottom() != null) {
-                lp.putLine(origX, bottomY, rightX, bottomY, border.bottom());
+                lp.drawLine(origX, bottomY, rightX, bottomY, border.bottom());
             }
             if (border.left() != null) {
-                lp.putLine(origX, origY, origX, bottomY, border.left());
+                lp.drawLine(origX, origY, origX, bottomY, border.left());
             }
         }
 

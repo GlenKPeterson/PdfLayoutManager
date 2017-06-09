@@ -57,7 +57,7 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-    public XyOffset buildTable() { return logicalPage.addTable(this); }
+    public XyOffset buildTable() { return logicalPage.drawTable(this); }
 
     public XyDim calcDimensions(float maxWidth) {
         XyDim maxDim = XyDim.ZERO;

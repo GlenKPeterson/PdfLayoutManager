@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 
-import static com.planbase.pdf.layoutmanager.CellStyle.Align.MIDDLE_CENTER;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_LEFT;
 import static java.awt.Color.*;
 import static org.organicdesign.fp.StaticImports.vec;
@@ -38,11 +37,11 @@ public class TestManual2 {
                                                                         TextStyle.of(PDType1Font.HELVETICA, 9f, BLACK));
                                                       return leftMargin;
                                                   });
-        lp.putCell(0, PDRectangle.A6.getHeight() - 40f,
-                   Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), decode("#ccffcc"),
-                                        BorderStyle.of(DARK_GRAY)), bodyWidth,
-                           Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
-                                   mumble(50))));
+        lp.drawCell(0, PDRectangle.A6.getHeight() - 40f,
+                    Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), decode("#ccffcc"),
+                                         BorderStyle.of(DARK_GRAY)), bodyWidth,
+                            Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
+                                    mumble(50))));
         lp.commit();
         // We're just going to write to a file.
         OutputStream os = new FileOutputStream("test2.pdf");

@@ -26,7 +26,6 @@ import com.planbase.pdf.layoutmanager.XyOffset;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
-import org.organicdesign.fp.oneOf.Or;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,7 +39,6 @@ import java.util.List;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DOC_UNITS_PER_INCH;
 import static java.awt.Color.*;
-import static junit.framework.TestCase.assertFalse;
 
 public class TestManualllyPdfLayoutMgr {
 
@@ -233,7 +231,7 @@ public class TestManualllyPdfLayoutMgr {
         // This was very hastily added to this test to prove that font loading works (it does).
         File fontFile = new File("target/test-classes/LiberationMono-Bold.ttf");
         PDType0Font liberationFont = pageMgr.loadTrueTypeFont(fontFile);
-        lp.putCell(xyOff.x(), xyOff.y(),
+        lp.drawCell(xyOff.x(), xyOff.y(),
                    Cell.of(CellStyle.of(MIDDLE_CENTER, Padding.of(2), decode("#ccffcc"),
                                         BorderStyle.of(DARK_GRAY)), 200f,
                            Text.of(TextStyle.of(liberationFont, 12f, BLACK),
@@ -259,9 +257,9 @@ public class TestManualllyPdfLayoutMgr {
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(TOP_CENTER, null, null, null);
 
-        lp.putCellAsHeaderFooter(pMargin, lp.yBodyTop() + 10,
-                                 Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                         "Test Logical Page Three"));
+        lp.drawCellAsWatermark(pMargin, lp.yBodyTop() + 10,
+                               Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
+                                       "Test Logical Page Three"));
 
 //        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
 
@@ -460,27 +458,27 @@ public class TestManualllyPdfLayoutMgr {
 
         lp = pageMgr.logicalPageStart();
 
-        lp.putCellAsHeaderFooter(pMargin, lp.yBodyTop() + 10,
-                                 Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                         "Test Logical Page Four"));
+        lp.drawCellAsWatermark(pMargin, lp.yBodyTop() + 10,
+                               Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
+                                       "Test Logical Page Four"));
 
         // Make a big 3-page X in a box.  Notice that we code it as though it's on one page, and the
         // API adds two more pages as needed.  This is a great test for how geometric shapes break
         // across pages.
 
         // top lne
-        lp.putLine(pMargin, lp.yBodyTop(), pageRMargin, lp.yBodyTop(), lineStyle);
+        lp.drawLine(pMargin, lp.yBodyTop(), pageRMargin, lp.yBodyTop(), lineStyle);
         // left line
-        lp.putLine(pMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
+        lp.drawLine(pMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
         // 3-page-long X
-        lp.putLine(pMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
+        lp.drawLine(pMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         // middle line
-        lp.putLine(pMargin, 0, pageRMargin, 0, lineStyle);
-        lp.putLine(pageRMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
+        lp.drawLine(pMargin, 0, pageRMargin, 0, lineStyle);
+        lp.drawLine(pageRMargin, lp.yBodyTop(), pMargin, -lp.yBodyTop(), lineStyle);
         // right line
-        lp.putLine(pageRMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
+        lp.drawLine(pageRMargin, lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         // bottom line
-        lp.putLine(pMargin, -lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
+        lp.drawLine(pMargin, -lp.yBodyTop(), pageRMargin, -lp.yBodyTop(), lineStyle);
         lp.commit();
 
         // All done - write it out!

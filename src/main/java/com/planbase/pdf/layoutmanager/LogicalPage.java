@@ -54,7 +54,7 @@ import java.util.TreeSet;
 
  <p>Put header/footer content wherever you want.  We move the body as a unit as needed.</p>
  */
-public class LogicalPage { // AKA Document Section
+public class LogicalPage implements RenderTarget { // AKA Document Section
     // These can be made configurable some day.  But until then, they are named.
 
     public enum Orientation { PORTRAIT, LANDSCAPE; }
@@ -158,7 +158,8 @@ public class LogicalPage { // AKA Document Section
         return mgr;
     }
 
-    LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
+    /** {@inheritDoc} */
+    @Override public LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         PageBufferAndY pby = mgr.appropriatePage(this, y);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
@@ -183,7 +184,7 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
+    public LogicalPage drawRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
@@ -237,15 +238,9 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    /**
-     Must draw from higher to lower.  Thus y1 must be &gt;= y2 (remember, higher y values
-     are up).
-     @param x1 first x-value
-     @param y1 first (upper) y-value
-     @param x2 second x-value
-     @param y2 second (lower or same) y-value
-     */
-    public LogicalPage putLine(float x1, float y1, float x2, float y2, final LineStyle ls) {
+    /** {@inheritDoc} */
+    @Override
+    public LogicalPage drawLine(float x1, float y1, float x2, float y2, final LineStyle ls) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        mgr.putLine(x1, y1, x2, y2, ls);
 
@@ -317,7 +312,7 @@ public class LogicalPage { // AKA Document Section
      You can draw a cell without a table (for a heading, or paragraph of same-format text, or
      whatever).
      */
-    public XyOffset putCell(float x, float y, Cell cell) {
+    public XyOffset drawCell(float x, float y, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
         XyDim maxDim = XyDim.ZERO;
@@ -331,7 +326,7 @@ public class LogicalPage { // AKA Document Section
         return XyOffset.of(x + wh.width(), y - wh.height());
     }
 
-    public XyOffset addTable(TableBuilder tb) {
+    public XyOffset drawTable(TableBuilder tb) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         return tb.render(this, tb.topLeft(), null, false);
     }
@@ -382,7 +377,7 @@ public class LogicalPage { // AKA Document Section
      @param cell the cell containing the styling and text to render
      @return the bottom Y-value of the rendered cell (on all pages)
      */
-    public float putCellAsHeaderFooter(float x, float origY, Cell cell) {
+    public float drawCellAsWatermark(float x, float origY, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         float outerWidth = cell.width();
         XyDim innerDim = cell.calcDimensions(outerWidth);
