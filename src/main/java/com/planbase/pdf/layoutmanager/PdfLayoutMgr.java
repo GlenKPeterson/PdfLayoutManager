@@ -28,7 +28,6 @@ import org.apache.pdfbox.util.Matrix;
 import org.organicdesign.fp.function.Fn1;
 import org.organicdesign.fp.oneOf.Option;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -38,8 +37,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
 
@@ -126,7 +123,7 @@ public class PdfLayoutMgr {
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<>();
 
-    private PDImageXObject ensureCached(final ScaledJpeg sj) {
+    PDImageXObject ensureCached(final ScaledJpeg sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
         PDImageXObject temp = jpegMap.get(bufferedImage);
         if (temp == null) {
@@ -141,7 +138,7 @@ public class PdfLayoutMgr {
         return temp;
     }
 
-        // You can have many DrawPngs backed by only a few images - it is a flyweight, and this
+    // You can have many DrawPngs backed by only a few images - it is a flyweight, and this
     // hash map keeps track of the few underlying images, even as intances of DrawPng
     // represent all the places where these images are used.
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
@@ -149,7 +146,7 @@ public class PdfLayoutMgr {
     // must be an inner class (or this would have to be package scoped).
     private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<>();
 
-    private PDImageXObject ensureCached(final ScaledPng sj) {
+    PDImageXObject ensureCached(final ScaledPng sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
         PDImageXObject temp = pngMap.get(bufferedImage);
         if (temp == null) {
@@ -162,152 +159,6 @@ public class PdfLayoutMgr {
             pngMap.put(bufferedImage, temp);
         }
         return temp;
-    }
-
-    /**
-     Caches the contents of a page for later drawing.  Inner classes are what's added to the cache
-     and what controlls the drawing.  Don't access this class directly if you don't have to.
-     */
-    // TODO: Should this be in its own file, or in LogicalPage?
-    static class PageBuffer {
-        final int pageNum;
-        // The x-offset for the body section of this page (left-margin-ish)
-        final float xOff;
-        private long lastOrd = 0;
-        private final Set<PdfItem> items = new TreeSet<>();
-
-        private PageBuffer(int pn, Option<Fn1<Integer,Float>> pr) {
-            pageNum = pn;
-            xOff = pr.match(r -> r.apply(pageNum),
-                            () -> 0f); }
-
-        void fillRect(float x, float y, float width, float height, Color c, float zIdx) {
-            items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
-        }
-
-//        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
-//                             final float h) {
-//            fillRect(xVal, yVal, w, h, c, PdfItem.DEFAULT_Z_INDEX);
-//        }
-//
-//        public void drawJpeg(final float xVal, final float yVal, final BufferedImage bi,
-//                             final PdfLayoutMgr mgr, final float z) {
-//            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
-//        }
-
-        void drawJpeg(float x, float y, ScaledJpeg sj, PdfLayoutMgr mgr) {
-            items.add(new DrawJpeg(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
-        }
-
-        void drawPng(float x, float y, ScaledPng sj, PdfLayoutMgr mgr) {
-            items.add(new DrawPng(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
-        }
-
-        private void drawLine(float xa, float ya, float xb, float yb, LineStyle ls, float z) {
-            items.add(new DrawLine(xa + xOff, ya, xb + xOff, yb, ls, lastOrd++, z));
-        }
-        void drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
-            drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
-        }
-
-        private void drawStyledText(float x, float y, String text, TextStyle s, float z) {
-            items.add(new Text(x + xOff, y, text, s, lastOrd++, z));
-        }
-        void drawStyledText(float x, float y, String text, TextStyle s) {
-            drawStyledText(x, y, text, s, PdfItem.DEFAULT_Z_INDEX);
-        }
-
-        private void commit(PDPageContentStream stream) throws IOException {
-            // Since items are z-ordered, then sub-ordered by entry-order, we will draw
-            // everything in the correct order.
-            for (PdfItem item : items) { item.commit(stream); }
-        }
-
-        private static class DrawLine extends PdfItem {
-            private final float x1, y1, x2, y2;
-            private final LineStyle style;
-            private DrawLine(float xa, float ya, float xb, float yb, LineStyle s,
-                             long ord, float z) {
-                super(ord, z);
-                x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
-            }
-            @Override public void commit(PDPageContentStream stream) throws IOException {
-                stream.setStrokingColor(style.color());
-                stream.setLineWidth(style.width());
-                stream.moveTo(x1, y1);
-                stream.lineTo(x2, y2);
-                stream.stroke();
-            }
-        }
-
-        private static class FillRect extends PdfItem {
-            private final float x, y, width, height;
-            private final Color color;
-            private FillRect(float xVal, float yVal, float w, float h, Color c, long ord, float z) {
-                super(ord, z);
-                x = xVal; y = yVal; width = w; height = h; color = c;
-            }
-            @Override public void commit(PDPageContentStream stream) throws IOException {
-                stream.setNonStrokingColor(color);
-                stream.addRect(x, y, width, height);
-                stream.fill();
-            }
-        }
-
-        static class Text extends PdfItem {
-            public final float x, y;
-            public final String t;
-            public final TextStyle style;
-            Text(float xCoord, float yCoord, String text, TextStyle s,
-                 long ord, float z) {
-                super(ord, z);
-                x = xCoord; y = yCoord; t = text; style = s;
-            }
-            @Override public void commit(PDPageContentStream stream) throws IOException {
-                stream.beginText();
-                stream.setNonStrokingColor(style.textColor());
-                stream.setFont(style.font(), style.fontSize());
-                stream.newLineAtOffset(x, y);
-                stream.showText(t);
-                stream.endText();
-            }
-        }
-
-        private static class DrawPng extends PdfItem {
-            private final float x, y;
-            private final PDImageXObject png;
-            private final ScaledPng scaledPng;
-            private DrawPng(float xVal, float yVal, ScaledPng sj, PdfLayoutMgr mgr,
-                            long ord, float z) {
-                super(ord, z);
-                x = xVal; y = yVal;
-                png = mgr.ensureCached(sj);
-                scaledPng = sj;
-            }
-            @Override public void commit(PDPageContentStream stream) throws IOException {
-                // stream.drawImage(png, x, y);
-                XyDim dim = scaledPng.dimensions();
-                stream.drawImage(png, x, y, dim.width(), dim.height());
-            }
-        }
-
-        private static class DrawJpeg extends PdfItem {
-            private final float x, y;
-            private final PDImageXObject jpeg;
-            private final ScaledJpeg scaledJpeg;
-            private DrawJpeg(float xVal, float yVal, ScaledJpeg sj, PdfLayoutMgr mgr,
-                             long ord, float z) {
-                super(ord, z);
-                x = xVal; y = yVal;
-                jpeg = mgr.ensureCached(sj);
-                scaledJpeg = sj;
-            }
-            @Override public void commit(PDPageContentStream stream) throws IOException {
-                // stream.drawImage(jpeg, x, y);
-                XyDim dim = scaledJpeg.dimensions();
-                stream.drawImage(jpeg, x, y, dim.width(), dim.height());
-            }
-        }
     }
 
     private final List<PageBuffer> pages = new ArrayList<>();

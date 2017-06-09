@@ -202,7 +202,7 @@ public class LogicalPage { // AKA Document Section
         } else {
             final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
 
-            PdfLayoutMgr.PageBuffer currPage = pby1.pb;
+            PageBuffer currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
             float ya = topY, yb = 0;
@@ -261,7 +261,7 @@ public class LogicalPage { // AKA Document Section
             final float yDiff = y1 - y2;
             // totalY
 
-            PdfLayoutMgr.PageBuffer currPage = pby1.pb;
+            PageBuffer currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
             float xa = x1, ya = y1, xb = 0, yb = 0;
@@ -403,13 +403,13 @@ public class LogicalPage { // AKA Document Section
       */
     void borderStyledText(float xCoord, float yCoord, String text, TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        borderItems.add(new PdfLayoutMgr.PageBuffer.Text(xCoord, yCoord, text, s, borderOrd++,
-                                                         PdfItem.DEFAULT_Z_INDEX));
+        borderItems.add(new PageBuffer.Text(xCoord, yCoord, text, s, borderOrd++,
+                                            PdfItem.DEFAULT_Z_INDEX));
     }
 
     static class PageBufferAndY {
-        final PdfLayoutMgr.PageBuffer pb;
+        final PageBuffer pb;
         final float y;
-        PageBufferAndY(PdfLayoutMgr.PageBuffer p, float theY) { pb = p; y = theY; }
+        PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
     }
 }
