@@ -38,7 +38,8 @@ class PageBuffer {
     PageBuffer(int pn, Option<Fn1<Integer, Float>> pr) {
         pageNum = pn;
         xOff = pr.match(r -> r.apply(pageNum),
-                        () -> 0f); }
+                        () -> 0f);
+    }
 
     void fillRect(float x, float y, float width, float height, Color c, float zIdx) {
         items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
