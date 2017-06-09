@@ -166,25 +166,28 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
         return this;
     }
 
-    LogicalPage drawJpeg(float x, float y, ScaledJpeg sj) {
+    /** {@inheritDoc} */
+    @Override public LogicalPage drawJpeg(float x, float y, ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
         PageBufferAndY pby = mgr.appropriatePage(this, y);
         // draw image based on baseline and decrement y appropriately for image.
-        pby.pb.drawJpeg(x, pby.y, sj, mgr);
+        pby.pb.drawJpeg(x, pby.y, sj);
         return this;
     }
 
-    LogicalPage drawPng(float x, float y, ScaledPng sj) {
+    /** {@inheritDoc} */
+    @Override public LogicalPage drawPng(float x, float y, ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
         PageBufferAndY pby = mgr.appropriatePage(this, y);
         // draw image based on baseline and decrement y appropriately for image.
-        pby.pb.drawPng(x, pby.y, sj, mgr);
+        pby.pb.drawPng(x, pby.y, sj);
         return this;
     }
 
-    public LogicalPage drawRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
+    /** {@inheritDoc} */
+    @Override public LogicalPage fillRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
@@ -321,14 +324,14 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
         float maxHeight = maxDim.height();
 
         // render the row with that maxHeight.
-        cell.render(this, XyOffset.of(x, y), XyDim.of(cell.width(), maxHeight), false);
+        cell.render(this, XyOffset.of(x, y), XyDim.of(cell.width(), maxHeight));
 
         return XyOffset.of(x + wh.width(), y - wh.height());
     }
 
     public XyOffset drawTable(TableBuilder tb) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        return tb.render(this, tb.topLeft(), null, false);
+        return tb.render(this, tb.topLeft(), null);
     }
 
     /**
@@ -358,31 +361,32 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
         // render the row with that maxHeight.
         float x = initialX;
         for (Cell cell : cells) {
-            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight), false);
+            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight));
             x += cell.width();
         }
 
         return origY - maxHeight;
     }
 
-    /**
-     Header and footer in this case means anything that doesn't have to appear within the body
-     of the page.  Most commonly used for headers and footers, but could be watermarks, background
-     images, or anything outside the normal page flow.  I believe these get drawn first so
-     the body text will render over the top of them.  Items put here will *not* wrap to the next
-     page.
-
-     @param x the x-value on all pages (often set outside the normal margins)
-     @param origY the y-value on all pages (often set outside the normal margins)
-     @param cell the cell containing the styling and text to render
-     @return the bottom Y-value of the rendered cell (on all pages)
-     */
-    public float drawCellAsWatermark(float x, float origY, Cell cell) {
-        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        float outerWidth = cell.width();
-        XyDim innerDim = cell.calcDimensions(outerWidth);
-        return cell.render(this, XyOffset.of(x, origY), innerDim.width(outerWidth), true).y();
-    }
+//    /**
+//     Header and footer in this case means anything that doesn't have to appear within the body
+//     of the page.  Most commonly used for headers and footers, but could be watermarks, background
+//     images, or anything outside the normal page flow.  I believe these get drawn first so
+//     the body text will render over the top of them.  Items put here will *not* wrap to the next
+//     page.
+//
+//     @param x the x-value on all pages (often set outside the normal margins)
+//     @param origY the y-value on all pages (often set outside the normal margins)
+//     @param cell the cell containing the styling and text to render
+//     @return the bottom Y-value of the rendered cell (on all pages)
+//     */
+//    public float drawCellAsWatermark(float x, float origY, Cell cell) {
+//        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
+//        float outerWidth = cell.width();
+//        XyDim innerDim = cell.calcDimensions(outerWidth);
+//        PageBufferAndY pby = mgr.appropriatePage(this, origY);
+//        return cell.render(pby.pb, XyOffset.of(x, pby.y), innerDim.width(outerWidth)).y();
+//    }
 
     void commitBorderItems(PDPageContentStream stream) throws IOException {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }

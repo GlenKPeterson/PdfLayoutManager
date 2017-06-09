@@ -138,8 +138,7 @@ public class TableRowBuilder {
         return maxDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
-                           boolean allPages) {
+    public XyOffset render(RenderTarget lp, XyOffset outerTopLeft) {
         XyDim maxDim = XyDim.ZERO.height(minRowHeight);
         for (Cell cell : cells) {
             XyDim wh = cell.calcDimensions(cell.width());
@@ -153,7 +152,7 @@ public class TableRowBuilder {
 //            System.out.println("\t\tAbout to render cell: " + cell);
             // TODO: Cache the duplicate cell.calcDimensions call!!!
             cell.render(lp, XyOffset.of(x, outerTopLeft.y()),
-                        XyDim.of(cell.width(), maxHeight), allPages);
+                        XyDim.of(cell.width(), maxHeight));
             x += cell.width();
         }
         return XyOffset.of(x, outerTopLeft.y() - maxHeight);

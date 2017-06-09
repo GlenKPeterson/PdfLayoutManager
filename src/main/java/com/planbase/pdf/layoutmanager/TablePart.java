@@ -87,12 +87,11 @@ public class TablePart {
         return maxDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, boolean allPages) {
+    public XyOffset render(RenderTarget lp, XyOffset outerTopLeft) {
         XyOffset rightmostLowest = outerTopLeft;
         for (TableRowBuilder row : rows) {
 //            System.out.println("\tAbout to render row: " + row);
-            XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
-                                     allPages);
+            XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()));
             rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
                                           Math.min(rl.y(), rightmostLowest.y()));
         }

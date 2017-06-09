@@ -30,15 +30,17 @@ import java.util.TreeSet;
  you want automatic page-breaking.  PageBuffer is for when you want to force something onto a
  specific page only.
  */
-class PageBuffer implements RenderTarget {
+public class PageBuffer implements RenderTarget {
+    private final PdfLayoutMgr mgr;
     final int pageNum;
     // The x-offset for the body section of this page (left-margin-ish)
     private final float xOff;
     private long lastOrd = 0;
     private final Set<PdfItem> items = new TreeSet<>();
 
-    PageBuffer(int pn, Option<Fn2<Integer,PageBuffer,Float>> pr) {
+    PageBuffer(int pn, PdfLayoutMgr m, Option<Fn2<Integer,PageBuffer,Float>> pr) {
         pageNum = pn;
+        mgr = m;
         xOff = pr.match(r -> r.apply(pageNum, this),
                         () -> 0f);
     }
@@ -46,7 +48,11 @@ class PageBuffer implements RenderTarget {
     void fillRect(float x, float y, float width, float height, Color c, float zIdx) {
         items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
     }
-
+    /** {@inheritDoc} */
+    @Override public PageBuffer fillRect(XyOffset topLeft, XyDim dim, Color c) {
+        fillRect(topLeft.x(), topLeft.y(), dim.width(), dim.height(), c, -1);
+        return this;
+    }
 //        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
 //                             final float h) {
 //            fillRect(xVal, yVal, w, h, c, PdfItem.DEFAULT_Z_INDEX);
@@ -57,12 +63,18 @@ class PageBuffer implements RenderTarget {
 //            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
-    void drawJpeg(float x, float y, ScaledJpeg sj, PdfLayoutMgr mgr) {
+    /** {@inheritDoc} */
+    @Override
+    public PageBuffer drawJpeg(float x, float y, ScaledJpeg sj) {
         items.add(new DrawJpeg(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+        return this;
     }
 
-    void drawPng(float x, float y, ScaledPng sj, PdfLayoutMgr mgr) {
+    /** {@inheritDoc} */
+    @Override
+    public PageBuffer drawPng(float x, float y, ScaledPng sj) {
         items.add(new DrawPng(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
+        return this;
     }
 
     private void drawLine(float xa, float ya, float xb, float yb, LineStyle ls, float z) {

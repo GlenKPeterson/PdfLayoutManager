@@ -66,7 +66,9 @@ public class ScaledJpeg implements Renderable {
 
     public XyDim calcDimensions(float maxWidth) { return dimensions(); }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions, boolean allPages) {
+    /** {@inheritDoc} */
+    @Override
+    public XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions) {
         // use bottom of image for page-breaking calculation.
         float y = outerTopLeft.y() - height;
         lp.drawJpeg(outerTopLeft.x(), y, this);

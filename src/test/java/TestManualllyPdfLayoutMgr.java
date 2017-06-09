@@ -37,8 +37,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
+import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DOC_UNITS_PER_INCH;
 import static java.awt.Color.*;
+import static org.apache.pdfbox.pdmodel.common.PDRectangle.LETTER;
 
 public class TestManualllyPdfLayoutMgr {
 
@@ -253,15 +255,22 @@ public class TestManualllyPdfLayoutMgr {
         lp.commit();
 
         // More landscape pages
-        lp = pageMgr.logicalPageStart();
         TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(TOP_CENTER, null, null, null);
+        lp = pageMgr.logicalPageStart(LANDSCAPE,
+                                      (pageNum, pb) ->
+                                      {
+                                          Cell cell = Cell.of(pageHeadCellStyle, tableWidth,
+                                                              pageHeadTextStyle,
+                                                              "Test Logical Page Three" +
+                                                              " (physical page " + pageNum + ")");
 
-        lp.drawCellAsWatermark(pMargin, lp.yBodyTop() + 10,
-                               Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                       "Test Logical Page Three"));
-
-//        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
+                                          cell.render(pb, XyOffset.of(pMargin,
+                                                                      LETTER.getWidth() - 27),
+                                                      cell.calcDimensions(tableWidth)
+                                                          .width(tableWidth));
+                                          return 0f; // Don't offset whole page.
+                                      });
 
         // We're going to reset and reuse this y variable.
         float y = lp.yBodyTop();
@@ -456,11 +465,19 @@ public class TestManualllyPdfLayoutMgr {
 
         final LineStyle lineStyle = LineStyle.of(BLACK, 1);
 
-        lp = pageMgr.logicalPageStart();
-
-        lp.drawCellAsWatermark(pMargin, lp.yBodyTop() + 10,
-                               Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
-                                       "Test Logical Page Four"));
+        lp = pageMgr.logicalPageStart(LANDSCAPE,
+                                      (pageNum, pb) ->
+                                      {
+                                          Cell cell = Cell.of(pageHeadCellStyle, tableWidth,
+                                                              pageHeadTextStyle,
+                                                              "Test Logical Page Four " +
+                                                              " (physical page " + pageNum + ")");
+                                          cell.render(pb, XyOffset.of(pMargin,
+                                                                      LETTER.getWidth() - 27),
+                                                      cell.calcDimensions(tableWidth)
+                                                          .width(tableWidth));
+                                          return 0f; // Don't offset whole page.
+                                      });
 
         // Make a big 3-page X in a box.  Notice that we code it as though it's on one page, and the
         // API adds two more pages as needed.  This is a great test for how geometric shapes break

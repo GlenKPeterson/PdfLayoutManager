@@ -237,7 +237,7 @@ public class PdfLayoutMgr {
             y += lp.bodyHeight();
             idx++;
             if (pages.size() <= idx) {
-                pages.add(new PageBuffer(pages.size() + 1, pageReactor()));
+                pages.add(new PageBuffer(pages.size() + 1, this, pageReactor()));
             }
         }
         PageBuffer ps = pages.get(idx);
@@ -261,7 +261,7 @@ public class PdfLayoutMgr {
     public LogicalPage logicalPageStart(LogicalPage.Orientation o,
                                         Fn2<Integer,PageBuffer,Float> pr) {
         pageReactor = pr;
-        PageBuffer pb = new PageBuffer(pages.size() + 1, pageReactor());
+        PageBuffer pb = new PageBuffer(pages.size() + 1, this, pageReactor());
         pages.add(pb);
         return LogicalPage.of(this, o);
     }

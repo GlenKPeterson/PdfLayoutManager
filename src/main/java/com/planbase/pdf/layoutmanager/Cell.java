@@ -116,7 +116,7 @@ public class Cell implements Renderable {
     // public BorderStyle border() { return borderStyle; }
     public float width() { return width; }
 
-    private void calcDimensionsForReal(final float maxWidth) {
+    private void calcDimensionsForReal(float maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
         XyDim blockDim = XyDim.ZERO;
         Padding padding = cellStyle.padding();
@@ -137,7 +137,7 @@ public class Cell implements Renderable {
         preCalcRows.put(maxWidth, pcrs);
     }
 
-    private PreCalcRows ensurePreCalcRows(final float maxWidth) {
+    private PreCalcRows ensurePreCalcRows(float maxWidth) {
         PreCalcRows pcr = preCalcRows.get(maxWidth);
         if (pcr == null) {
             calcDimensionsForReal(maxWidth);
@@ -147,7 +147,7 @@ public class Cell implements Renderable {
     }
 
     /** {@inheritDoc} */
-    @Override public XyDim calcDimensions(final float maxWidth) {
+    @Override public XyDim calcDimensions(float maxWidth) {
         // I think zero or negative width cells might be OK to ignore.  I'd like to try to make
         // Text.calcDimensionsForReal() handle this situation before throwing an error here.
 //        if (maxWidth < 0) {
@@ -165,8 +165,8 @@ public class Cell implements Renderable {
 
     {@inheritDoc}
     */
-    @Override public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
-                                     final XyDim outerDimensions, boolean allPages) {
+    @Override
+    public XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions) {
 //        System.out.println("Cell.render(" + this.toString());
 //        new Exception().printStackTrace();
 
@@ -178,7 +178,7 @@ public class Cell implements Renderable {
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
 //            System.out.println("\tCell.render calling putRect...");
-            lp.drawRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
+            lp.fillRect(outerTopLeft, outerDimensions, cellStyle.bgColor());
 //            System.out.println("\tCell.render back from putRect");
         }
 
@@ -217,7 +217,7 @@ public class Cell implements Renderable {
             float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.width(), pcr.blockDim.width());
             outerLowerRight = row.render(lp,
                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset),
-                                         pcr.blockDim, allPages);
+                                         pcr.blockDim);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 

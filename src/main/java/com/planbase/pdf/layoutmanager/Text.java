@@ -175,8 +175,9 @@ public class Text implements Renderable {
         return ensureWrappedBlock(maxWidth).blockDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
-                           boolean allPages) {
+    /** {@inheritDoc} */
+    @Override public XyOffset render(RenderTarget lp, XyOffset outerTopLeft,
+                                     XyDim outerDimensions) {
 
 //        System.out.println("\tText.render(" + this.toString());
 //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
@@ -199,11 +200,11 @@ public class Text implements Renderable {
             //final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
 
             y -= textStyle.ascent();
-            if (allPages) {
-                lp.borderStyledText(x, y, wr.string, textStyle);
-            } else {
-                lp.drawStyledText(x, y, wr.string, textStyle);
-            }
+//            if (allPages) {
+//                lp.borderStyledText(x, y, wr.string, textStyle);
+//            } else {
+            lp.drawStyledText(x, y, wr.string, textStyle);
+//            }
             y -= textStyle.descent();
             y -= textStyle.leading();
         }

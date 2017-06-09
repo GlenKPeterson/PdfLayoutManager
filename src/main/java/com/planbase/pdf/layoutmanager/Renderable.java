@@ -25,13 +25,17 @@ public interface Renderable {
     should be cached because render() will likely be called with the same width (or at least one
     previously given widths).
      */
-    public XyDim calcDimensions(float maxWidth);
+    XyDim calcDimensions(float maxWidth);
 
     /**
      Only call this with a maxWidth that you have previously passed to calcDimensions.
      Renders item and all child-items with given width and returns the x-y pair of the
      lower-right-hand corner of the last line (e.g. of text).
+     @param lp the place to render to (either a single page, or logical collection of pages)
+     @param outerTopLeft the top-left position to render to
+     @param outerDimensions the width and height of the thing to render.
+     @return the bottom-right corner of the rendered result.  This is not necessarily
+     the same as topLeft + outerDimensions (it could be on a different page).
     */
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
-                           boolean allPages);
+    XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions);
 }
