@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.1-ALPHA</version>
+        <version>0.6.2-ALPHA</version>
     </dependency>
 ```
 
@@ -93,6 +93,16 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+TODO: Should LogicalPage and PageBuffer be renamed PageFlow and PageStatic?  PageGrouping and SinglePage?
+
+***0.6.2-ALPHA***
+ - All LogicalPage.put___ methods are now .draw___.
+ - PageBuffer is now public
+ - New interface RenderTarget now unifies LogicalPage and PageBuffer
+ - LogicalPage is for a grouping of logical pages where the contents spill from one page to the next.
+ - PageBuffer is a single physical page.  You can print off the paper, but it doesn't end up on a different page.
+ - LogicalPage.putCellAsHeaderFooter(...) is replaced by pageMgr.logicalPageStart(Orientation, Fn2<Integer,PageBuffer,Float>).
+
 ***0.6.1-ALPHA***
  - Added PdfLayoutMgr.loadTrueTypeFont() to give access to the PDFBox 2.0 improved font loading capabilities.
  - Changed TextStyle to take a PDFont instead of the more specific PDType1Font
