@@ -24,15 +24,23 @@ public class TestManual2 {
     @Test public void testBodyMargins() throws IOException {
         // Nothing happens without a PdfLayoutMgr.
         PdfLayoutMgr pageMgr = PdfLayoutMgr.of(PDDeviceRGB.INSTANCE, PDRectangle.A6);
+        float bodyWidth = PDRectangle.A6.getWidth() - 80f;
 
-        LogicalPage lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT, pageNum -> {
-            boolean isLeft = pageNum % 2 == 1;
+        LogicalPage lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT,
+                                                  (pageNum, pb) ->
+                                                  {
+                                                      boolean isLeft = pageNum % 2 == 1;
+                                                      float leftMargin = isLeft ? 37f : 45f;
 //            System.out.println("pageNum " + pageNum);
-            return isLeft ? 37f : 45f;
-        });
+                                                      pb.drawLine(leftMargin, 30f, leftMargin + bodyWidth, 30f,
+                                                                  LineStyle.of(BLACK));
+                                                      pb.drawStyledText(leftMargin, 20f, "Page # " + pageNum,
+                                                                        TextStyle.of(PDType1Font.HELVETICA, 9f, BLACK));
+                                                      return leftMargin;
+                                                  });
         lp.putCell(0, PDRectangle.A6.getHeight() - 40f,
                    Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), decode("#ccffcc"),
-                                        BorderStyle.of(DARK_GRAY)), PDRectangle.A6.getWidth() - 80f,
+                                        BorderStyle.of(DARK_GRAY)), bodyWidth,
                            Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
                                    mumble(50))));
         lp.commit();

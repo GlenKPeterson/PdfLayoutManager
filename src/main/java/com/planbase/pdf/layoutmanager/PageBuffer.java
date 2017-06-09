@@ -16,7 +16,7 @@ package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.organicdesign.fp.function.Fn1;
+import org.organicdesign.fp.function.Fn2;
 import org.organicdesign.fp.oneOf.Option;
 
 import java.awt.Color;
@@ -35,9 +35,9 @@ class PageBuffer {
     private long lastOrd = 0;
     private final Set<PdfItem> items = new TreeSet<>();
 
-    PageBuffer(int pn, Option<Fn1<Integer, Float>> pr) {
+    PageBuffer(int pn, Option<Fn2<Integer,PageBuffer,Float>> pr) {
         pageNum = pn;
-        xOff = pr.match(r -> r.apply(pageNum),
+        xOff = pr.match(r -> r.apply(pageNum, this),
                         () -> 0f);
     }
 

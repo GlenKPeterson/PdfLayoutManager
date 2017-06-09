@@ -25,7 +25,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.util.Matrix;
-import org.organicdesign.fp.function.Fn1;
+import org.organicdesign.fp.function.Fn2;
 import org.organicdesign.fp.oneOf.Option;
 
 import java.awt.image.BufferedImage;
@@ -164,7 +164,7 @@ public class PdfLayoutMgr {
     private final List<PageBuffer> pages = new ArrayList<>();
     private final PDDocument doc;
     // Just to start, takes a page number and returns an x-offset for that page.
-    private Fn1<Integer,Float> pageReactor = null;
+    private Fn2<Integer,PageBuffer,Float> pageReactor = null;
 
     // pages.size() counts the first page as 1, so 0 is the appropriate sentinel value
     private int unCommittedPageIdx = 0;
@@ -259,7 +259,7 @@ public class PdfLayoutMgr {
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public LogicalPage logicalPageStart(LogicalPage.Orientation o,
-                                        Fn1<Integer,Float> pr) {
+                                        Fn2<Integer,PageBuffer,Float> pr) {
         pageReactor = pr;
         PageBuffer pb = new PageBuffer(pages.size() + 1, pageReactor());
         pages.add(pb);
@@ -333,10 +333,10 @@ public class PdfLayoutMgr {
     }
 
     /** Sets the pageReactor function. */
-    public PdfLayoutMgr pageReactor(Fn1<Integer,Float> pr) { pageReactor = pr; return this; }
+    public PdfLayoutMgr pageReactor(Fn2<Integer,PageBuffer,Float> pr) { pageReactor = pr; return this; }
 
     /** Returns the pageReactor function. */
-    public Option<Fn1<Integer,Float>> pageReactor() {
+    public Option<Fn2<Integer,PageBuffer,Float>> pageReactor() {
         return pageReactor == null ? Option.none() : Option.of(pageReactor);
     }
 
