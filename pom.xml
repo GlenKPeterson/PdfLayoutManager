@@ -38,7 +38,7 @@ this directory like the following (you'll have to replace the question marks):
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
-	<version>0.6.2-ALPHA</version>
+	<version>0.6.3-ALPHA</version>
 	<packaging>jar</packaging>
 
 	<name>PdfLayoutManager</name>

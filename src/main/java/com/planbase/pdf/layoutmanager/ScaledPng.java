@@ -71,7 +71,7 @@ public class ScaledPng implements Renderable {
     public XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions) {
         // use bottom of image for page-breaking calculation.
         float y = outerTopLeft.y() - height;
-        lp.drawPng(outerTopLeft.x(), y, this);
+        y = lp.drawPng(outerTopLeft.x(), y, this);
         return XyOffset.of(outerTopLeft.x() + width, y);
     }
 }

@@ -71,7 +71,7 @@ public class ScaledJpeg implements Renderable {
     public XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions) {
         // use bottom of image for page-breaking calculation.
         float y = outerTopLeft.y() - height;
-        lp.drawJpeg(outerTopLeft.x(), y, this);
+        y = lp.drawJpeg(outerTopLeft.x(), y, this);
         return XyOffset.of(outerTopLeft.x() + width, y);
     }
 }

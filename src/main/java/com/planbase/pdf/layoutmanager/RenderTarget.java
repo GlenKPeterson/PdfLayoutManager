@@ -14,6 +14,7 @@ public interface RenderTarget {
      @param y1 first (upper) y-value
      @param x2 second x-value
      @param y2 second (lower or same) y-value
+     @return the updated RenderTarget (may be changed to return the lowest y-value instead)
      */
     RenderTarget drawLine(float x1, float y1, float x2, float y2, final LineStyle ls);
 
@@ -23,27 +24,27 @@ public interface RenderTarget {
      @param y the (bottom?) Y-value
      @param s the text
      @param textStyle the style
-     @return the updated RenderTarget
+     @return the updated RenderTarget (may be changed to return the lowest y-value instead)
      */
     RenderTarget drawStyledText(float x, float y, String s, TextStyle textStyle);
 
     /**
      Puts a jpeg on this RenderTarget
      @param x left offset
-     @param y bottom? offset
+     @param y bottom offset
      @param sj the jpeg image
-     @return the updated RenderTarget
+     @return the lowest y-value.
      */
-    RenderTarget drawJpeg(float x, float y, ScaledJpeg sj);
+    float drawJpeg(float x, float y, ScaledJpeg sj);
 
     /**
      Puts a png on this RenderTarget
      @param x left offset
-     @param y bottom? offset
+     @param y bottom offset
      @param sj the png image
-     @return the updated RenderTarget
+     @return the lowest y-value.
      */
-    RenderTarget drawPng(float x, float y, ScaledPng sj);
+    float drawPng(float x, float y, ScaledPng sj);
 
     /**
      Puts a colored rectangle on this RenderTarget.  There is no outline or border (that's drawn
@@ -51,7 +52,7 @@ public interface RenderTarget {
      @param topLeft exterior x and y values of the upper-left corner
      @param dim width and height (dimensions) of rectangle
      @param c color
-     @return the updated RenderTarget
+     @return the updated RenderTarget (may be changed to return the lowest y-value instead)
      */
     RenderTarget fillRect(XyOffset topLeft, XyDim dim, Color c);
 }

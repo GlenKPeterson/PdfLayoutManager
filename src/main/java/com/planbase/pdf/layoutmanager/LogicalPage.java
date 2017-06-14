@@ -141,6 +141,15 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
                         : mgr.pageDim().height();
     }
 
+//    /**
+//     Height of the entire page (in document units).  This is the long dimension for portrait,
+//     the short dimension for landscape.
+//     */
+//    public float pageHeight() {
+//        return portrait ? mgr.pageDim().height()
+//                        : mgr.pageDim().width();
+//    }
+
     /** The orientation of this logical page grouping */
     public Orientation orientation() {
         return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE;
@@ -161,29 +170,37 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
     /** {@inheritDoc} */
     @Override public LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        PageBufferAndY pby = mgr.appropriatePage(this, y);
+        PageBufferAndY pby = mgr.appropriatePage(this, y, 0);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
         return this;
     }
 
     /** {@inheritDoc} */
-    @Override public LogicalPage drawJpeg(float x, float y, ScaledJpeg sj) {
+    @Override public float drawJpeg(float x, float y, ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, y);
+        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.dimensions().height());
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawJpeg(x, pby.y, sj);
-        return this;
+        return y + pby.adj;
     }
 
     /** {@inheritDoc} */
-    @Override public LogicalPage drawPng(float x, float y, ScaledPng sj) {
+    @Override public float drawPng(float x, float y, ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, y);
+        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.dimensions().height());
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawPng(x, pby.y, sj);
-        return this;
+
+        // The y value is the distance from the bottom of the first page to the bottom of the image.
+        // We want to return the corrected version of the same distance.  On the first page, y is
+        // positive and needs no correction.  On subsequent pages it is negative and only needs
+        // correction if the image is requested to be outside of the bounds of the body section.
+        // In which case, we subtract just enough from the y value to bring it back into the body
+        // section.  The amount to subtract is yImageTop - yBodyTop using the y value from this page
+        // (pby.y).
+        return y + pby.adj;
     }
 
     /** {@inheritDoc} */
@@ -199,8 +216,8 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = mgr.appropriatePage(this, topY);
-        PageBufferAndY pby2 = mgr.appropriatePage(this, bottomY);
+        PageBufferAndY pby1 = mgr.appropriatePage(this, topY, 0);
+        PageBufferAndY pby2 = mgr.appropriatePage(this, bottomY, 0);
         if (pby1.equals(pby2)) {
             pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
         } else {
@@ -249,8 +266,8 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
 
         if (y1 < y2) { throw new IllegalStateException("y1 param must be >= y2 param"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
-        PageBufferAndY pby1 = mgr.appropriatePage(this, y1);
-        PageBufferAndY pby2 = mgr.appropriatePage(this, y2);
+        PageBufferAndY pby1 = mgr.appropriatePage(this, y1, 0);
+        PageBufferAndY pby2 = mgr.appropriatePage(this, y2, 0);
         if (pby1.equals(pby2)) {
             pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
         } else {
@@ -409,6 +426,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
     static class PageBufferAndY {
         final PageBuffer pb;
         final float y;
-        PageBufferAndY(PageBuffer p, float theY) { pb = p; y = theY; }
+        final float adj;
+        PageBufferAndY(PageBuffer p, float theY, float a) { pb = p; y = theY; adj = a; }
     }
 }

@@ -352,6 +352,7 @@ public class TestManualllyPdfLayoutMgr {
                                       ScaledJpeg.of(melonPic, 50, 50),
                                       ScaledJpeg.of(melonPic, 50, 50),
                                       ScaledJpeg.of(melonPic, 170, 100)))
+                          .add(regular, vec("Watermelon!"))
                           .build(),
                       Cell.builder(regularCell, colWidths[1])
                           .add(regular,

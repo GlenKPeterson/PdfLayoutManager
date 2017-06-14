@@ -32,21 +32,23 @@ public class Cell implements Renderable {
     private final float width;
 
     // A list of the contents.  It's pretty limiting to have one item per row.
-    private final List<Renderable> rows;
+    private final List<Renderable> contents;
 
-    private final Map<Float,PreCalcRows> preCalcRows = new HashMap<Float,PreCalcRows>(0);
+    // Caches XyDims for each content item, indexed by desired width (we only have to lay-out again
+    // when the width changes.
+    private final Map<Float,PreCalcAll> widthCache = new HashMap<Float,PreCalcAll>(0);
 
-    private static class PreCalcRow {
-        Renderable row;
-        XyDim blockDim;
-        public static PreCalcRow of(Renderable r, XyDim d) {
-            PreCalcRow pcr = new PreCalcRow(); pcr.row = r; pcr.blockDim = d; return pcr;
+    private static class PreCalc {
+        Renderable item;
+        XyDim dim;
+        public static PreCalc of(Renderable r, XyDim d) {
+            PreCalc pcr = new PreCalc(); pcr.item = r; pcr.dim = d; return pcr;
         }
     }
 
-    private static class PreCalcRows {
-        List<PreCalcRow> rows = new ArrayList<PreCalcRow>(1);
-        XyDim blockDim;
+    private static class PreCalcAll {
+        List<PreCalc> items = new ArrayList<PreCalc>(1);
+        XyDim totalDim;
     }
 
     private Cell(CellStyle cs, float w, List<Renderable> rs) {
@@ -58,7 +60,7 @@ public class Cell implements Renderable {
 //                throw new IllegalArgumentException("How am I supposed to render a null?");
 //            }
 //        }
-        cellStyle = cs; width = w; rows = rs;
+        cellStyle = cs; width = w; contents = rs;
     }
 
     /**
@@ -117,31 +119,31 @@ public class Cell implements Renderable {
     public float width() { return width; }
 
     private void calcDimensionsForReal(float maxWidth) {
-        PreCalcRows pcrs = new PreCalcRows();
+        PreCalcAll allCalc = new PreCalcAll();
         XyDim blockDim = XyDim.ZERO;
         Padding padding = cellStyle.padding();
         float innerWidth = maxWidth;
         if (padding != null) {
             innerWidth -= (padding.left() + padding.right());
         }
-        for (Renderable row : rows) {
-            XyDim rowDim = (row == null) ? XyDim.ZERO : row.calcDimensions(innerWidth);
+        for (Renderable item : contents) {
+            XyDim rowDim = (item == null) ? XyDim.ZERO : item.calcDimensions(innerWidth);
             blockDim = XyDim.of(Math.max(blockDim.width(), rowDim.width()),
                                 blockDim.height() + rowDim.height());
-//            System.out.println("\trow = " + row);
+//            System.out.println("\titem = " + item);
 //            System.out.println("\trowDim = " + rowDim);
 //            System.out.println("\tactualDim = " + actualDim);
-            pcrs.rows.add(PreCalcRow.of(row, rowDim));
+            allCalc.items.add(PreCalc.of(item, rowDim));
         }
-        pcrs.blockDim = blockDim;
-        preCalcRows.put(maxWidth, pcrs);
+        allCalc.totalDim = blockDim;
+        widthCache.put(maxWidth, allCalc);
     }
 
-    private PreCalcRows ensurePreCalcRows(float maxWidth) {
-        PreCalcRows pcr = preCalcRows.get(maxWidth);
+    private PreCalcAll ensurePreCalcRows(float maxWidth) {
+        PreCalcAll pcr = widthCache.get(maxWidth);
         if (pcr == null) {
             calcDimensionsForReal(maxWidth);
-            pcr = preCalcRows.get(maxWidth);
+            pcr = widthCache.get(maxWidth);
         }
         return pcr;
     }
@@ -153,9 +155,9 @@ public class Cell implements Renderable {
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
 //        }
-        XyDim blockDim = ensurePreCalcRows(maxWidth).blockDim;
+        XyDim blockDim = ensurePreCalcRows(maxWidth).totalDim;
         return ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
-//        System.out.println("Cell.calcDimensions(" + maxWidth + ") blockDim=" + blockDim +
+//        System.out.println("Cell.calcDimensions(" + maxWidth + ") dim=" + dim +
 //                           " returns " + ret);
     }
 
@@ -171,9 +173,9 @@ public class Cell implements Renderable {
 //        new Exception().printStackTrace();
 
         float maxWidth = outerDimensions.width();
-        PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
+        PreCalcAll pcrs = ensurePreCalcRows(maxWidth);
         final Padding padding = cellStyle.padding();
-        // XyDim outerDimensions = padding.addTo(pcrs.blockDim);
+        // XyDim outerDimensions = padding.addTo(pcrs.dim);
 
         // Draw background first (if necessary) so that everything else ends up on top of it.
         if (cellStyle.bgColor() != null) {
@@ -194,7 +196,7 @@ public class Cell implements Renderable {
 //            System.out.println("\tCell.render innerTopLeft after padding=" + innerTopLeft);
             innerDimensions = padding.subtractFrom(outerDimensions);
         }
-        XyDim wrappedBlockDim = pcrs.blockDim;
+        XyDim wrappedBlockDim = pcrs.totalDim;
 //        System.out.println("\tCell.render cellStyle.align()=" + cellStyle.align());
 //        System.out.println("\tCell.render outerDimensions=" + outerDimensions);
 //        System.out.println("\tCell.render padding=" + padding);
@@ -208,16 +210,17 @@ public class Cell implements Renderable {
         }
 
         XyOffset outerLowerRight = innerTopLeft;
-        for (int i = 0; i < rows.size(); i++) {
-            Renderable row = rows.get(i);
+        for (int i = 0; i < contents.size(); i++) {
+            Renderable row = contents.get(i);
             if (row == null) {
                 continue;
             }
-            PreCalcRow pcr = pcrs.rows.get(i);
-            float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.width(), pcr.blockDim.width());
+            PreCalc pcItem = pcrs.items.get(i);
+            float rowXOffset = cellStyle.align()
+                                        .leftOffset(wrappedBlockDim.width(), pcItem.dim.width());
             outerLowerRight = row.render(lp,
                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset),
-                                         pcr.blockDim);
+                                         pcItem.dim);
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
@@ -227,7 +230,24 @@ public class Cell implements Renderable {
             float origX = outerTopLeft.x();
             float origY = outerTopLeft.y();
             float rightX = outerTopLeft.x() + outerDimensions.width();
-            float bottomY = outerTopLeft.y() - outerDimensions.height();
+
+            // This breaks cell rows in order to fix rendering content after images that fall
+            // mid-page-break.  Math.min() below is so that when the contents overflow the bottom
+            // of the cell, we adjust the cell border downward to match.  We aren't doing the same
+            // for the background color, or for the rest of the row, so that's going to look bad.
+            //
+            // To fix these issues, I think we need to make that adjustment in the pre-calc instead
+            // of here.  Which means that the pre-calc needs to be aware of page breaking because
+            // the code that causes this adjustment is PdfLayoutMgr.appropriatePage().  So we
+            // probably need a fake version of that that doesn't cache anything for display on the
+            // page, then refactor backward from there until we enter this code with pre-corrected
+            // outerLowerRight and can get rid of Math.min.
+            //
+            // When we do that, we also want to check LogicalPage.drawJpeg() and .drawPng()
+            // to see if `return y + pby.adj;` still makes sense.
+            float bottomY = Math.min(outerTopLeft.y() - outerDimensions.height(),
+                                     outerLowerRight.y());
+
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
                 lp.drawLine(origX, origY, rightX, origY, border.top());
@@ -320,7 +340,7 @@ public class Cell implements Renderable {
             }
             return this;
         }
-//        public Builder add(Cell c) { rows.add(c); return this; }
+//        public Builder add(Cell c) { contents.add(c); return this; }
 
         public Cell build() { return new Cell(cellStyle, width, rows); }
 
@@ -329,14 +349,14 @@ public class Cell implements Renderable {
 
 // Replaced with TableRow.CellBuilder.buildCell()
 //        public TableRowBuilder buildCell() {
-//            Cell c = new Cell(cellStyle, width, rows);
+//            Cell c = new Cell(cellStyle, width, contents);
 //            return trb.addCell(c);
 //        }
 
         /** {@inheritDoc} */
         @Override public String toString() {
             StringBuilder sB = new StringBuilder("Cell.Builder(").append(cellStyle).append(" width=")
-                    .append(width).append(" rows=[");
+                    .append(width).append(" contents=[");
 
             for (int i = 0; (i < rows.size()) && (i < 3); i++) {
                 if (i > 0) { sB.append(" "); }
@@ -349,11 +369,11 @@ public class Cell implements Renderable {
     /** {@inheritDoc} */
     @Override public String toString() {
         StringBuilder sB = new StringBuilder("Cell(").append(cellStyle).append(" width=")
-                .append(width).append(" rows=[");
+                .append(width).append(" contents=[");
 
-        for (int i = 0; (i < rows.size()) && (i < 3); i++) {
+        for (int i = 0; (i < contents.size()) && (i < 3); i++) {
             if (i > 0) { sB.append(" "); }
-            sB.append(rows.get(i));
+            sB.append(contents.get(i));
         }
         return sB.append("])").toString();
     }

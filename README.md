@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.2-ALPHA</version>
+        <version>0.6.3-ALPHA</version>
     </dependency>
 ```
 
@@ -94,6 +94,10 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 Recent Changes
 ==============
 TODO: Should LogicalPage and PageBuffer be renamed PageFlow and PageStatic?  PageGrouping and SinglePage?
+
+***0.6.3-ALPHA***
+ - Forced body images on page breaks to fall entirely within the body of the next page.
+ Currently breaks multi-cell rows in tables that have this data condition (visible in the demo PDF).
 
 ***0.6.2-ALPHA***
  - All LogicalPage.put___ methods are now .draw___.

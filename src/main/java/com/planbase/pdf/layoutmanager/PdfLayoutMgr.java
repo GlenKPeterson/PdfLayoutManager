@@ -224,13 +224,12 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y) {
+    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y, float height) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been" +
                                             " created by calling newPage().");
         }
         int idx = unCommittedPageIdx;
-
         // Get the first possible page.  Just keep moving to the top of the next page until it's in
         // the printable area.
         while (y < lp.yBodyBottom()) {
@@ -241,7 +240,13 @@ public class PdfLayoutMgr {
             }
         }
         PageBuffer ps = pages.get(idx);
-        return new LogicalPage.PageBufferAndY(ps, y);
+        float adj = 0;
+        if (y + height > lp.yBodyTop()) {
+            float oldY = y;
+            y = lp.yBodyTop() - height;
+            adj = y - oldY;
+        }
+        return new LogicalPage.PageBufferAndY(ps, y, adj);
     }
 
     /**

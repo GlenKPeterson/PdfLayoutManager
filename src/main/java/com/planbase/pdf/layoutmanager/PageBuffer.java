@@ -65,16 +65,18 @@ public class PageBuffer implements RenderTarget {
 
     /** {@inheritDoc} */
     @Override
-    public PageBuffer drawJpeg(float x, float y, ScaledJpeg sj) {
+    public float drawJpeg(float x, float y, ScaledJpeg sj) {
         items.add(new DrawJpeg(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
-        return this;
+        // This does not account for a page break because this class represents a single page.
+        return sj.dimensions().height();
     }
 
     /** {@inheritDoc} */
     @Override
-    public PageBuffer drawPng(float x, float y, ScaledPng sj) {
+    public float drawPng(float x, float y, ScaledPng sj) {
         items.add(new DrawPng(x + xOff, y, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
-        return this;
+        // This does not account for a page break because this class represents a single page.
+        return sj.dimensions().height();
     }
 
     private void drawLine(float xa, float ya, float xb, float yb, LineStyle ls, float z) {
