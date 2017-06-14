@@ -89,6 +89,8 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 * replace `.yPageBottom()` with `.yBodyBottom()`
 * `xyDim.y()` is now `xyDim.height()` (replace manually)
 * `xyDim.x()` is now `xyDim.width()` (replace manually)
+* replace LogicalPage.Orientation with PdfLayoutMgr.Orientation
+* replace LogicalPage with PageGrouping
 * If you usee `cellbuilder.add()` and there are errors, try replacing with `.addStrs(`
 
 Recent Changes
