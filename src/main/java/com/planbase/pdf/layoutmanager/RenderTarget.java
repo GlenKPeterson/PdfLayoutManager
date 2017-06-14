@@ -3,8 +3,8 @@ package com.planbase.pdf.layoutmanager;
 import java.awt.Color;
 
 /**
- Represents something to be drawn to.  For page-breaking, use the {@link LogicalPage}
- implementation.  For a fixed, single page use the {@link PageBuffer} implementation.
+ Represents something to be drawn to.  For page-breaking, use the {@link PageGrouping}
+ implementation.  For a fixed, single page use the {@link SinglePage} implementation.
  */
 public interface RenderTarget {
     /**

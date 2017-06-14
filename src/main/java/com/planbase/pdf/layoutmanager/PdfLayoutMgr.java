@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.LANDSCAPE;
 
 /**
  <p>The main class in this package; it handles page and line breaks.</p>
@@ -47,14 +47,14 @@ import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
 <pre><code>// Create a new manager
 PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
-LogicalPage lp = pageMgr.logicalPageStart();
+PageGrouping lp = pageMgr.logicalPageStart();
 // defaults to Landscape orientation
 // call various lp.tableBuilder() or lp.put...() methods here.
 // They will page-break and create extra physical pages as needed.
 // ...
 lp.commit();
 
-lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
+lp = pageMgr.logicalPageStart(PORTRAIT);
 // These pages will be in Portrait orientation
 // call various lp methods to put things on the next page grouping
 // ...
@@ -71,6 +71,8 @@ pageMgr.save(os);</code></pre>
  and is NOT thread-safe!</p>
  */
 public class PdfLayoutMgr {
+
+    public enum Orientation { PORTRAIT, LANDSCAPE; }
 
     // private Logger logger = Logger.getLogger(PdfLayoutMgr.class);
 
@@ -103,6 +105,9 @@ public class PdfLayoutMgr {
      roughly one document unit.  This is a useful constant for page layout math.
      */
     public static final float DOC_UNITS_PER_INCH = 72f;
+    // Some printers need at least 1/2" of margin (36 "pixels") in order to accept a print job.
+    // This amount seems to accommodate all printers.
+    static final float DEFAULT_MARGIN = 37f;
 
 // TODO: add Sensible defaults, such as textStyle?
 //    private TextStyle textStyle;
@@ -161,10 +166,10 @@ public class PdfLayoutMgr {
         return temp;
     }
 
-    private final List<PageBuffer> pages = new ArrayList<>();
+    private final List<SinglePage> pages = new ArrayList<>();
     private final PDDocument doc;
     // Just to start, takes a page number and returns an x-offset for that page.
-    private Fn2<Integer,PageBuffer,Float> pageReactor = null;
+    private Fn2<Integer,SinglePage,Float> pageReactor = null;
 
     // pages.size() counts the first page as 1, so 0 is the appropriate sentinel value
     private int unCommittedPageIdx = 0;
@@ -173,7 +178,7 @@ public class PdfLayoutMgr {
     private final XyDim pageDim;
 //    private final PDRectangle pageSize;
 
-    List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
+    List<SinglePage> pages() { return Collections.unmodifiableList(pages); }
 
     private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) {
         doc = new PDDocument();
@@ -213,7 +218,7 @@ public class PdfLayoutMgr {
     /**
      Returns the width and height of the paper-size where THE HEIGHT IS ALWAYS THE LONGER DIMENSION.
      You may need to swap these for landscape: `pageDim().swapWh()`.  For this reason, it's not a
-     good idea to use this directly.  Use the corrected values through a {@link LogicalPage}
+     good idea to use this directly.  Use the corrected values through a {@link PageGrouping}
      instead.
      */
     XyDim pageDim() { return pageDim; }
@@ -224,7 +229,7 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y, float height) {
+    PageGrouping.PageBufferAndY appropriatePage(PageGrouping lp, float y, float height) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been" +
                                             " created by calling newPage().");
@@ -236,17 +241,17 @@ public class PdfLayoutMgr {
             y += lp.bodyHeight();
             idx++;
             if (pages.size() <= idx) {
-                pages.add(new PageBuffer(pages.size() + 1, this, pageReactor()));
+                pages.add(new SinglePage(pages.size() + 1, this, pageReactor()));
             }
         }
-        PageBuffer ps = pages.get(idx);
+        SinglePage ps = pages.get(idx);
         float adj = 0;
         if (y + height > lp.yBodyTop()) {
             float oldY = y;
             y = lp.yBodyTop() - height;
             adj = y - oldY;
         }
-        return new LogicalPage.PageBufferAndY(ps, y, adj);
+        return new PageGrouping.PageBufferAndY(ps, y, adj);
     }
 
     /**
@@ -263,26 +268,26 @@ public class PdfLayoutMgr {
      two or more physical pages) in the requested page orientation.
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public LogicalPage logicalPageStart(LogicalPage.Orientation o,
-                                        Fn2<Integer,PageBuffer,Float> pr) {
+    public PageGrouping logicalPageStart(Orientation o,
+                                         Fn2<Integer,SinglePage,Float> pr) {
         pageReactor = pr;
-        PageBuffer pb = new PageBuffer(pages.size() + 1, this, pageReactor());
+        SinglePage pb = new SinglePage(pages.size() + 1, this, pageReactor());
         pages.add(pb);
-        return LogicalPage.of(this, o);
+        return PageGrouping.of(this, o);
     }
 
     /**
      Tells this PdfLayoutMgr that you want to start a new logical page (which may be broken across
      two or more physical pages) in the requested page orientation.
      */
-    public LogicalPage logicalPageStart(LogicalPage.Orientation o) {
+    public PageGrouping logicalPageStart(Orientation o) {
         return logicalPageStart(o, null);
     }
 
     /**
      Get a new logical page (which may be broken across two or more physical pages) in Landscape orientation.
      */
-    public LogicalPage logicalPageStart() { return logicalPageStart(LANDSCAPE, null); }
+    public PageGrouping logicalPageStart() { return logicalPageStart(LANDSCAPE, null); }
 
     /**
      Loads a TrueType font (and embeds it into the document?) from the given file into a
@@ -301,7 +306,7 @@ public class PdfLayoutMgr {
 
      @throws IOException - if there is a failure writing to the underlying stream.
      */
-    void logicalPageEnd(LogicalPage lp) throws IOException {
+    void logicalPageEnd(PageGrouping lp) throws IOException {
 
         // Write out all uncommitted pages.
         while (unCommittedPageIdx < pages.size()) {
@@ -320,7 +325,7 @@ public class PdfLayoutMgr {
                 stream.setStrokingColor(colorSpace.getInitialColor());
                 stream.setNonStrokingColor(colorSpace.getInitialColor());
 
-                PageBuffer pb = pages.get(unCommittedPageIdx);
+                SinglePage pb = pages.get(unCommittedPageIdx);
                 pb.commit(stream);
                 lp.commitBorderItems(stream);
 
@@ -338,10 +343,13 @@ public class PdfLayoutMgr {
     }
 
     /** Sets the pageReactor function. */
-    public PdfLayoutMgr pageReactor(Fn2<Integer,PageBuffer,Float> pr) { pageReactor = pr; return this; }
+    public PdfLayoutMgr pageReactor(Fn2<Integer,SinglePage,Float> pr) {
+        pageReactor = pr;
+        return this;
+    }
 
     /** Returns the pageReactor function. */
-    public Option<Fn2<Integer,PageBuffer,Float>> pageReactor() {
+    public Option<Fn2<Integer,SinglePage,Float>> pageReactor() {
         return pageReactor == null ? Option.none() : Option.of(pageReactor);
     }
 

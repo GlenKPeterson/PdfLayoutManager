@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.security.SecureRandom;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_LEFT;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
 import static java.awt.Color.*;
 import static org.organicdesign.fp.StaticImports.vec;
 
@@ -32,18 +33,19 @@ public class TestManual2 {
         System.out.println(f.getAbsolutePath());
         BufferedImage graphPic = ImageIO.read(f);
 
-        LogicalPage lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT,
-                                                  (pageNum, pb) ->
-                                                  {
-                                                      boolean isLeft = pageNum % 2 == 1;
-                                                      float leftMargin = isLeft ? 37f : 45f;
+        PageGrouping lp = pageMgr.logicalPageStart(
+                PORTRAIT,
+                (pageNum, pb) ->
+                {
+                    boolean isLeft = pageNum % 2 == 1;
+                    float leftMargin = isLeft ? 37f : 45f;
 //            System.out.println("pageNum " + pageNum);
-                                                      pb.drawLine(leftMargin, 30f, leftMargin + bodyWidth, 30f,
-                                                                  LineStyle.of(BLACK));
-                                                      pb.drawStyledText(leftMargin, 20f, "Page # " + pageNum,
-                                                                        TextStyle.of(PDType1Font.HELVETICA, 9f, BLACK));
-                                                      return leftMargin;
-                                                  });
+                    pb.drawLine(leftMargin, 30f, leftMargin + bodyWidth, 30f,
+                                LineStyle.of(BLACK));
+                    pb.drawStyledText(leftMargin, 20f, "Page # " + pageNum,
+                                      TextStyle.of(PDType1Font.HELVETICA, 9f, BLACK));
+                    return leftMargin;
+                });
         lp.drawCell(0, PDRectangle.A6.getHeight() - 40f,
                     Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), decode("#ccffcc"),
                                          BorderStyle.of(DARK_GRAY)), bodyWidth,

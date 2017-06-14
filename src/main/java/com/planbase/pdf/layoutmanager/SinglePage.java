@@ -26,11 +26,11 @@ import java.util.TreeSet;
 
 /**
  Caches the contents of a specific, single page for later drawing.  Inner classes are what's added
- to the cache and what controlls the drawing.  You generally want to use {@link LogicalPage} when
- you want automatic page-breaking.  PageBuffer is for when you want to force something onto a
+ to the cache and what controlls the drawing.  You generally want to use {@link PageGrouping} when
+ you want automatic page-breaking.  SinglePage is for when you want to force something onto a
  specific page only.
  */
-public class PageBuffer implements RenderTarget {
+public class SinglePage implements RenderTarget {
     private final PdfLayoutMgr mgr;
     final int pageNum;
     // The x-offset for the body section of this page (left-margin-ish)
@@ -38,7 +38,7 @@ public class PageBuffer implements RenderTarget {
     private long lastOrd = 0;
     private final Set<PdfItem> items = new TreeSet<>();
 
-    PageBuffer(int pn, PdfLayoutMgr m, Option<Fn2<Integer,PageBuffer,Float>> pr) {
+    SinglePage(int pn, PdfLayoutMgr m, Option<Fn2<Integer,SinglePage,Float>> pr) {
         pageNum = pn;
         mgr = m;
         xOff = pr.match(r -> r.apply(pageNum, this),
@@ -49,7 +49,7 @@ public class PageBuffer implements RenderTarget {
         items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
     }
     /** {@inheritDoc} */
-    @Override public PageBuffer fillRect(XyOffset topLeft, XyDim dim, Color c) {
+    @Override public SinglePage fillRect(XyOffset topLeft, XyDim dim, Color c) {
         fillRect(topLeft.x(), topLeft.y(), dim.width(), dim.height(), c, -1);
         return this;
     }
@@ -84,7 +84,7 @@ public class PageBuffer implements RenderTarget {
     }
     /** {@inheritDoc} */
     @Override
-    public PageBuffer drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
+    public SinglePage drawLine(float xa, float ya, float xb, float yb, LineStyle ls) {
         drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
         return this;
     }
@@ -94,7 +94,7 @@ public class PageBuffer implements RenderTarget {
     }
     /** {@inheritDoc} */
     @Override
-    public PageBuffer drawStyledText(float x, float y, String text, TextStyle s) {
+    public SinglePage drawStyledText(float x, float y, String text, TextStyle s) {
         drawStyledText(x, y, text, s, PdfItem.DEFAULT_Z_INDEX);
         return this;
     }

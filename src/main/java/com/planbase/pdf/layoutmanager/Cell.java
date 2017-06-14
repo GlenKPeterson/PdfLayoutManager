@@ -243,7 +243,7 @@ public class Cell implements Renderable {
             // page, then refactor backward from there until we enter this code with pre-corrected
             // outerLowerRight and can get rid of Math.min.
             //
-            // When we do that, we also want to check LogicalPage.drawJpeg() and .drawPng()
+            // When we do that, we also want to check PageGrouping.drawJpeg() and .drawPng()
             // to see if `return y + pby.adj;` still makes sense.
             float bottomY = Math.min(outerTopLeft.y() - outerDimensions.height(),
                                      outerLowerRight.y());

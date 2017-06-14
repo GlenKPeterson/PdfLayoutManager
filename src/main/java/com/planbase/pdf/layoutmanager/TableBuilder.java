@@ -23,17 +23,17 @@ import java.util.List;
  * make this class easier to use.
  */
 public class TableBuilder implements Renderable {
-    private final LogicalPage logicalPage;
+    private final PageGrouping pageGrouping;
     private final XyOffset topLeft;
     private final List<Float> cellWidths = new ArrayList<Float>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(LogicalPage lp, XyOffset tl) {
-        logicalPage = lp; topLeft = tl;
+    private TableBuilder(PageGrouping lp, XyOffset tl) {
+        pageGrouping = lp; topLeft = tl;
     }
-    public static TableBuilder of(LogicalPage lp, XyOffset tl) {
+    public static TableBuilder of(PageGrouping lp, XyOffset tl) {
         return new TableBuilder(lp, tl);
     }
 
@@ -57,7 +57,7 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-    public XyOffset buildTable() { return logicalPage.drawTable(this); }
+    public XyOffset buildTable() { return pageGrouping.drawTable(this); }
 
     public XyDim calcDimensions(float maxWidth) {
         XyDim maxDim = XyDim.ZERO;

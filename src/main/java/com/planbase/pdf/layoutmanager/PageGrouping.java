@@ -1,5 +1,6 @@
 package com.planbase.pdf.layoutmanager;
 
+import com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
@@ -7,6 +8,10 @@ import java.awt.Color;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DEFAULT_MARGIN;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.LANDSCAPE;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
 
 /**
  <p>Maybe better called a "DocumentSection" this represents a group of Renderables that logically
@@ -54,15 +59,8 @@ import java.util.TreeSet;
 
  <p>Put header/footer content wherever you want.  We move the body as a unit as needed.</p>
  */
-public class LogicalPage implements RenderTarget { // AKA Document Section
-    // These can be made configurable some day.  But until then, they are named.
+public class PageGrouping implements RenderTarget { // AKA Document Section
 
-    public enum Orientation { PORTRAIT, LANDSCAPE; }
-
-    // Some printers need at least 1/2" of margin (36 "pixels") in order to accept a print job.
-    // This amount seems to accommodate all printers.
-    static final float DEFAULT_MARGIN = 37f;
-//    private static final XyOffset DEFAULT_OFFSET = XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN);
     private static final XyDim DEFAULT_DOUBLE_MARGIN_DIM =
             XyDim.of(DEFAULT_MARGIN * 2, DEFAULT_MARGIN * 2);
 
@@ -82,7 +80,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
      the start of the body area.
      @param bodyDim the dimensions of the body area.
      */
-    private LogicalPage(PdfLayoutMgr m, boolean p, XyOffset bodyOff, XyDim bodyDim) {
+    private PageGrouping(PdfLayoutMgr m, boolean p, XyOffset bodyOff, XyDim bodyDim) {
         mgr = m; portrait = p;
         bodyRect = new PDRectangle(bodyOff.x(), bodyOff.y(), bodyDim.width(), bodyDim.height());
     }
@@ -94,23 +92,23 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
      @param bodyOff the offset (in document units) from the lower-left hand corner of the page to
      the lower-left of the body area.
      @param bodyDim the dimensions of the body area.
-     @return a new LogicalPage with the given settings.
+     @return a new PageGrouping with the given settings.
      */
-    static LogicalPage of(PdfLayoutMgr m, Orientation orientation,
-                          XyOffset bodyOff, XyDim bodyDim) {
-        return new LogicalPage(m, orientation == Orientation.PORTRAIT, bodyOff, bodyDim);
+    static PageGrouping of(PdfLayoutMgr m, Orientation orientation,
+                           XyOffset bodyOff, XyDim bodyDim) {
+        return new PageGrouping(m, orientation == PORTRAIT, bodyOff, bodyDim);
     }
 
     /**
-     Create a LogicalPage with default margins for body top and bottom.
+     Create a PageGrouping with default margins for body top and bottom.
      @param m the PdfLayoutMgr you are using.
      @param orientation page orientation for this logical page grouping.
-     @return a new LogicalPage with the given settings.
+     @return a new PageGrouping with the given settings.
      */
-    static LogicalPage of(PdfLayoutMgr m, Orientation orientation) {
+    static PageGrouping of(PdfLayoutMgr m, Orientation orientation) {
 
         return of(m, orientation, XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN),
-                  (orientation == Orientation.PORTRAIT)
+                  (orientation == PORTRAIT)
                   ? m.pageDim().minus(DEFAULT_DOUBLE_MARGIN_DIM)
                   : m.pageDim().swapWh().minus(DEFAULT_DOUBLE_MARGIN_DIM));
     }
@@ -152,7 +150,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
 
     /** The orientation of this logical page grouping */
     public Orientation orientation() {
-        return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE;
+        return portrait ? PORTRAIT : LANDSCAPE;
     }
 
     public TableBuilder tableBuilder(XyOffset tl) {
@@ -168,7 +166,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
     }
 
     /** {@inheritDoc} */
-    @Override public LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
+    @Override public PageGrouping drawStyledText(float x, float y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         PageBufferAndY pby = mgr.appropriatePage(this, y, 0);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
@@ -204,7 +202,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
     }
 
     /** {@inheritDoc} */
-    @Override public LogicalPage fillRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
+    @Override public PageGrouping fillRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
@@ -223,7 +221,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
         } else {
             final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
 
-            PageBuffer currPage = pby1.pb;
+            SinglePage currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
             float ya = topY, yb = 0;
@@ -260,7 +258,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
 
     /** {@inheritDoc} */
     @Override
-    public LogicalPage drawLine(float x1, float y1, float x2, float y2, final LineStyle ls) {
+    public PageGrouping drawLine(float x1, float y1, float x2, float y2, final LineStyle ls) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        mgr.putLine(x1, y1, x2, y2, ls);
 
@@ -276,7 +274,7 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
             final float yDiff = y1 - y2;
             // totalY
 
-            PageBuffer currPage = pby1.pb;
+            SinglePage currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
             float xa = x1, ya = y1, xb = 0, yb = 0;
@@ -419,14 +417,14 @@ public class LogicalPage implements RenderTarget { // AKA Document Section
       */
     void borderStyledText(float xCoord, float yCoord, String text, TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        borderItems.add(new PageBuffer.Text(xCoord, yCoord, text, s, borderOrd++,
+        borderItems.add(new SinglePage.Text(xCoord, yCoord, text, s, borderOrd++,
                                             PdfItem.DEFAULT_Z_INDEX));
     }
 
     static class PageBufferAndY {
-        final PageBuffer pb;
+        final SinglePage pb;
         final float y;
         final float adj;
-        PageBufferAndY(PageBuffer p, float theY, float a) { pb = p; y = theY; adj = a; }
+        PageBufferAndY(SinglePage p, float theY, float a) { pb = p; y = theY; adj = a; }
     }
 }

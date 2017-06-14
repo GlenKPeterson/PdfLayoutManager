@@ -16,7 +16,7 @@ import com.planbase.pdf.layoutmanager.BorderStyle;
 import com.planbase.pdf.layoutmanager.Cell;
 import com.planbase.pdf.layoutmanager.CellStyle;
 import com.planbase.pdf.layoutmanager.LineStyle;
-import com.planbase.pdf.layoutmanager.LogicalPage;
+import com.planbase.pdf.layoutmanager.PageGrouping;
 import com.planbase.pdf.layoutmanager.Padding;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledJpeg;
@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.*;
-import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.LANDSCAPE;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DOC_UNITS_PER_INCH;
 import static java.awt.Color.*;
 import static org.apache.pdfbox.pdmodel.common.PDRectangle.LETTER;
@@ -63,11 +63,11 @@ public class TestManualllyPdfLayoutMgr {
         // a "pixel".
         final float pMargin = DOC_UNITS_PER_INCH / 2;
 
-        // A LogicalPage is a group of pages with the same settings.  When your contents scroll off
+        // A PageGrouping is a group of pages with the same settings.  When your contents scroll off
         // the bottom of a page, a new page is automatically created for you with the settings taken
         // from the LogicPage grouping. If you don't want a new page, be sure to stay within the
         // bounds of the current one!
-        LogicalPage lp = pageMgr.logicalPageStart();
+        PageGrouping lp = pageMgr.logicalPageStart();
 
         // Set up some useful constants for later.
         final float tableWidth = lp.pageWidth() - (2 * pMargin);
@@ -201,7 +201,7 @@ public class TestManualllyPdfLayoutMgr {
         lp.commit();
 
         // Let's do a portrait page now.  I just copied this from the previous page.
-        lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
+        lp = pageMgr.logicalPageStart(PdfLayoutMgr.Orientation.PORTRAIT);
         XyOffset xyOff = lp.tableBuilder(XyOffset.of(40f, lp.yBodyTop()))
           .addCellWidths(vec(120f, 120f, 120f))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))

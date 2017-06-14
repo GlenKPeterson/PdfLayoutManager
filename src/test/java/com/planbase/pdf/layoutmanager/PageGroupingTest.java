@@ -21,20 +21,19 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 
-import static com.planbase.pdf.layoutmanager.LogicalPage.DEFAULT_MARGIN;
-import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.LANDSCAPE;
-import static com.planbase.pdf.layoutmanager.LogicalPage.Orientation.PORTRAIT;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.DEFAULT_MARGIN;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.LANDSCAPE;
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
 import static org.apache.pdfbox.pdmodel.common.PDRectangle.A1;
 import static org.apache.pdfbox.pdmodel.common.PDRectangle.A6;
 import static org.apache.pdfbox.pdmodel.common.PDRectangle.LETTER;
 import static org.junit.Assert.assertEquals;
 
-public class LogicalPageTest {
+public class PageGroupingTest {
     @Test public void testBasics() throws IOException {
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
-        LogicalPage lp = pageMgr.logicalPageStart();
+        PageGrouping lp = pageMgr.logicalPageStart();
 
         // Just testing some default values before potentially merging changes that could make
         // these variable.
@@ -78,8 +77,8 @@ public class LogicalPageTest {
         float bottomM = 60f;
         // Make a new manager for a new test.
         pageMgr = PdfLayoutMgr.of(PDDeviceGray.INSTANCE, A6);
-        lp = LogicalPage.of(pageMgr, PORTRAIT, XyOffset.of(DEFAULT_MARGIN, bottomM),
-                            pageMgr.pageDim().minus(XyDim.of(DEFAULT_MARGIN * 2, topM + bottomM)));
+        lp = PageGrouping.of(pageMgr, PORTRAIT, XyOffset.of(DEFAULT_MARGIN, bottomM),
+                             pageMgr.pageDim().minus(XyDim.of(DEFAULT_MARGIN * 2, topM + bottomM)));
 
         assertEquals(A6.getHeight() - topM, lp.yBodyTop(), 0.000000001);
         assertEquals(bottomM, lp.yBodyBottom(), 0.000000001);
@@ -92,8 +91,8 @@ public class LogicalPageTest {
 
         // Make a new manager for a new test.
         pageMgr = PdfLayoutMgr.of(PDDeviceGray.INSTANCE, A6);
-        lp = LogicalPage.of(pageMgr, LANDSCAPE, XyOffset.of(DEFAULT_MARGIN, bottomM),
-                            pageMgr.pageDim().swapWh()
+        lp = PageGrouping.of(pageMgr, LANDSCAPE, XyOffset.of(DEFAULT_MARGIN, bottomM),
+                             pageMgr.pageDim().swapWh()
                                    .minus(XyDim.of(DEFAULT_MARGIN * 2, topM + bottomM)));
 
         assertEquals(A6.getWidth() - topM, lp.yBodyTop(), 0.000000001);
