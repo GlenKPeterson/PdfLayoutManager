@@ -1,6 +1,8 @@
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
+import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceCMYK;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,16 +16,20 @@ import java.util.regex.Pattern;
 final class Utils {
     private Utils() { throw new UnsupportedOperationException("No instances!"); }
 
-    public static String toString(Color c) {
-        if (c == null) { return "null"; }
-        return new StringBuilder("#").append(twoDigitHex(c.getRed()))
-                .append(twoDigitHex(c.getGreen()))
-                .append(twoDigitHex(c.getBlue())).toString();
-    }
-    public static String twoDigitHex(int i) {
-        String h = Integer.toHexString(i);
-        return (h.length() < 2) ? "0" + h : h;
-    }
+    public static final PDColor CMYK_BLACK = new PDColor(new float[] {0, 0, 0, 1}, PDDeviceCMYK.INSTANCE);
+    public static final PDColor CMYK_WHITE = new PDColor(new float[] {0, 0, 0, 0}, PDDeviceCMYK.INSTANCE);
+
+
+//    public static String toString(PDColor c) {
+//        if (c == null) { return "null"; }
+//        return new StringBuilder("#").append(twoDigitHex(c.getRed()))
+//                .append(twoDigitHex(c.getGreen()))
+//                .append(twoDigitHex(c.getBlue())).toString();
+//    }
+//    public static String twoDigitHex(int i) {
+//        String h = Integer.toHexString(i);
+//        return (h.length() < 2) ? "0" + h : h;
+//    }
 //    public static void println(CharSequence cs) { System.out.println(cs); }
 
     public static boolean equals(Object o1, Object o2) {

@@ -1,6 +1,6 @@
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 
 /**
  Represents something to be drawn to.  For page-breaking, use the {@link PageGrouping}
@@ -54,5 +54,5 @@ public interface RenderTarget {
      @param c color
      @return the updated RenderTarget (may be changed to return the lowest y-value instead)
      */
-    RenderTarget fillRect(XyOffset topLeft, XyDim dim, Color c);
+    RenderTarget fillRect(XyOffset topLeft, XyDim dim, PDColor c);
 }

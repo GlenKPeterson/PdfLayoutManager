@@ -369,7 +369,7 @@ public class PdfLayoutMgr {
         return doc.hashCode() + pages.hashCode();
     }
 
-//    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
+//    public XyOffset putRect(XyOffset outerTopLeft, XyDim outerDimensions, final PDColor c) {
 ////        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 ////                           Utils.toString(c) + ")");
 //        putRect(outerTopLeft.x(), outerTopLeft.y(), outerDimensions.x(), outerDimensions.y(), c);

@@ -14,7 +14,7 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 
 /**
  Represents the color and width of a line.  DashStyle (and maybe capStyle or joinStyle?) could be
@@ -23,10 +23,10 @@ import java.awt.Color;
 public class LineStyle {
     public static final float DEFAULT_WIDTH = 1;
 
-    private final Color color;
+    private final PDColor color;
     private final float width;
 
-    private LineStyle(Color c, float w) {
+    private LineStyle(PDColor c, float w) {
         if (c == null) { throw new IllegalArgumentException("Line Style must have a color."); }
         if (w <= 0) {
             throw new IllegalArgumentException("Line Style must have a positive width.");
@@ -34,11 +34,11 @@ public class LineStyle {
         color = c; width = w;
     }
     /** Factory method */
-    public static LineStyle of(Color c, float w) { return new LineStyle(c, w); }
+    public static LineStyle of(PDColor c, float w) { return new LineStyle(c, w); }
 
-    public static LineStyle of(Color c) { return new LineStyle(c, DEFAULT_WIDTH); }
+    public static LineStyle of(PDColor c) { return new LineStyle(c, DEFAULT_WIDTH); }
 
-    public Color color() { return color; }
+    public PDColor color() { return color; }
     public float width() { return width; }
 
     @Override
@@ -64,6 +64,6 @@ public class LineStyle {
     }
 
     @Override public String toString() {
-        return "LineStyle(" + Utils.toString(color) + " w=" + width + ")";
+        return "LineStyle(c=" + color + " w=" + width + ")";
     }
 }

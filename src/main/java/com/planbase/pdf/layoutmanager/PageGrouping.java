@@ -4,7 +4,7 @@ import com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -202,7 +202,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
     }
 
     /** {@inheritDoc} */
-    @Override public PageGrouping fillRect(XyOffset outerTopLeft, XyDim outerDimensions, Color c) {
+    @Override public PageGrouping fillRect(XyOffset outerTopLeft, XyDim outerDimensions, PDColor c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");

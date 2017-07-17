@@ -14,7 +14,7 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 
 // TODO: This class should at least allow the user to provide LineStyles instead of colors and widths directly.
 
@@ -26,7 +26,7 @@ import java.awt.Color;
  instead.  This class works just like styles in CSS in terms of specifying one style, then
  overwriting it with another.  This example sets all borders except to black and the default width,
  then removes the top border:
- <pre><code>BorderStyle topBorderStyle = BorderStyle.builder().color(Color.BLACK)
+ <pre><code>BorderStyle topBorderStyle = BorderStyle.builder().color(PDColor.BLACK)
                                                   .width(LineStyle.DEFAULT_WIDTH)
                                                   .top(null, 0).build();</code></pre>
  If neighboring cells in a cell-row have the same border, only one will be printed.  If different,
@@ -65,7 +65,7 @@ public class BorderStyle {
 
         /** Sets top, right, bottom, and left color */
         @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-        private Builder color(Color c) {
+        private Builder color(PDColor c) {
             if (top == null) {
                 top = LineStyle.of(c);
             } else if (!Utils.equals(top.color(), c)) {
@@ -116,7 +116,7 @@ public class BorderStyle {
         left = b.left;
     }
 
-    private BorderStyle(Color c, float w) {
+    private BorderStyle(PDColor c, float w) {
         LineStyle style = LineStyle.of(c, w);
         top = style;
         right = style;
@@ -130,7 +130,7 @@ public class BorderStyle {
      @param w the width of the border.
      @return a new immutable border object
      */
-    public static BorderStyle of(Color c, float w) {
+    public static BorderStyle of(PDColor c, float w) {
         return new BorderStyle(c, w);
     }
 
@@ -139,7 +139,7 @@ public class BorderStyle {
      @param c the border color
      @return a new immutable border object with default width
      */
-    public static BorderStyle of(Color c) {
+    public static BorderStyle of(PDColor c) {
         return new BorderStyle(c, LineStyle.DEFAULT_WIDTH);
     }
 

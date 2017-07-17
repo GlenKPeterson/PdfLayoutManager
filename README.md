@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.3-ALPHA</version>
+        <version>0.6.4-ALPHA</version>
     </dependency>
 ```
 
@@ -92,9 +92,12 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 * replace LogicalPage.Orientation with PdfLayoutMgr.Orientation
 * replace LogicalPage with PageGrouping
 * If you usee `cellbuilder.add()` and there are errors, try replacing with `.addStrs(`
+* Replace all java.awt.Color with org.apache.pdfbox.pdmodel.graphics.color.PDColor.  Yeah, really.
 
 Recent Changes
 ==============
+***0.6.4-ALPHA***
+ - Changed from java.awt.Color to org.apache.pdfbox.pdmodel.graphics.color.PDColor.  Java Color was nasty to use with CMYK. 
 
 ***0.6.3-ALPHA***
  - Forced body images on page breaks to fall entirely within the body of the next page.

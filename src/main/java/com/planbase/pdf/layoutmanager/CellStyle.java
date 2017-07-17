@@ -14,7 +14,7 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 
 /**
  The style of a cell including: horizontal alignment, padding, background color, and border style.
@@ -128,21 +128,21 @@ public class CellStyle {
 
     private final Align align;
     private final Padding padding;
-    private final Color bgColor;
+    private final PDColor bgColor;
     private final BorderStyle borderStyle; // Only for cell-style
 
-    private CellStyle(Align a, Padding p, Color bg, BorderStyle b) {
+    private CellStyle(Align a, Padding p, PDColor bg, BorderStyle b) {
         align = a; padding = p; bgColor = bg; // I think it's OK if this is null.
         borderStyle = b;
     }
 
-    public static CellStyle of(Align a, Padding p, Color bg, BorderStyle b) {
+    public static CellStyle of(Align a, Padding p, PDColor bg, BorderStyle b) {
         return builder().align(a).padding(p).bgColor(bg).borderStyle(b).build();
     }
 
     public Align align() { return align; }
     public Padding padding() { return padding; }
-    public Color bgColor() { return bgColor; }
+    public PDColor bgColor() { return bgColor; }
     public BorderStyle borderStyle() { return borderStyle; }
 
     // NOTE: This lincluded the padding!
@@ -155,7 +155,7 @@ public class CellStyle {
 
     public CellStyle align(Align a) { return new Builder(this).align(a).build(); }
     public CellStyle padding(Padding p) { return new Builder(this).padding(p).build(); }
-    public CellStyle bgColor(Color c) { return new Builder(this).bgColor(c).build(); }
+    public CellStyle bgColor(PDColor c) { return new Builder(this).bgColor(c).build(); }
     public CellStyle borderStyle(BorderStyle bs) {
         return new Builder(this).borderStyle(bs).build();
     }
@@ -171,7 +171,7 @@ public class CellStyle {
     public static class Builder {
         private Align align;
         private Padding padding;
-        private Color bgColor;
+        private PDColor bgColor;
         private BorderStyle borderStyle; // Only for cell-style
 
         private Builder() {}
@@ -188,7 +188,7 @@ public class CellStyle {
 
             if ( (align == DEFAULT_ALIGN) &&
                  (padding == Padding.DEFAULT_TEXT_PADDING) &&
-                 ((bgColor == null) || bgColor.equals(Color.WHITE)) &&
+                 (bgColor == null) &&
                  ((borderStyle == null) || (borderStyle == BorderStyle.NO_BORDERS)) ) {
                 return DEFAULT;
             }
@@ -202,14 +202,14 @@ public class CellStyle {
 //        public Builder alignRight() { align = HorizAlign.RIGHT; return this; }
 
         public Builder padding(Padding p) { padding = p; return this; }
-        public Builder bgColor(Color c) { bgColor = c; return this; }
+        public Builder bgColor(PDColor c) { bgColor = c; return this; }
         public Builder borderStyle(BorderStyle bs) { borderStyle = bs; return this; }
     }
 
     @Override public String toString() {
         StringBuilder sB = new StringBuilder("CellStyle(").append(align);
         if (padding != null) { sB.append(" ").append(padding); }
-        if (bgColor != null) { sB.append(" ").append(Utils.toString(bgColor)); }
+        if (bgColor != null) { sB.append(" ").append(bgColor); }
         if (borderStyle != null) { sB.append(" ").append(borderStyle); }
         return sB.append(")").toString();
     }

@@ -14,7 +14,7 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 import java.io.IOException;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -27,7 +27,7 @@ Specifies font, font-size, color, and padding.  Immutable.
 public class TextStyle {
 
     private final PDFont font;
-    private final Color textColor;
+    private final PDColor textColor;
     private final float fontSize;
 
     private final float avgCharWidth;
@@ -37,9 +37,8 @@ public class TextStyle {
     private final float descent;
     private final float leading;
 
-    private TextStyle(PDFont f, float sz, Color tc, float leadingFactor) {
+    private TextStyle(PDFont f, float sz, PDColor tc, float leadingFactor) {
         if (f == null) { throw new IllegalArgumentException("Font must not be null"); }
-        if (tc == null) { tc = Color.BLACK; }
 
         font = f; textColor = tc; fontSize = sz;
         // Somewhere it says that font units are 1000 times page units, but my tests with
@@ -68,7 +67,7 @@ public class TextStyle {
     }
 
     /** Creates a TextStyle with the given font, size, color, and a leadingFactor of 0.5. */
-    public static TextStyle of(PDFont f, float sz, Color tc) {
+    public static TextStyle of(PDFont f, float sz, PDColor tc) {
         return new TextStyle(f, sz, tc, 0.5f);
     }
 
@@ -79,7 +78,7 @@ public class TextStyle {
      A leadingFactor of 1 will result of a leading equal to the descent, while a leadingFactor
      of 2 will result of a leading equal to twice the descent etc...
      */
-    public static TextStyle of(PDFont f, float sz, Color tc, float leadingFactor) {
+    public static TextStyle of(PDFont f, float sz, PDColor tc, float leadingFactor) {
         return new TextStyle(f, sz, tc, leadingFactor);
     }
 
@@ -101,8 +100,8 @@ public class TextStyle {
     public PDFont font() { return font; }
     public float fontSize() { return fontSize; }
 
-    public Color textColor() { return textColor; }
-    public TextStyle textColor(Color c) { return TextStyle.of(font, fontSize, c); }
+    public PDColor textColor() { return textColor; }
+    public TextStyle textColor(PDColor c) { return TextStyle.of(font, fontSize, c); }
     /**
      Average character width (for this font, or maybe guessed) as a positive number in document
      units

@@ -19,7 +19,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.organicdesign.fp.function.Fn2;
 import org.organicdesign.fp.oneOf.Option;
 
-import java.awt.Color;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -45,15 +45,15 @@ public class SinglePage implements RenderTarget {
                         () -> 0f);
     }
 
-    void fillRect(float x, float y, float width, float height, Color c, float zIdx) {
+    void fillRect(float x, float y, float width, float height, PDColor c, float zIdx) {
         items.add(new FillRect(x + xOff, y, width, height, c, lastOrd++, zIdx));
     }
     /** {@inheritDoc} */
-    @Override public SinglePage fillRect(XyOffset topLeft, XyDim dim, Color c) {
+    @Override public SinglePage fillRect(XyOffset topLeft, XyDim dim, PDColor c) {
         fillRect(topLeft.x(), topLeft.y(), dim.width(), dim.height(), c, -1);
         return this;
     }
-//        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
+//        public void fillRect(final float xVal, final float yVal, final float w, final PDColor c,
 //                             final float h) {
 //            fillRect(xVal, yVal, w, h, c, PdfItem.DEFAULT_Z_INDEX);
 //        }
@@ -124,8 +124,8 @@ public class SinglePage implements RenderTarget {
 
     private static class FillRect extends PdfItem {
         private final float x, y, width, height;
-        private final Color color;
-        private FillRect(float xVal, float yVal, float w, float h, Color c, long ord, float z) {
+        private final PDColor color;
+        private FillRect(float xVal, float yVal, float w, float h, PDColor c, long ord, float z) {
             super(ord, z);
             x = xVal; y = yVal; width = w; height = h; color = c;
         }

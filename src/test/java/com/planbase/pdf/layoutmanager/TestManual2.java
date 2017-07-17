@@ -2,7 +2,8 @@ package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
+import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceCMYK;
 import org.junit.Test;
 import org.organicdesign.fp.collections.ImList;
 
@@ -16,7 +17,7 @@ import java.security.SecureRandom;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_LEFT;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
-import static java.awt.Color.*;
+import static com.planbase.pdf.layoutmanager.Utils.CMYK_BLACK;
 import static org.organicdesign.fp.StaticImports.vec;
 
 /**
@@ -24,9 +25,13 @@ import static org.organicdesign.fp.StaticImports.vec;
  */
 public class TestManual2 {
 
+    public static final PDColor CMYK_DARK_GRAY = new PDColor(new float[] {0, 0, 0, 0.2f}, PDDeviceCMYK.INSTANCE);
+    public static final PDColor CMYK_LIGHT_GREEN = new PDColor(new float[] {0.05f, 0, 0.1f, 0.01f}, PDDeviceCMYK.INSTANCE);
+
     @Test public void testBodyMargins() throws IOException {
         // Nothing happens without a PdfLayoutMgr.
-        PdfLayoutMgr pageMgr = PdfLayoutMgr.of(PDDeviceRGB.INSTANCE, PDRectangle.A6);
+        PdfLayoutMgr pageMgr = PdfLayoutMgr.of(PDDeviceCMYK.INSTANCE, PDRectangle.A6);
+
         float bodyWidth = PDRectangle.A6.getWidth() - 80f;
 
         File f = new File("target/test-classes/graph2.png");
@@ -41,15 +46,15 @@ public class TestManual2 {
                     float leftMargin = isLeft ? 37f : 45f;
 //            System.out.println("pageNum " + pageNum);
                     pb.drawLine(leftMargin, 30f, leftMargin + bodyWidth, 30f,
-                                LineStyle.of(BLACK));
+                                LineStyle.of(CMYK_BLACK));
                     pb.drawStyledText(leftMargin, 20f, "Page # " + pageNum,
-                                      TextStyle.of(PDType1Font.HELVETICA, 9f, BLACK));
+                                      TextStyle.of(PDType1Font.HELVETICA, 9f, CMYK_BLACK));
                     return leftMargin;
                 });
         lp.drawCell(0, PDRectangle.A6.getHeight() - 40f,
-                    Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), decode("#ccffcc"),
-                                         BorderStyle.of(DARK_GRAY)), bodyWidth,
-                            vec(Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
+                    Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), CMYK_LIGHT_GREEN,
+                                         BorderStyle.of(CMYK_DARK_GRAY)), bodyWidth,
+                            vec(Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The long families needed the national " +
                                         "words and women said new. The new " +
                                         "companies told the possible hands " +
@@ -62,7 +67,7 @@ public class TestManual2 {
                                         "places got free. The able homes said " +
                                         "the better work and cases went free."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
+                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The hard eyes seemed the clear " +
                                         "mothers and systems came economic. " +
                                         "The high months showed the possible " +
@@ -76,7 +81,7 @@ public class TestManual2 {
                                         "the good governments and cases " +
                                         "lived social."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
+                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The social people ran the " +
                                         "local cases and men left local. The " +
                                         "easy areas saw the whole times and " +
@@ -95,7 +100,7 @@ public class TestManual2 {
                                         "international men kept the real " +
                                         "questions and nights made big."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, BLACK),
+                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The " +
                                         "best points got the economic waters " +
                                         "and problems gave great. The whole " +
