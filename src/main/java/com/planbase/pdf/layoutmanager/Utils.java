@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Holds utility functions.
  */
-final class Utils {
+public final class Utils {
     private Utils() { throw new UnsupportedOperationException("No instances!"); }
 
     public static final PDColor CMYK_BLACK = new PDColor(new float[] {0, 0, 0, 1}, PDDeviceCMYK.INSTANCE);
@@ -32,17 +32,17 @@ final class Utils {
 //    }
 //    public static void println(CharSequence cs) { System.out.println(cs); }
 
-    public static boolean equals(Object o1, Object o2) {
+    static boolean equals(Object o1, Object o2) {
         return (o1 == o2) ||
                 ((o1 != null) && o1.equals(o2));
     }
 
-    public static int floatHashCode(float value) {
+    static int floatHashCode(float value) {
         return Float.floatToIntBits(value);
     }
 
     private static final String ISO_8859_1 = "ISO_8859_1";
-    private static final String UNICODE_BULLET = "\u2022";
+    public static final String BULLET_CHAR = "\u2022";
 
     // PDFBox uses an encoding that the PDF spec calls WinAnsiEncoding.  The spec says this is
     // Windows Code Page 1252.
@@ -341,7 +341,7 @@ final class Utils {
             tempMap.put("\u201E", new String(new byte[]{0,(byte)132},ISO_8859_1)); // Low right double quote.
             tempMap.put("\u2020", new String(new byte[]{0,(byte)134},ISO_8859_1)); // Dagger
             tempMap.put("\u2021", new String(new byte[]{0,(byte)135},ISO_8859_1)); // Double dagger
-            tempMap.put(UNICODE_BULLET, new String(new byte[]{0,(byte)149},ISO_8859_1)); // Bullet - use this as replacement character.
+            tempMap.put(BULLET_CHAR, new String(new byte[]{0, (byte)149}, ISO_8859_1)); // Bullet - use this as replacement character.
             tempMap.put("\u2026", new String(new byte[]{0,(byte)133},ISO_8859_1)); // Ellipsis
             tempMap.put("\u2030", new String(new byte[]{0,(byte)137},ISO_8859_1)); // Permille
             tempMap.put("\u2039", new String(new byte[]{0,(byte)139},ISO_8859_1)); // Left angle-quote
@@ -414,7 +414,7 @@ final class Utils {
             // WinAnsi character set, so that's what I'll use it for.  It looks tons better than
             // nullnullnull...
             if (s == null) {
-                s = utf16ToWinAnsi.get(UNICODE_BULLET);
+                s = utf16ToWinAnsi.get(BULLET_CHAR);
             }
             sB.append(s);
 

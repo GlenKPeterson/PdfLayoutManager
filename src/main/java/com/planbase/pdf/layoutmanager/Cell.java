@@ -60,7 +60,8 @@ public class Cell implements Renderable {
 //                throw new IllegalArgumentException("How am I supposed to render a null?");
 //            }
 //        }
-        cellStyle = cs; width = w; contents = rs;
+        cellStyle = (cs == null) ? CellStyle.DEFAULT : cs;
+        width = w; contents = rs;
     }
 
     /**

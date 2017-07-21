@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.5-ALPHA</version>
+        <version>0.6.6-ALPHA</version>
     </dependency>
 ```
 
@@ -96,6 +96,11 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***0.6.6-ALPHA***
+ - Make sure Cells get their default style if none is specified (avoids a NPE).
+ - Moved TestManual2 to no-package so it will prove that everything it needs is public.
+ - Added example of putting a whole Table within a cell in order to add bullets.
+
 ***0.6.5-ALPHA***
  - TableBuilder now produces a Table which you can call render() on.
  Instead of starting with logicalPage.tableBuilder(topLeft) or TableBuilder.of(logicalPage, topLeft), just start with TableBuilder.of().

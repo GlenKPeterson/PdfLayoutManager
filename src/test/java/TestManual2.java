@@ -1,5 +1,28 @@
-package com.planbase.pdf.layoutmanager;
+// Copyright 2017-07-21 PlanBase Inc. & Glen Peterson
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
+import com.planbase.pdf.layoutmanager.BorderStyle;
+import com.planbase.pdf.layoutmanager.Cell;
+import com.planbase.pdf.layoutmanager.CellStyle;
+import com.planbase.pdf.layoutmanager.LineStyle;
+import com.planbase.pdf.layoutmanager.Padding;
+import com.planbase.pdf.layoutmanager.PageGrouping;
+import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
+import com.planbase.pdf.layoutmanager.ScaledPng;
+import com.planbase.pdf.layoutmanager.TableBuilder;
+import com.planbase.pdf.layoutmanager.Text;
+import com.planbase.pdf.layoutmanager.TextStyle;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
@@ -16,8 +39,10 @@ import java.io.OutputStream;
 import java.security.SecureRandom;
 
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_LEFT;
+import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_RIGHT;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
 import static com.planbase.pdf.layoutmanager.Utils.CMYK_BLACK;
+import static com.planbase.pdf.layoutmanager.Utils.BULLET_CHAR;
 import static org.organicdesign.fp.StaticImports.vec;
 
 /**
@@ -27,6 +52,10 @@ public class TestManual2 {
 
     public static final PDColor CMYK_DARK_GRAY = new PDColor(new float[] {0, 0, 0, 0.2f}, PDDeviceCMYK.INSTANCE);
     public static final PDColor CMYK_LIGHT_GREEN = new PDColor(new float[] {0.05f, 0, 0.1f, 0.01f}, PDDeviceCMYK.INSTANCE);
+
+    static final CellStyle BULLET_CELL_STYLE = CellStyle.of(TOP_RIGHT, Padding.of(0, 4f, 0, 0), null, null);
+    static final TextStyle BULLET_TEXT_STYLE = TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK);
+
 
     @Test public void testBodyMargins() throws IOException {
         // Nothing happens without a PdfLayoutMgr.
@@ -105,56 +134,22 @@ public class TestManual2 {
                                         "best points got the economic waters " +
                                         "and problems gave great. The whole " +
                                         "countries went the best children and " +
-                                        "eyes came able. The national " +
-                                        "numbers played the recent numbers " +
-                                        "and money liked old. The economic " +
-                                        "mothers could the full waters and " +
-                                        "books found different. The free school " +
-                                        "s kept the white months and things " +
-                                        "ran better. The easy points played the " +
-                                        "little worlds and stories gave old. The " +
-                                        "certain months needed the sure jobs " +
-                                        "and countries found good. The good " +
-                                        "companies made the low companies " +
-                                        "Page # 2and stories felt hard. The recent " +
-                                        "stories had the national stories and " +
-                                        "countries helped right. The early eyes " +
-                                        "played the white men and hands could " +
-                                        "best. The better points thought the " +
-                                        "political governments and jobs found " +
-                                        "recent. The long points put the sure " +
-                                        "things and schools became " +
-                                        "international. The young hands came " +
-                                        "the recent things and eyes tried large. " +
-                                        "The good numbers could the human " +
-                                        "questions and rights moved possible. " +
-                                        "The recent facts found the high times " +
-                                        "and nights moved old. The national " +
-                                        "questions felt the able points and " +
-                                        "studies seemed free. The full cases " +
-                                        "got the great months and times played " +
-                                        "public. The major mothers went the " +
-                                        "sure businesses and books got true. " +
-                                        "The right years meant the important " +
-                                        "cases and men willed bad. The late " +
-                                        "states turned the best companies and " +
-                                        "problems came old. The recent " +
-                                        "months had the black eyes and " +
-                                        "systems helped small. The public " +
-                                        "cases turned the low facts and money " +
-                                        "turned military. The big days made " +
-                                        "Page # 3the late work and governments moved " +
-                                        "little. The better words said the recent " +
-                                        "businesses and weeks felt bad. The " +
-                                        "possible businesses wanted the large " +
-                                        "days and waters could sure. The bad " +
-                                        "businesses put the black money and " +
-                                        "questions called right. The early " +
-                                        "businesses lived the better ways and " +
-                                        "Mrs told best. The political questions " +
-                                        "ran the only money and jobs took bad. " +
-                                        "The public things gave the recent " +
-                                        "facts and governments looked good."))));
+                                        "eyes came able."),
+                                TableBuilder.of()
+                                            .addCellWidths(20f, 80f)
+                                            .partBuilder()
+                                            .rowBuilder()
+                                            .cellBuilder().cellStyle(BULLET_CELL_STYLE)
+                                            .add(BULLET_TEXT_STYLE, vec(BULLET_CHAR)).buildCell()
+                                            .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("This is some text that has a bullet")).buildCell()
+                                            .buildRow()
+                                            .rowBuilder()
+                                            .cellBuilder().cellStyle(BULLET_CELL_STYLE)
+                                            .add(BULLET_TEXT_STYLE, vec("2.")).buildCell()
+                                            .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("text that has a number")).buildCell()
+                                            .buildRow()
+                                            .buildPart()
+                                            .buildTable())));
         lp.commit();
         // We're just going to write to a file.
         OutputStream os = new FileOutputStream("test2.pdf");
