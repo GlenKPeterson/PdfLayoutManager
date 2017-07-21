@@ -312,7 +312,7 @@ public class Cell implements Renderable {
 
         /** {@inheritDoc} */
         @Override public Builder add(Renderable rs) {
-            Collections.addAll(rows, rs); return this;
+            rows.add(rs); return this;
         }
 
         /** {@inheritDoc} */

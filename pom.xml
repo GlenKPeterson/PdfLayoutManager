@@ -17,7 +17,7 @@ this directory like the following (you'll have to replace the question marks):
 <settings>
   <profiles>
     <profile>
-      <id>oss.sonatype.org</id>
+      <id>ossrh</id>
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -28,7 +28,7 @@ this directory like the following (you'll have to replace the question marks):
   </profiles>
   <servers>
     <server>
-      <id>oss.sonatype.org</id>
+      <id>ossrh</id>
       <username>?????</username>
       <password>?????</password>
     </server>
@@ -38,7 +38,7 @@ this directory like the following (you'll have to replace the question marks):
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
-	<version>0.6.4-ALPHA</version>
+	<version>0.6.5-ALPHA</version>
 	<packaging>jar</packaging>
 
 	<name>PdfLayoutManager</name>
@@ -121,7 +121,7 @@ this directory like the following (you'll have to replace the question marks):
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.6</version>
+				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>

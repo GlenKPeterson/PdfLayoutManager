@@ -18,28 +18,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Use this to create Tables.  This strives to remind the programmer of HTML tables but because you can resize and
- * scroll a browser window, but not a piece of paper, this is fundamentally different.  Still familiarity with HTML may
- * make this class easier to use.
+ Use this to create Tables.  This strives to remind the programmer of HTML tables but because you
+ can resize and scroll a browser window, and not a piece of paper, this is fundamentally different.
+ Still familiarity with HTML may make this class easier to use.
  */
-public class TableBuilder implements Renderable {
-    private final PageGrouping pageGrouping;
-    private final XyOffset topLeft;
+public class TableBuilder {
     private final List<Float> cellWidths = new ArrayList<Float>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(PageGrouping lp, XyOffset tl) {
-        pageGrouping = lp; topLeft = tl;
-    }
-    public static TableBuilder of(PageGrouping lp, XyOffset tl) {
-        return new TableBuilder(lp, tl);
+    private TableBuilder() {}
+
+    public static TableBuilder of() {
+        return new TableBuilder();
     }
 
-    public XyOffset topLeft() { return topLeft; }
-
+    /** Returns the default widths for all table parts (if set). */
     public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
+
+    /** Sets default widths for all table parts. */
     public TableBuilder addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }
     public TableBuilder addCellWidths(float... ws) {
         for (float w : ws) { cellWidths.add(w); }
@@ -57,38 +55,5 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-    public XyOffset buildTable() { return pageGrouping.drawTable(this); }
-
-    public XyDim calcDimensions(float maxWidth) {
-        XyDim maxDim = XyDim.ZERO;
-        for (TablePart part : parts) {
-            XyDim wh = part.calcDimensions();
-            maxDim = XyDim.of(Math.max(wh.width(), maxDim.width()),
-                              maxDim.height() + wh.height());
-        }
-        return maxDim;
-    }
-
-    /*
-    Renders item and all child-items with given width and returns the x-y pair of the
-    lower-right-hand corner of the last line (e.g. of text).
-    */
-    @Override public XyOffset render(RenderTarget lp, XyOffset outerTopLeft,
-                                     XyDim outerDimensions) {
-        XyOffset rightmostLowest = outerTopLeft;
-        for (TablePart part : parts) {
-//            System.out.println("About to render part: " + part);
-            XyOffset rl = part.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()));
-            rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
-                                          Math.min(rl.y(), rightmostLowest.y()));
-        }
-        return rightmostLowest;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder("TableBuilder(").append(System.identityHashCode(this))
-                .append(")").toString();
-
-    }
+    public Table buildTable() { return new Table(parts); }
 }

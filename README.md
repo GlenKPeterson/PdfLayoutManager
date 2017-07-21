@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.4-ALPHA</version>
+        <version>0.6.5-ALPHA</version>
     </dependency>
 ```
 
@@ -96,6 +96,15 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***0.6.5-ALPHA***
+ - TableBuilder now produces a Table which you can call render() on.
+ Instead of starting with logicalPage.tableBuilder(topLeft) or TableBuilder.of(logicalPage, topLeft), just start with TableBuilder.of().
+ tB.buildTable() now returns a new Table class.
+ On that, you call .render(logicalPage, topLeft, null);
+ It's roughly the same number of characters of typing, but frees you from needing a logicalPage or
+ any coordinates in order to construct a Table.
+ Once constructed, you can throw it into anything that takes a Renderable (and is wide enough since a table's width is fixed.)
+
 ***0.6.4-ALPHA***
  - Changed from java.awt.Color to org.apache.pdfbox.pdmodel.graphics.color.PDColor.  Java Color was nasty to use with CMYK. 
 

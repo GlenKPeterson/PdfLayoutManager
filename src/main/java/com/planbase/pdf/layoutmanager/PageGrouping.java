@@ -153,11 +153,6 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         return portrait ? PORTRAIT : LANDSCAPE;
     }
 
-    public TableBuilder tableBuilder(XyOffset tl) {
-        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        return TableBuilder.of(this, tl);
-    }
-
     /** Ends this logical page grouping and invalidates it for further operations. */
     public PdfLayoutMgr commit() throws IOException {
         mgr.logicalPageEnd(this);
@@ -342,11 +337,6 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         cell.render(this, XyOffset.of(x, y), XyDim.of(cell.width(), maxHeight));
 
         return XyOffset.of(x + wh.width(), y - wh.height());
-    }
-
-    public XyOffset drawTable(TableBuilder tb) {
-        if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        return tb.render(this, tb.topLeft(), null);
     }
 
     /**
