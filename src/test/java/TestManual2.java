@@ -20,7 +20,10 @@ import com.planbase.pdf.layoutmanager.Padding;
 import com.planbase.pdf.layoutmanager.PageGrouping;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledPng;
+import com.planbase.pdf.layoutmanager.Table;
 import com.planbase.pdf.layoutmanager.TableBuilder;
+import com.planbase.pdf.layoutmanager.TablePart;
+import com.planbase.pdf.layoutmanager.TableRowBuilder;
 import com.planbase.pdf.layoutmanager.Text;
 import com.planbase.pdf.layoutmanager.TextStyle;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -41,8 +44,8 @@ import java.security.SecureRandom;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_LEFT;
 import static com.planbase.pdf.layoutmanager.CellStyle.Align.TOP_RIGHT;
 import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
-import static com.planbase.pdf.layoutmanager.Utils.CMYK_BLACK;
 import static com.planbase.pdf.layoutmanager.Utils.BULLET_CHAR;
+import static com.planbase.pdf.layoutmanager.Utils.CMYK_BLACK;
 import static org.organicdesign.fp.StaticImports.vec;
 
 /**
@@ -80,6 +83,46 @@ public class TestManual2 {
                                       TextStyle.of(PDType1Font.HELVETICA, 9f, CMYK_BLACK));
                     return leftMargin;
                 });
+
+        TableBuilder tB = TableBuilder.of();
+//        Table table = tB.addCellWidths(20f, 80f)
+//                        .partBuilder()
+//                        .rowBuilder()
+//                        .cellBuilder().cellStyle(BULLET_CELL_STYLE)
+//                        .add(BULLET_TEXT_STYLE, vec(BULLET_CHAR)).buildCell()
+//                        .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("This is some text that has a bullet")).buildCell()
+//                        .buildRow()
+//                        .rowBuilder()
+//                        .cellBuilder().cellStyle(BULLET_CELL_STYLE)
+//                        .add(BULLET_TEXT_STYLE, vec("2.")).buildCell()
+//                        .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("text that has a number")).buildCell()
+//                        .buildRow()
+//                        .buildPart()
+//                        .buildTable();
+
+
+        TablePart tpb = TableBuilder.of()
+                                    .addCellWidths(20f, 80f).partBuilder();
+
+        // This could be in a loop that prints out list items.
+        TableRowBuilder.RowCellBuilder rcb = tpb.rowBuilder().cellBuilder();
+        rcb.cellStyle(BULLET_CELL_STYLE)
+           .add(BULLET_TEXT_STYLE, vec(BULLET_CHAR));
+        rcb = rcb.buildCell().cellBuilder();
+        rcb.add(BULLET_TEXT_STYLE, vec("This is some text that has a bullet"));
+        rcb.buildCell().buildRow();
+
+        // Next iteration in the loop
+        rcb = tpb.rowBuilder().cellBuilder();
+        rcb.cellStyle(BULLET_CELL_STYLE)
+           .add(BULLET_TEXT_STYLE, vec("2."));
+        rcb = rcb.buildCell().cellBuilder();
+        rcb.add(BULLET_TEXT_STYLE, vec("text that has a number"));
+        rcb.buildCell().buildRow();
+
+        // After the loop, build the table.
+        Table table = tpb.buildPart().buildTable();
+
         lp.drawCell(0, PDRectangle.A6.getHeight() - 40f,
                     Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), CMYK_LIGHT_GREEN,
                                          BorderStyle.of(CMYK_DARK_GRAY)), bodyWidth,
@@ -135,21 +178,7 @@ public class TestManual2 {
                                         "and problems gave great. The whole " +
                                         "countries went the best children and " +
                                         "eyes came able."),
-                                TableBuilder.of()
-                                            .addCellWidths(20f, 80f)
-                                            .partBuilder()
-                                            .rowBuilder()
-                                            .cellBuilder().cellStyle(BULLET_CELL_STYLE)
-                                            .add(BULLET_TEXT_STYLE, vec(BULLET_CHAR)).buildCell()
-                                            .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("This is some text that has a bullet")).buildCell()
-                                            .buildRow()
-                                            .rowBuilder()
-                                            .cellBuilder().cellStyle(BULLET_CELL_STYLE)
-                                            .add(BULLET_TEXT_STYLE, vec("2.")).buildCell()
-                                            .cellBuilder().add(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK), vec("text that has a number")).buildCell()
-                                            .buildRow()
-                                            .buildPart()
-                                            .buildTable())));
+                                table)));
         lp.commit();
         // We're just going to write to a file.
         OutputStream os = new FileOutputStream("test2.pdf");
