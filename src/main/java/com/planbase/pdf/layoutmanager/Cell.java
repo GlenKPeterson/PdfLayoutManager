@@ -205,12 +205,14 @@ public class Cell implements Renderable {
         }
 
         XyOffset outerLowerRight = innerTopLeft;
+        float y = innerTopLeft.y();
         for (Line line : pcls.lines) {
             float rowXOffset = cellStyle.align()
                                         .leftOffset(wrappedBlockDim.width(), line.getWidth());
             outerLowerRight = line.render(lp,
-                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset));
-            innerTopLeft = outerLowerRight.x(innerTopLeft.x());
+                                          XyOffset.of(rowXOffset, y));
+            y -= line.height();
+//            innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
         // Draw border last to cover anything that touches it?

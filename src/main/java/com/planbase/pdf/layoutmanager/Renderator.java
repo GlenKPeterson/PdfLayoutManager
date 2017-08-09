@@ -15,7 +15,7 @@ public interface Renderator {
 
         @Override public FixedItem getSomething(float maxWidth) {
             XyDim dim = item.calcDimensions(maxWidth);
-            FixedItem ret = new FixedItemImpl(item, dim.width(), dim.height(), 0f);
+            FixedItem ret = new FixedItemImpl(item, dim.width(), dim.height(), 0f, dim.height());
             item = null;
             return ret;
         }

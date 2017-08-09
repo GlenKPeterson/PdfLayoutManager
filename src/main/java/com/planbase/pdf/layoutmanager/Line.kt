@@ -13,22 +13,25 @@ interface FixedItem {
 
     fun ascent(): Float
     fun descent(): Float
+    fun lineHeight(): Float
 
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset
 }
 
 data class FixedItemImpl(val item: Renderable,
-                     val width: Float,
-                     val ascent: Float,
-                     val descent: Float) : FixedItem {
+                         val width: Float,
+                         val ascent: Float,
+                         val descent: Float,
+                         val lineHeight:Float) : FixedItem {
     override fun ascent(): Float = ascent
     override fun descent(): Float = descent
-    override fun xyDim(): XyDim = XyDim.of(width, ascent + descent)
+    override fun lineHeight(): Float = lineHeight
+    override fun xyDim(): XyDim = XyDim.of(width, lineHeight)
 //    fun width(): Float = width
 //    fun totalHeight(): Float = heightAboveBase + depthBelowBase
 
     override fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset =
-            item.render(lp, outerTopLeft, xyDim())
+            item.render(lp, outerTopLeft.y(outerTopLeft.y() + ascent), xyDim())
 }
 
 class Line {
@@ -49,14 +52,12 @@ class Line {
 //    fun xyDim(): XyDim = XyDim.of(width, height())
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset {
         var x:Float = outerTopLeft.x()
-        var y:Float = outerTopLeft.y()
+        val y = outerTopLeft.y()
         for (item:FixedItem in items) {
-            y -= item.ascent()
-            item.render(lp, XyOffset.of(x, y))
-            y -= item.descent()
+            item.render(lp, XyOffset.of(x, y - item.ascent()))
             x += item.xyDim().width()
         }
-        return XyOffset.of(x, y)
+        return XyOffset.of(x, height())
     }
 }
 

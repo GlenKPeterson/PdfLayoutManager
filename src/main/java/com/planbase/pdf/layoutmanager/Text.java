@@ -58,6 +58,8 @@ public class Text implements Renderable {
         @Override public float ascent() { return textStyle.ascent(); }
 
         @Override public float descent() { return textStyle.descent(); }
+
+        @Override public float lineHeight() { return textStyle.lineHeight(); }
     }
 
     private static class WrappedBlock {
@@ -359,6 +361,7 @@ public class Text implements Renderable {
             RowIdx ri = tryGettingText(remainingWidth, idx, txt);
             WrappedRow row = ri.row();
             if (row.xyDim().width() <= remainingWidth) {
+                idx = ri.idx();
                 return Option.some(row);
             }
             return Option.none();
