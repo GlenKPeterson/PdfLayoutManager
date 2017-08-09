@@ -14,14 +14,14 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import org.organicdesign.fp.tuple.Tuple2;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.lang.Math.max;
 
 /**
  A styled table cell or layout block with a pre-set horizontal width.  Vertical height is calculated 
@@ -36,23 +36,13 @@ public class Cell implements Renderable {
     // A list of the contents.  It's pretty limiting to have one item per row.
     private final List<Renderable> contents;
 
-    // Caches XyDims for all content items, indexed by desired width (we only have to lay-out again
+    // Caches XyDims for all content lines, indexed by desired width (we only have to lay-out again
     // when the width changes.
-    private final Map<Float, PreCalcAll> widthCache = new HashMap<>(0);
+    private final Map<Float,PreCalcLines> widthCache = new HashMap<>(0);
 
-    // Holds an immutable pre-calculated item and it's dimensions.
-    private static class PreCalc extends Tuple2<Renderable, XyDim> {
-        private PreCalc(Renderable r, XyDim d) { super(r, d); }
-
-        public static PreCalc of(Renderable r, XyDim d) { return new PreCalc(r, d); }
-
-        public Renderable item() { return _1; }
-        XyDim dim() { return _2; }
-    }
-
-    // A cache for all pre-calculated items.
-    private static class PreCalcAll {
-        List<PreCalc> items = new ArrayList<>(1);
+    // A cache for all pre-calculated lines.
+    private static class PreCalcLines {
+        List<Line> lines = new ArrayList<>(1);
         XyDim totalDim;
     }
 
@@ -127,33 +117,30 @@ public class Cell implements Renderable {
     public float width() { return width; }
 
     private void calcDimensionsForReal(float maxWidth) {
-        PreCalcAll allCalc = new PreCalcAll();
-        XyDim blockDim = XyDim.ZERO;
+        PreCalcLines allCalc = new PreCalcLines();
         Padding padding = cellStyle.padding();
         float innerWidth = maxWidth;
         if (padding != null) {
             innerWidth -= (padding.left() + padding.right());
         }
-        for (Renderable item : contents) {
-            XyDim rowDim = (item == null) ? XyDim.ZERO : item.calcDimensions(innerWidth);
-            blockDim = XyDim.of(Math.max(blockDim.width(), rowDim.width()),
-                                blockDim.height() + rowDim.height());
-//            System.out.println("\titem = " + item);
-//            System.out.println("\trowDim = " + rowDim);
-//            System.out.println("\tactualDim = " + actualDim);
-            allCalc.items.add(PreCalc.of(item, rowDim));
+        allCalc.lines = LineKt.renderablesToLines(contents, innerWidth);
+        float width = 0f;
+        float height = 0f;
+        for (Line line : allCalc.lines) {
+            width = max(width, line.getWidth());
+            height += line.height();
         }
-        allCalc.totalDim = blockDim;
+        allCalc.totalDim = XyDim.of(width, height);
         widthCache.put(maxWidth, allCalc);
     }
 
-    private PreCalcAll ensurePreCalcRows(float maxWidth) {
-        PreCalcAll pcr = widthCache.get(maxWidth);
-        if (pcr == null) {
+    private PreCalcLines ensurePreCalcLines(float maxWidth) {
+        PreCalcLines pcl = widthCache.get(maxWidth);
+        if (pcl == null) {
             calcDimensionsForReal(maxWidth);
-            pcr = widthCache.get(maxWidth);
+            pcl = widthCache.get(maxWidth);
         }
-        return pcr;
+        return pcl;
     }
 
     /** {@inheritDoc} */
@@ -163,14 +150,14 @@ public class Cell implements Renderable {
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
 //        }
-        XyDim blockDim = ensurePreCalcRows(maxWidth).totalDim;
+        XyDim blockDim = ensurePreCalcLines(maxWidth).totalDim;
         return ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
 //        System.out.println("Cell.calcDimensions(" + maxWidth + ") dim=" + dim +
 //                           " returns " + ret);
     }
 
     /*
-    Renders item and all child-items with given width and returns the x-y pair of the
+    Renders item and all child-lines with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
 
     {@inheritDoc}
@@ -181,7 +168,7 @@ public class Cell implements Renderable {
 //        new Exception().printStackTrace();
 
         float maxWidth = outerDimensions.width();
-        PreCalcAll pcrs = ensurePreCalcRows(maxWidth);
+        PreCalcLines pcls = ensurePreCalcLines(maxWidth);
         final Padding padding = cellStyle.padding();
         // XyDim outerDimensions = padding.addTo(pcrs.dim);
 
@@ -204,7 +191,7 @@ public class Cell implements Renderable {
 //            System.out.println("\tCell.render innerTopLeft after padding=" + innerTopLeft);
             innerDimensions = padding.subtractFrom(outerDimensions);
         }
-        XyDim wrappedBlockDim = pcrs.totalDim;
+        XyDim wrappedBlockDim = pcls.totalDim;
 //        System.out.println("\tCell.render cellStyle.align()=" + cellStyle.align());
 //        System.out.println("\tCell.render outerDimensions=" + outerDimensions);
 //        System.out.println("\tCell.render padding=" + padding);
@@ -218,17 +205,11 @@ public class Cell implements Renderable {
         }
 
         XyOffset outerLowerRight = innerTopLeft;
-        for (int i = 0; i < contents.size(); i++) {
-            Renderable row = contents.get(i);
-            if (row == null) {
-                continue;
-            }
-            PreCalc pcItem = pcrs.items.get(i);
+        for (Line line : pcls.lines) {
             float rowXOffset = cellStyle.align()
-                                        .leftOffset(wrappedBlockDim.width(), pcItem.dim().width());
-            outerLowerRight = row.render(lp,
-                                         innerTopLeft.x(innerTopLeft.x() + rowXOffset),
-                                         pcItem.dim());
+                                        .leftOffset(wrappedBlockDim.width(), line.getWidth());
+            outerLowerRight = line.render(lp,
+                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset));
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 

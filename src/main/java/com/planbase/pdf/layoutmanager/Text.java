@@ -32,7 +32,7 @@ public class Text implements Renderable {
     private final Map<Float,WrappedBlock> dims = new HashMap<>();
     private final CellStyle.Align align = CellStyle.DEFAULT_ALIGN;
 
-    private static class WrappedRow implements FixedItem {
+    static class WrappedRow implements FixedItem {
         final String string;
         final XyDim rowDim;
         final TextStyle textStyle;
@@ -54,6 +54,10 @@ public class Text implements Renderable {
             return XyOffset.of(outerTopLeft.x() + rowDim.width(),
                                outerTopLeft.y() - rowDim.height() - textStyle.leading());
         }
+
+        @Override public float ascent() { return textStyle.ascent(); }
+
+        @Override public float descent() { return textStyle.descent(); }
     }
 
     private static class WrappedBlock {
@@ -257,28 +261,27 @@ public class Text implements Renderable {
         return new TextRenderator(this);
     }
 
-    private static class RowIdx extends Tuple2<WrappedRow,Integer> {
+    static class RowIdx extends Tuple2<WrappedRow,Integer> {
         RowIdx(WrappedRow fi, Integer i) { super(fi, i); }
         WrappedRow row() { return _1; }
         Integer idx() { return _2; }
     }
 
-    private static RowIdx tryGettingText(float maxWidth, int startIdx, Text txt) {
+    static RowIdx tryGettingText(float maxWidth, int startIdx, Text txt) {
         if (maxWidth < 0) {
             throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
         }
         String row = txt.text(); //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
-
-        String text = substrNoLeadingWhitespace(row, startIdx);
-
-        if (text.length() <= startIdx) {
+        if (row.length() <= startIdx) {
             throw new IllegalStateException("text length must be greater than startIdx");
         }
+
+        String text = substrNoLeadingWhitespace(row, startIdx);
 
         int charWidthGuess = txt.avgCharsForWidth(maxWidth);
 
         int textLen = text.length();
-//            System.out.println("text=[" + text + "] len=" + textLen);
+//        System.out.println("text=[" + text + "] len=" + textLen);
         // Knowing the average width of a character lets us guess and generally be near
         // the word where the line break will occur.  Since the font reports a narrow average,
         // (possibly due to the predominance of spaces in text) we widen it a little for a
@@ -288,7 +291,7 @@ public class Text implements Renderable {
         String substr = text.substring(0, idx);
         float strWidth = txt.textStyle.stringWidthInDocUnits(substr);
 
-//            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
+//        System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
         // If too short - find shortest string that is too long.
         // int idx = idx;
         // int maxTooShortIdx = -1;
@@ -310,11 +313,11 @@ public class Text implements Renderable {
         }
 
         idx--;
-//            System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
+//        System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
         // Too long.  Find longest string that is short enough.
         while ( (strWidth > maxWidth) && (idx > 0) ) {
-//                System.out.println("find longest string that is short enough");
-            //logger.info("strWidth: " + strWidth + " cell.width: " + cell.width + " idx: " + idx);
+//            System.out.println("find longest string that is short enough");
+//            System.out.println("strWidth: " + strWidth + " maxWidth: " + maxWidth + " idx: " + idx);
             // Find previous whitespace run
             while ( (idx > -1) && !Character.isWhitespace(text.charAt(idx)) ) {
                 idx--;
@@ -332,7 +335,7 @@ public class Text implements Renderable {
         }
 
         idx++;
-        return new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx);
+        return new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx + startIdx + 1);
     }
 
 

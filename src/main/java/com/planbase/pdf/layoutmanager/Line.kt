@@ -11,14 +11,19 @@ interface FixedItem {
 //    fun width(): Float = width
 //    fun totalHeight(): Float = heightAboveBase + depthBelowBase
 
+    fun ascent(): Float
+    fun descent(): Float
+
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset
 }
 
 data class FixedItemImpl(val item: Renderable,
                      val width: Float,
-                     val heightAboveBase: Float,
-                     val depthBelowBase: Float) : FixedItem {
-    override fun xyDim(): XyDim = XyDim.of(width, heightAboveBase + depthBelowBase)
+                     val ascent: Float,
+                     val descent: Float) : FixedItem {
+    override fun ascent(): Float = ascent
+    override fun descent(): Float = descent
+    override fun xyDim(): XyDim = XyDim.of(width, ascent + descent)
 //    fun width(): Float = width
 //    fun totalHeight(): Float = heightAboveBase + depthBelowBase
 
@@ -28,12 +33,30 @@ data class FixedItemImpl(val item: Renderable,
 
 class Line {
     var width: Float = 0f
+    var maxAscent: Float = 0f
+    var maxDescent: Float = 0f
     val items: MutableList<FixedItem> = mutableVec()
+
     fun isEmpty() = items.isEmpty()
     fun append(fi : FixedItem):Line {
+        maxAscent = maxOf(maxAscent, fi.ascent())
+        maxDescent = maxOf(maxDescent, fi.descent())
         width += fi.xyDim().width()
         items.append(fi)
         return this
+    }
+    fun height(): Float = maxAscent + maxDescent
+//    fun xyDim(): XyDim = XyDim.of(width, height())
+    fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset {
+        var x:Float = outerTopLeft.x()
+        var y:Float = outerTopLeft.y()
+        for (item:FixedItem in items) {
+            y -= item.ascent()
+            item.render(lp, XyOffset.of(x, y))
+            y -= item.descent()
+            x += item.xyDim().width()
+        }
+        return XyOffset.of(x, y)
     }
 }
 
