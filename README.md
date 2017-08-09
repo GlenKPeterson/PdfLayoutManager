@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.6.6-ALPHA</version>
+        <version>0.7.6-ALPHA</version>
     </dependency>
 ```
 
@@ -96,6 +96,10 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+***0.7.6-ALPHA***
+ - DO NOT USE THIS!  Severely broken for table contents - all goes in first cell!
+ - Changed cells to try to put as many elements in each line as possible (formerly put each new element on a new line)
+
 ***0.6.6-ALPHA***
  - Make sure Cells get their default style if none is specified (avoids a NPE).
  - Moved TestManual2 to no-package so it will prove that everything it needs is public.
