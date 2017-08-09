@@ -127,7 +127,11 @@ public class TestManual2 {
                     Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), CMYK_LIGHT_GREEN,
                                          BorderStyle.of(CMYK_DARK_GRAY)), bodyWidth,
                             vec(Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
-                                        "The long families needed the national " +
+                                        "The long "),
+                                Text.of(TextStyle.of(PDType1Font.HELVETICA_BOLD, 12f, CMYK_BLACK),
+                                        "families"),
+                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                                        " needed the national " +
                                         "words and women said new. The new " +
                                         "companies told the possible hands " +
                                         "and books was low. The other " +

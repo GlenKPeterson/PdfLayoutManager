@@ -19,6 +19,21 @@ package com.planbase.pdf.layoutmanager;
  */
 // TODO: Split into Layoutable and Renderable where Layoutable just has calcDimensions() which returns a Renderable which just has render() (but without maxWidth) and getXyDim()
 public interface Renderable {
+    enum Constants implements Renderable {
+        EOL {
+            @Override
+            public XyDim calcDimensions(float maxWidth) {
+                return null;
+            }
+
+            @Override
+            public XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions) {
+                return null;
+            }
+        };
+
+    }
+
     /**
     Given a width, returns the height and actual width after line wrapping.  If line wrapping is
     not needed, just returns the static width and height.  If calculations are done, the results
@@ -38,4 +53,9 @@ public interface Renderable {
      the same as topLeft + outerDimensions (it could be on a different page).
     */
     XyOffset render(RenderTarget lp, XyOffset outerTopLeft, XyDim outerDimensions);
+
+    default Renderator renderator() {
+        return new Renderator.SingleItemRenderator(this);
+    }
+
 }

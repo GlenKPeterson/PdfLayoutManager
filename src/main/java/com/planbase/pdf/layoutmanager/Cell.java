@@ -14,6 +14,8 @@
 
 package com.planbase.pdf.layoutmanager;
 
+import org.organicdesign.fp.tuple.Tuple2;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,20 +36,23 @@ public class Cell implements Renderable {
     // A list of the contents.  It's pretty limiting to have one item per row.
     private final List<Renderable> contents;
 
-    // Caches XyDims for each content item, indexed by desired width (we only have to lay-out again
+    // Caches XyDims for all content items, indexed by desired width (we only have to lay-out again
     // when the width changes.
-    private final Map<Float,PreCalcAll> widthCache = new HashMap<Float,PreCalcAll>(0);
+    private final Map<Float, PreCalcAll> widthCache = new HashMap<>(0);
 
-    private static class PreCalc {
-        Renderable item;
-        XyDim dim;
-        public static PreCalc of(Renderable r, XyDim d) {
-            PreCalc pcr = new PreCalc(); pcr.item = r; pcr.dim = d; return pcr;
-        }
+    // Holds an immutable pre-calculated item and it's dimensions.
+    private static class PreCalc extends Tuple2<Renderable, XyDim> {
+        private PreCalc(Renderable r, XyDim d) { super(r, d); }
+
+        public static PreCalc of(Renderable r, XyDim d) { return new PreCalc(r, d); }
+
+        public Renderable item() { return _1; }
+        XyDim dim() { return _2; }
     }
 
+    // A cache for all pre-calculated items.
     private static class PreCalcAll {
-        List<PreCalc> items = new ArrayList<PreCalc>(1);
+        List<PreCalc> items = new ArrayList<>(1);
         XyDim totalDim;
     }
 
@@ -61,45 +66,46 @@ public class Cell implements Renderable {
 //            }
 //        }
         cellStyle = (cs == null) ? CellStyle.DEFAULT : cs;
-        width = w; contents = rs;
+        width = w;
+        contents = rs;
     }
 
     /**
      Creates a new cell with the given style and width.
 
-     @param cs the cell style
+     @param cs    the cell style
      @param width the width (height will be calculated based on how objects can be rendered within
      this width).
      @return a cell suitable for rendering.
      */
     public static Cell of(CellStyle cs, float width) { //, final Object... r) {
-        return new Cell(cs, width, Collections.<Renderable>emptyList());
+        return new Cell(cs, width, Collections.emptyList());
 //                        (r == null) ? Collections.emptyList()
 //                                    : Arrays.asList(r));
     }
 
     // Simple case of a single styled String
     public static Cell of(CellStyle cs, float width, TextStyle ts, String s) {
-        List<Renderable> ls = new ArrayList<Renderable>(1);
+        List<Renderable> ls = new ArrayList<>(1);
         ls.add(Text.of(ts, s));
         return new Cell(cs, width, ls);
     }
 
     // Simple case of a single styled String
     public static Cell of(CellStyle cs, float width, Text t) {
-        List<Renderable> ls = new ArrayList<Renderable>(1);
+        List<Renderable> ls = new ArrayList<>(1);
         ls.add(t);
         return new Cell(cs, width, ls);
     }
 
     public static Cell of(CellStyle cs, float width, ScaledJpeg j) {
-        List<Renderable> ls = new ArrayList<Renderable>(1);
+        List<Renderable> ls = new ArrayList<>(1);
         ls.add(j);
         return new Cell(cs, width, ls);
     }
 
     public static Cell of(CellStyle cs, float width, Renderable r) {
-        List<Renderable> ls = new ArrayList<Renderable>(1);
+        List<Renderable> ls = new ArrayList<>(1);
         ls.add(r);
         return new Cell(cs, width, ls);
     }
@@ -110,12 +116,13 @@ public class Cell implements Renderable {
 
     // Simple case of a single styled String
     public static Cell of(CellStyle cs, float width, Cell c) {
-        List<Renderable> ls = new ArrayList<Renderable>(1);
+        List<Renderable> ls = new ArrayList<>(1);
         ls.add(c);
         return new Cell(cs, width, ls);
     }
 
     public CellStyle cellStyle() { return cellStyle; }
+
     // public BorderStyle border() { return borderStyle; }
     public float width() { return width; }
 
@@ -218,10 +225,10 @@ public class Cell implements Renderable {
             }
             PreCalc pcItem = pcrs.items.get(i);
             float rowXOffset = cellStyle.align()
-                                        .leftOffset(wrappedBlockDim.width(), pcItem.dim.width());
+                                        .leftOffset(wrappedBlockDim.width(), pcItem.dim().width());
             outerLowerRight = row.render(lp,
                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset),
-                                         pcItem.dim);
+                                         pcItem.dim());
             innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
 
@@ -292,7 +299,7 @@ public class Cell implements Renderable {
     public static class Builder implements CellBuilder {
         private final float width;
         private CellStyle cellStyle;
-        private final List<Renderable> rows = new ArrayList<Renderable>();
+        private final List<Renderable> rows = new ArrayList<>();
         private TextStyle textStyle;
 
         private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }

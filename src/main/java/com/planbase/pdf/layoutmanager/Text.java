@@ -14,6 +14,10 @@
 
 package com.planbase.pdf.layoutmanager;
 
+import org.jetbrains.annotations.NotNull;
+import org.organicdesign.fp.oneOf.Option;
+import org.organicdesign.fp.tuple.Tuple2;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,22 +29,35 @@ import java.util.Map;
 public class Text implements Renderable {
     private final TextStyle textStyle;
     private final String text;
-    private final Map<Float,WrappedBlock> dims = new HashMap<Float,WrappedBlock>();
+    private final Map<Float,WrappedBlock> dims = new HashMap<>();
     private final CellStyle.Align align = CellStyle.DEFAULT_ALIGN;
 
-    private static class WrappedRow {
-        String string;
-        XyDim rowDim;
-        public static WrappedRow of(String s, float x, float y) {
-            WrappedRow wr = new WrappedRow();
-            wr.string = s;
-            wr.rowDim = XyDim.of(x, y);
-            return wr;
+    private static class WrappedRow implements FixedItem {
+        final String string;
+        final XyDim rowDim;
+        final TextStyle textStyle;
+        WrappedRow(String s, float x, float y, TextStyle ts) {
+            string = s; rowDim = XyDim.of(x, y); textStyle = ts;
+        }
+        public static WrappedRow of(String s, float x, TextStyle ts) {
+            return new WrappedRow(s, x, ts.lineHeight(), ts);
+        }
+
+        @Override @NotNull
+        public XyDim xyDim() { return rowDim; }
+//        float width() { return rowDim.width(); }
+//        float totalHeight() { return rowDim.height(); }
+
+        @Override @NotNull
+        public XyOffset render(@NotNull RenderTarget lp, @NotNull XyOffset outerTopLeft) {
+            lp.drawStyledText(outerTopLeft.x(), outerTopLeft.y(), string, textStyle);
+            return XyOffset.of(outerTopLeft.x() + rowDim.width(),
+                               outerTopLeft.y() - rowDim.height() - textStyle.leading());
         }
     }
 
     private static class WrappedBlock {
-        List<WrappedRow> rows = new ArrayList<WrappedRow>();
+        List<WrappedRow> rows = new ArrayList<>();
         XyDim blockDim;
     }
 
@@ -59,7 +76,9 @@ public class Text implements Renderable {
     }
 
     public String text() { return text; };
+
     public TextStyle style() { return textStyle; }
+
     public int avgCharsForWidth(float width) {
         return (int) ((width * 1220) / textStyle.avgCharWidth());
     }
@@ -67,7 +86,6 @@ public class Text implements Renderable {
     public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
     private XyDim calcDimensionsForReal(final float maxWidth) {
-        // TODO: Make this show text even if the width is zero or less, just show one word per line.
         if (maxWidth < 0) {
             throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
         }
@@ -136,7 +154,7 @@ public class Text implements Renderable {
                 strWidth = textStyle.stringWidthInDocUnits(substr);
             }
 
-            wb.rows.add(WrappedRow.of(substr, strWidth, textStyle.lineHeight()));
+            wb.rows.add(WrappedRow.of(substr, strWidth, textStyle));
 //            System.out.println("added row");
             y -= textStyle.lineHeight();
 //            System.out.println("y=" + y);
@@ -167,7 +185,7 @@ public class Text implements Renderable {
         return wb;
     }
 
-    public XyDim calcDimensions(final float maxWidth) {
+    @Override public XyDim calcDimensions(final float maxWidth) {
         // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
@@ -203,6 +221,9 @@ public class Text implements Renderable {
 //            if (allPages) {
 //                lp.borderStyledText(x, y, wr.string, textStyle);
 //            } else {
+
+// TODO: Probably want this!
+//            wr.render(lp, XyOffset.of(x, y));
             lp.drawStyledText(x, y, wr.string, textStyle);
 //            }
             y -= textStyle.descent();
@@ -230,4 +251,115 @@ public class Text implements Renderable {
                                                  : text) +
                "\")";
     }
+
+    @Override
+    public Renderator renderator() {
+        return new TextRenderator(this);
+    }
+
+    private static class RowIdx extends Tuple2<WrappedRow,Integer> {
+        RowIdx(WrappedRow fi, Integer i) { super(fi, i); }
+        WrappedRow row() { return _1; }
+        Integer idx() { return _2; }
+    }
+
+    private static RowIdx tryGettingText(float maxWidth, int startIdx, Text txt) {
+        if (maxWidth < 0) {
+            throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
+        }
+        String row = txt.text(); //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
+
+        String text = substrNoLeadingWhitespace(row, startIdx);
+
+        if (text.length() <= startIdx) {
+            throw new IllegalStateException("text length must be greater than startIdx");
+        }
+
+        int charWidthGuess = txt.avgCharsForWidth(maxWidth);
+
+        int textLen = text.length();
+//            System.out.println("text=[" + text + "] len=" + textLen);
+        // Knowing the average width of a character lets us guess and generally be near
+        // the word where the line break will occur.  Since the font reports a narrow average,
+        // (possibly due to the predominance of spaces in text) we widen it a little for a
+        // better first guess.
+        int idx = charWidthGuess;
+        if (idx > textLen) { idx = textLen; }
+        String substr = text.substring(0, idx);
+        float strWidth = txt.textStyle.stringWidthInDocUnits(substr);
+
+//            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
+        // If too short - find shortest string that is too long.
+        // int idx = idx;
+        // int maxTooShortIdx = -1;
+        while ( (strWidth < maxWidth) && (idx < textLen) ) {
+//                System.out.println("find shortest string that is too long");
+            // Consume any whitespace.
+            while ( (idx < textLen) &&
+                    Character.isWhitespace(text.charAt(idx)) ) {
+                idx++;
+            }
+            // Find last non-whitespace character
+            while ( (idx < textLen) &&
+                    !Character.isWhitespace(text.charAt(idx)) ) {
+                idx++;
+            }
+            // Test new width
+            substr = text.substring(0, idx);
+            strWidth = txt.textStyle.stringWidthInDocUnits(substr);
+        }
+
+        idx--;
+//            System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
+        // Too long.  Find longest string that is short enough.
+        while ( (strWidth > maxWidth) && (idx > 0) ) {
+//                System.out.println("find longest string that is short enough");
+            //logger.info("strWidth: " + strWidth + " cell.width: " + cell.width + " idx: " + idx);
+            // Find previous whitespace run
+            while ( (idx > -1) && !Character.isWhitespace(text.charAt(idx)) ) {
+                idx--;
+            }
+            // Find last non-whatespace character before whitespace run.
+            while ( (idx > -1) && Character.isWhitespace(text.charAt(idx)) ) {
+                idx--;
+            }
+            if (idx < 1) {
+                break; // no spaces - have to put whole thing in cell and let it run over.
+            }
+            // Test new width
+            substr = text.substring(0, idx + 1);
+            strWidth = txt.textStyle.stringWidthInDocUnits(substr);
+        }
+
+        idx++;
+        return new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx);
+    }
+
+
+    class TextRenderator implements Renderator {
+        private final Text txt;
+        private int idx = 0;
+
+        TextRenderator(Text t) { txt = t; }
+
+        @Override public boolean hasMore() { return idx < txt.text.length(); }
+
+
+
+        @Override public WrappedRow getSomething(float maxWidth) {
+            RowIdx ri = tryGettingText(maxWidth, idx, txt);
+            idx = ri.idx();
+            return ri.row();
+        }
+
+        @Override public Option<FixedItem> getIfFits(float remainingWidth) {
+            RowIdx ri = tryGettingText(remainingWidth, idx, txt);
+            WrappedRow row = ri.row();
+            if (row.xyDim().width() <= remainingWidth) {
+                return Option.some(row);
+            }
+            return Option.none();
+        }
+    }
+
 }
