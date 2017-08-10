@@ -21,6 +21,19 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
+/*
+        ----    __----__
+        ^     ,'  ."".  `,
+        |    /   /    \   \
+   Ascent   (   (      )   )
+        V    \   \_  _/   /
+        ____  `.__ ""  _,'
+Descent/          """\ \,.
+       \____          '--"
+Leading ____  _  _  _  _  _  _
+
+Line height = ascent + descent + leading.
+ */
 /**
 Specifies font, font-size, color, and padding.  Immutable.
  */
