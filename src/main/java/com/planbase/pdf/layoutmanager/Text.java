@@ -57,7 +57,9 @@ public class Text implements Renderable {
 
         @Override public float ascent() { return textStyle.ascent(); }
 
-        @Override public float descent() { return textStyle.descent(); }
+        @Override public float descentAndLeading() {
+            return textStyle.descent() + textStyle.leading();
+        }
 
         @Override public float lineHeight() { return textStyle.lineHeight(); }
     }
@@ -348,8 +350,6 @@ public class Text implements Renderable {
         TextRenderator(Text t) { txt = t; }
 
         @Override public boolean hasMore() { return idx < txt.text.length(); }
-
-
 
         @Override public WrappedRow getSomething(float maxWidth) {
             RowIdx ri = tryGettingText(maxWidth, idx, txt);

@@ -12,7 +12,7 @@ interface FixedItem {
 //    fun totalHeight(): Float = heightAboveBase + depthBelowBase
 
     fun ascent(): Float
-    fun descent(): Float
+    fun descentAndLeading(): Float
     fun lineHeight(): Float
 
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset
@@ -21,10 +21,10 @@ interface FixedItem {
 data class FixedItemImpl(val item: Renderable,
                          val width: Float,
                          val ascent: Float,
-                         val descent: Float,
+                         val descentAndLeading: Float,
                          val lineHeight:Float) : FixedItem {
     override fun ascent(): Float = ascent
-    override fun descent(): Float = descent
+    override fun descentAndLeading(): Float = descentAndLeading
     override fun lineHeight(): Float = lineHeight
     override fun xyDim(): XyDim = XyDim.of(width, lineHeight)
 //    fun width(): Float = width
@@ -37,18 +37,18 @@ data class FixedItemImpl(val item: Renderable,
 class Line {
     var width: Float = 0f
     var maxAscent: Float = 0f
-    var maxDescent: Float = 0f
+    var maxDescentAndLeading: Float = 0f
     val items: MutableList<FixedItem> = mutableVec()
 
     fun isEmpty() = items.isEmpty()
     fun append(fi : FixedItem):Line {
         maxAscent = maxOf(maxAscent, fi.ascent())
-        maxDescent = maxOf(maxDescent, fi.descent())
+        maxDescentAndLeading = maxOf(maxDescentAndLeading, fi.descentAndLeading())
         width += fi.xyDim().width()
         items.append(fi)
         return this
     }
-    fun height(): Float = maxAscent + maxDescent
+    fun height(): Float = maxAscent + maxDescentAndLeading
 //    fun xyDim(): XyDim = XyDim.of(width, height())
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset {
         var x:Float = outerTopLeft.x()
