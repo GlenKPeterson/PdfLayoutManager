@@ -210,7 +210,7 @@ public class Cell implements Renderable {
             float rowXOffset = cellStyle.align()
                                         .leftOffset(wrappedBlockDim.width(), line.getWidth());
             outerLowerRight = line.render(lp,
-                                          XyOffset.of(rowXOffset, y));
+                                          XyOffset.of(rowXOffset + innerTopLeft.x(), y));
             y -= line.height();
 //            innerTopLeft = outerLowerRight.x(innerTopLeft.x());
         }
