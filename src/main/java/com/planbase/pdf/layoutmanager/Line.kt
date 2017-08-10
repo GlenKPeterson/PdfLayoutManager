@@ -80,6 +80,9 @@ For each renderable
         start a new line.
  */
 fun renderablesToLines(itemsInBlock: List<Renderable>, maxWidth: Float) : ImList<Line> {
+    if (maxWidth < 0) {
+        throw IllegalArgumentException("maxWidth must be >= 0, not " + maxWidth)
+    }
     val lines: MutableList<Line> = mutableVec()
     var line: Line = Line()
 

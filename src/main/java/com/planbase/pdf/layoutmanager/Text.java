@@ -352,12 +352,18 @@ public class Text implements Renderable {
         @Override public boolean hasMore() { return idx < txt.text.length(); }
 
         @Override public WrappedRow getSomething(float maxWidth) {
+            if (maxWidth < 0) {
+                throw new IllegalArgumentException("Illegal negative width: " + maxWidth);
+            }
             RowIdx ri = tryGettingText(maxWidth, idx, txt);
             idx = ri.idx();
             return ri.row();
         }
 
         @Override public Option<FixedItem> getIfFits(float remainingWidth) {
+            if (remainingWidth <= 0) {
+                return Option.none();
+            }
             RowIdx ri = tryGettingText(remainingWidth, idx, txt);
             WrappedRow row = ri.row();
             if (row.xyDim().width() <= remainingWidth) {
