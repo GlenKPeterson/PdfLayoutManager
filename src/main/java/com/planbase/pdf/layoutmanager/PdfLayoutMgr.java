@@ -350,7 +350,7 @@ public class PdfLayoutMgr {
 
     /** Returns the pageReactor function. */
     public Option<Fn2<Integer,SinglePage,Float>> pageReactor() {
-        return pageReactor == null ? Option.none() : Option.of(pageReactor);
+        return pageReactor == null ? Option.none() : Option.someOrNullNoneOf(pageReactor);
     }
 
     @Override
