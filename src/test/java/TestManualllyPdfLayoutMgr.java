@@ -20,7 +20,6 @@ import com.planbase.pdf.layoutmanager.Padding;
 import com.planbase.pdf.layoutmanager.PageGrouping;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledJpeg;
-import com.planbase.pdf.layoutmanager.Table;
 import com.planbase.pdf.layoutmanager.TableBuilder;
 import com.planbase.pdf.layoutmanager.Text;
 import com.planbase.pdf.layoutmanager.TextStyle;
@@ -128,9 +127,9 @@ public class TestManualllyPdfLayoutMgr {
           .minRowHeight(120f)
           .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, RGB_BLACK))
           .rowBuilder()
-          .cellBuilder().align(TOP_LEFT).addStrs("Line 1", "Line two", "Line three").buildCell()
-          .cellBuilder().align(TOP_CENTER).addStrs("Line 1", "Line two", "Line three").buildCell()
-          .cellBuilder().align(TOP_RIGHT).addStrs("Line 1", "Line two", "Line three").buildCell()
+          .cellBuilder().align(TOP_LEFT).addStrs("Line 1\n", "Line two\n", "Line three").buildCell()
+          .cellBuilder().align(TOP_CENTER).addStrs("Line 1\n", "Line two\n", "Line three").buildCell()
+          .cellBuilder().align(TOP_RIGHT).addStrs("Line 1\n", "Line two\n", "Line three").buildCell()
           .buildRow()
           .rowBuilder()
           .cellBuilder().align(MIDDLE_LEFT).addStrs("Line 1", "Line two", "Line three").buildCell()

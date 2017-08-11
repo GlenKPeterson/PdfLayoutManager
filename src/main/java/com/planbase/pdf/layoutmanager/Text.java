@@ -15,13 +15,16 @@
 package com.planbase.pdf.layoutmanager;
 
 import org.jetbrains.annotations.NotNull;
-import org.organicdesign.fp.oneOf.Option;
 import org.organicdesign.fp.tuple.Tuple2;
+import org.organicdesign.fp.tuple.Tuple3;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.planbase.pdf.layoutmanager.ContTermNone.Companion;
+import static org.organicdesign.fp.StaticImports.xformChars;
 
 /**
  * Represents styled text kind of like a #Text node in HTML.
@@ -241,6 +244,8 @@ public class Text implements Renderable {
                            outerTopLeft.y() - wb.blockDim.height());
     }
 
+    private static final char CR = '\n';
+
     private static String substrNoLeadingWhitespace(final String text, int startIdx) {
         // Drop any opening whitespace.
         while ( (startIdx < text.length()) &&
@@ -251,6 +256,40 @@ public class Text implements Renderable {
             return text.substring(startIdx);
         }
         return text;
+    }
+
+    static class Thing extends Tuple3<String,Integer,Boolean> {
+        Thing(String s,Integer i,Boolean b) { super(s,i,b); }
+        public String trimmedStr() { return _1; }
+        public Integer totalCharsConsumed() { return _2; }
+        public Boolean foundCr() { return _3; }
+    }
+
+    static Thing substrNoLeadingSpaceUntilRet(final String text, int origStartIdx) {
+        int startIdx = origStartIdx;
+        // Drop any opening whitespace.
+        while ( (startIdx < text.length()) &&
+                Character.isWhitespace(text.charAt(startIdx))) {
+            startIdx++;
+        }
+        int crIdx = text.indexOf(CR, startIdx);
+        boolean foundCr = true;
+        if (crIdx < 0) {
+            crIdx = text.length();
+            foundCr = false;
+        } else {
+            // decrement here effectively adds one to the total length to consume the CR.
+            origStartIdx--;
+        }
+        int charsConsumed = crIdx - origStartIdx;
+        return new Thing(text.substring(startIdx, crIdx), charsConsumed, foundCr);
+
+//        return xformChars(text)
+//                       .drop(startIdx)
+//                       .dropWhile(Character::isWhitespace)
+//                       .takeWhile(c -> CR != c)
+//                       .fold(new StringBuilder(), StringBuilder::append)
+//                       .toString();
     }
 
     @Override
@@ -271,7 +310,7 @@ public class Text implements Renderable {
         Integer idx() { return _2; }
     }
 
-    static RowIdx tryGettingText(float maxWidth, int startIdx, Text txt) {
+    static ContTerm<RowIdx> tryGettingText(float maxWidth, int startIdx, Text txt) {
         if (maxWidth < 0) {
             throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
         }
@@ -280,7 +319,9 @@ public class Text implements Renderable {
             throw new IllegalStateException("text length must be greater than startIdx");
         }
 
-        String text = substrNoLeadingWhitespace(row, startIdx);
+        // String text = substrNoLeadingWhitespace(row, startIdx);
+        Thing thing = substrNoLeadingSpaceUntilRet(row, startIdx);
+        String text = thing.trimmedStr();
 
         int charWidthGuess = txt.avgCharsForWidth(maxWidth);
 
@@ -339,7 +380,16 @@ public class Text implements Renderable {
         }
 
         idx++;
-        return new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx + startIdx + 1);
+        int eolIdx = substr.indexOf(CR);
+        if (eolIdx > -1) {
+            substr = substr.substring(0, eolIdx);
+            strWidth = txt.textStyle.stringWidthInDocUnits(substr);
+            if (strWidth > maxWidth) {
+                throw new IllegalStateException("strWidth=" + strWidth + " > maxWidth=" + maxWidth);
+            }
+            return ContTerm.Companion.terminal(new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx + startIdx + 1));
+        }
+        return ContTerm.Companion.continuing(new RowIdx(WrappedRow.of(substr, strWidth, txt.textStyle), idx + startIdx + 1));
     }
 
 
@@ -351,26 +401,34 @@ public class Text implements Renderable {
 
         @Override public boolean hasMore() { return idx < txt.text.length(); }
 
-        @Override public WrappedRow getSomething(float maxWidth) {
+        @Override public ContTerm<FixedItem> getSomething(float maxWidth) {
             if (maxWidth < 0) {
                 throw new IllegalArgumentException("Illegal negative width: " + maxWidth);
             }
-            RowIdx ri = tryGettingText(maxWidth, idx, txt);
-            idx = ri.idx();
-            return ri.row();
+            return tryGettingText(maxWidth, idx, txt)
+                           .match((c) -> {
+                                      idx = c.idx();
+                                      return ContTerm.Companion.continuing(c.row());
+                                  },
+                                  (t) -> {
+                                      idx = t.idx();
+                                      return ContTerm.Companion.terminal(t.row());
+                                  });
         }
 
-        @Override public Option<FixedItem> getIfFits(float remainingWidth) {
+        @Override public ContTermNone getIfFits(float remainingWidth) {
             if (remainingWidth <= 0) {
-                return Option.none();
+                return Companion.none();
             }
-            RowIdx ri = tryGettingText(remainingWidth, idx, txt);
-            WrappedRow row = ri.row();
+            ContTerm<RowIdx> ctri = tryGettingText(remainingWidth, idx, txt);
+            WrappedRow row = ctri.getEither().row();
             if (row.xyDim().width() <= remainingWidth) {
-                idx = ri.idx();
-                return Option.some(row);
+                idx = ctri.getEither().idx();
+                return ctri.match(c -> Companion.continuing(row),
+                                  t -> Companion.terminal(row));
+            } else {
+                return Companion.none();
             }
-            return Option.none();
         }
     }
 

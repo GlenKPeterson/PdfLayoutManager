@@ -193,7 +193,7 @@ this directory like the following (you'll have to replace the question marks):
 		<dependency>
 			<groupId>org.organicdesign</groupId>
 			<artifactId>Paguro</artifactId>
-			<version>3.0.5-ALPHA</version>
+			<version>3.0.8-BETA</version>
 		</dependency>
 		<dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -202,7 +202,7 @@ this directory like the following (you'll have to replace the question marks):
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
+            <artifactId>kotlin-test-junit</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
