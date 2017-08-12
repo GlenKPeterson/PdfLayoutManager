@@ -77,7 +77,7 @@ public class Cell implements Renderable {
     // Simple case of a single styled String
     public static Cell of(CellStyle cs, float width, TextStyle ts, String s) {
         List<Renderable> ls = new ArrayList<>(1);
-        ls.add(Text.of(ts, s));
+        ls.add(Text.Companion.of(ts, s));
         return new Cell(cs, width, ls);
     }
 
@@ -315,7 +315,7 @@ public class Cell implements Renderable {
         @Override public Builder add(TextStyle ts, Iterable<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
-                    rows.add(Text.of(ts, s));
+                    rows.add(Text.Companion.of(ts, s));
                 }
             }
             return this;
@@ -327,7 +327,7 @@ public class Cell implements Renderable {
                 throw new IllegalStateException("Must set a default text style before adding raw strings");
             }
             for (String s : ss) {
-                rows.add(Text.of(textStyle, s));
+                rows.add(Text.Companion.of(textStyle, s));
             }
             return this;
         }

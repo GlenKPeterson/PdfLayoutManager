@@ -248,7 +248,7 @@ public class TestManualllyPdfLayoutMgr {
         lp.drawCell(xyOff.x(), xyOff.y(),
                    Cell.of(CellStyle.of(MIDDLE_CENTER, Padding.of(2), RGB_LIGHT_GREEN,
                                         BorderStyle.of(RGB_DARK_GRAY)), 200f,
-                           Text.of(TextStyle.of(liberationFont, 12f, RGB_BLACK),
+                           new Text(TextStyle.of(liberationFont, 12f, RGB_BLACK),
                                    "Hello Liberation Mono Bold Font!")));
 
         tB = TableBuilder.of();

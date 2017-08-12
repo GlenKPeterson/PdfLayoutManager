@@ -24,7 +24,7 @@ class SingleItemRenderatorTest {
 
         var tor = r.renderator()
         assertTrue(tor.hasMore())
-        assertEquals(r.calcDimensions(0f), tor.getSomething(9f).match({it}, {it}).xyDim())
+        assertEquals(r.calcDimensions(0f), tor.getSomething(9f).item.xyDim())
         assertFalse(tor.hasMore())
 
         tor = r.renderator()

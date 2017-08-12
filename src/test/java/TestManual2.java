@@ -126,11 +126,11 @@ public class TestManual2 {
         lp.drawCell(0, PDRectangle.A6.getHeight() - 40f,
                     Cell.of(CellStyle.of(TOP_LEFT, Padding.of(2), CMYK_LIGHT_GREEN,
                                          BorderStyle.of(CMYK_DARK_GRAY)), bodyWidth,
-                            vec(Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                            vec(new Text(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The long "),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA_BOLD, 12f, CMYK_BLACK),
+                                new Text(TextStyle.of(PDType1Font.HELVETICA_BOLD, 12f, CMYK_BLACK),
                                         "families"),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                                new Text(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         " needed the national " +
                                         "words and women said new. The new " +
                                         "companies told the possible hands " +
@@ -143,7 +143,7 @@ public class TestManual2 {
                                         "places got free. The able homes said " +
                                         "the better work and cases went free."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                                new Text(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The hard eyes seemed the clear " +
                                         "mothers and systems came economic. " +
                                         "The high months showed the possible " +
@@ -157,7 +157,7 @@ public class TestManual2 {
                                         "the good governments and cases " +
                                         "lived social."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                                new Text(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The social people ran the " +
                                         "local cases and men left local. The " +
                                         "easy areas saw the whole times and " +
@@ -176,7 +176,7 @@ public class TestManual2 {
                                         "international men kept the real " +
                                         "questions and nights made big."),
                                 ScaledPng.of(graphPic),
-                                Text.of(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
+                                new Text(TextStyle.of(PDType1Font.HELVETICA, 12f, CMYK_BLACK),
                                         "The " +
                                         "best points got the economic waters " +
                                         "and problems gave great. The whole " +

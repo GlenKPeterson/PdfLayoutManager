@@ -70,7 +70,7 @@ public class TableRowBuilder {
             throw new IllegalStateException("Tried to add a text cell without setting a default text style");
         }
         for (String s : ss) {
-            addCellAt(Cell.of(cellStyle, nextCellSize(), Text.of(textStyle, s)), nextCellIdx);
+            addCellAt(Cell.of(cellStyle, nextCellSize(), new Text(textStyle, s)), nextCellIdx);
             nextCellIdx++;
         }
         return this;
@@ -216,7 +216,7 @@ public class TableRowBuilder {
                                                 " raw strings");
             }
             for (String s : ss) {
-                rows.add(Text.of(textStyle, s));
+                rows.add(new Text(textStyle, s));
             }
             return this;
         }
@@ -225,7 +225,7 @@ public class TableRowBuilder {
         @Override public RowCellBuilder add(TextStyle ts, Iterable<String> ls) {
             if (ls != null) {
                 for (String s : ls) {
-                    rows.add(Text.of(ts, s));
+                    rows.add(new Text(ts, s));
                 }
             }
             return this;

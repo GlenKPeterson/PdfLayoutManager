@@ -11,7 +11,7 @@ public interface Renderator {
 
         @Override public boolean hasMore() { return item != null; }
 
-        @Override public ContTerm<FixedItem> getSomething(float maxWidth) {
+        @Override public ContTerm getSomething(float maxWidth) {
             XyDim dim = item.calcDimensions(maxWidth);
             FixedItem ret = new FixedItemImpl(item, dim.width(), dim.height(), 0f, dim.height());
             item = null;
@@ -21,8 +21,8 @@ public interface Renderator {
         @Override public ContTermNone getIfFits(float remainingWidth) {
             XyDim dim = item.calcDimensions(remainingWidth);
             if (dim.width() <= remainingWidth) {
-                return getSomething(remainingWidth).match(c -> ContTermNone.Companion.continuing(c),
-                                                          t -> ContTermNone.Companion.terminal(t));
+                ContTerm something = getSomething(remainingWidth);
+                return something.toContTermNone();
             }
             return ContTermNone.Companion.none();
         }
@@ -34,7 +34,7 @@ public interface Renderator {
      Called when line is empty.  Returns something less than maxWidth if possible, but always
      returns something even if it won’t fit.  Call this when line is empty.
      */
-    ContTerm<FixedItem> getSomething(float maxWidth);
+    ContTerm getSomething(float maxWidth);
 
     /**
      Called when line is not empty to try to fit on this line.  If it doesn’t fit, then the

@@ -1,12 +1,9 @@
 package com.planbase.pdf.layoutmanager
 
 import org.organicdesign.fp.StaticImports.mutableVec
-import org.organicdesign.fp.StaticImports.vec
 import org.organicdesign.fp.collections.ImList
 import org.organicdesign.fp.collections.MutableList
-import org.organicdesign.fp.oneOf.OneOf2
 import org.organicdesign.fp.oneOf.OneOf2OrNone
-import org.organicdesign.fp.type.RuntimeTypes
 
 /** Represents a fixed-size item  */
 
@@ -42,43 +39,19 @@ data class FixedItemImpl(val item: Renderable,
 Represents a continuing or terminal FixedItem where Continuing means there could be more on this
 line (no hard line break) and Terminal means a hard-coded line-break was encountered.
  */
-// TODO: This might be better as a data class than a oneOf
-class ContTerm<T> private constructor(c: T?, t: T?, n:Int)
-    : OneOf2<T,T>(CONT_TERM_TYPES, c, t, n) {
-
-    @Suppress("UNCHECKED_CAST")
-    fun getEither():T = super.item as T
-
-//    /** Returns true if this is Continuing.  */
-//    val isContinuing: Boolean
-//        get() = sel == 1
-//    /** Returns true if this is Terminal.  */
-//    val isTerminal: Boolean
-//        get() = sel == 2
-//
-//    /** Returns the good value if this is a Good, or throws an exception if this is a Bad.  */
-//    fun continuing(): T = match({ c -> c },
-//            { super.throw2(it) })
-//
-//    /** Returns the bad value if this is a Bad, or throws an exception if this is a Good.  */
-//    fun terminal(): T = match({ super.throw1(it) },
-//            { t -> t })
-
-    /** Represents the presence of a Continuing line.  */
-    private class Continuing
-
-    /** Represents the presence of a Terminal line.  */
-    private class Terminal
-
+data class ContTerm(val item: FixedItem, val foundCr: Boolean) {
+    fun toContTermNone() : ContTermNone =
+            if (foundCr) {
+                ContTermNone.Companion.terminal(item)
+            } else {
+                ContTermNone.Companion.continuing(item)
+            }
     companion object {
-        private val CONT_TERM_TYPES = RuntimeTypes.registerClasses(vec(Continuing::class.java,
-                Terminal::class.java))
-
         /** Construct a new Continuing from the given object.  */
-        fun <T> continuing(continuing: T?): ContTerm<T> = ContTerm(continuing, null, 1)
+        fun continuing(continuing: FixedItem): ContTerm = ContTerm(continuing, false)
 
         /** Construct a new Terminal from the given object.  */
-        fun <T> terminal(terminal: T?): ContTerm<T> = ContTerm(null, terminal, 2)
+        fun terminal(terminal: FixedItem): ContTerm = ContTerm(terminal, true)
     }
 }
 
@@ -88,12 +61,12 @@ class ContTermNone private constructor(c: FixedItem?, t: FixedItem?, n:Int)
 
     override fun typeName(selIdx: Int): String = NAMES[selIdx - 1]
 
-    /** Returns true if this is Continuing.  */
-    val isContinuing: Boolean
-        get() = sel == 1
-    /** Returns true if this is Terminal.  */
-    val isTerminal: Boolean
-        get() = sel == 2
+//    /** Returns true if this is Continuing.  */
+//    val isContinuing: Boolean
+//        get() = sel == 1
+//    /** Returns true if this is Terminal.  */
+//    val isTerminal: Boolean
+//        get() = sel == 2
 
     val isNone: Boolean
         get() = sel == 3
@@ -168,12 +141,11 @@ fun renderablesToLines(itemsInBlock: List<Renderable>, maxWidth: Float) : ImList
         val rtor:Renderator = item.renderator()
         while (rtor.hasMore()) {
             if (line.isEmpty()) {
-                rtor.getSomething(maxWidth)
-                        .match( { c -> line.append(c) },
-                                { t -> line.append(t)
-                                    line = Line()
-                                    line
-                                })
+                val something : ContTerm = rtor.getSomething(maxWidth)
+                line.append(something.item)
+                if (something.foundCr) {
+                    line = Line()
+                }
             } else {
                 rtor.getIfFits(maxWidth - line.width)
                         .match({ c -> line.append(c) },

@@ -14,10 +14,9 @@ class TextTest {
         val tStyle = TextStyle.of(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
         val txt = Text.of(tStyle, "This is a long enough line of text.")
         var ri : RowIdx = Text.tryGettingText(50f, 0, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        val wrappedRow : WrappedRow = ri.row()
-        var idx = ri.idx()
+        assertFalse(ri.foundCr)
+        val wrappedRow : WrappedRow = ri.row
+        var idx = ri.idx
         assertEquals("This is a", wrappedRow.string)
         assertEquals(10, idx)
         assertEquals(34.903126f, wrappedRow.rowDim.width())
@@ -26,35 +25,34 @@ class TextTest {
         assertEquals(tStyle.lineHeight(), wrappedRow.rowDim.height())
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("long", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("long", ri.row.string)
         assertEquals(15, idx)
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("enough line", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("enough line", ri.row.string)
         assertEquals(27, idx)
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("of text.", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("of text.", ri.row.string)
         assertEquals(36, idx)
     }
 
     @Test fun testTextTerminal() {
         val tStyle = TextStyle.of(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
         val txt = Text.of(tStyle, "This is\na long enough line of text.")
-        var ri : RowIdx = Text.tryGettingText(50f, 0, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        val wrappedRow : WrappedRow = ri.row()
-        var idx = ri.idx()
+        var ri = Text.tryGettingText(50f, 0, txt)
+        assertFalse(ri.foundCr)
+        val wrappedRow : WrappedRow = ri.row
+        var idx = ri.idx
         assertEquals("This is", wrappedRow.string)
         assertEquals(8, idx)
         assertEquals(27.084375f, wrappedRow.rowDim.width())
@@ -63,47 +61,47 @@ class TextTest {
         assertEquals(tStyle.lineHeight(), wrappedRow.rowDim.height())
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("a long", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("a long", ri.row.string)
         assertEquals(15, idx)
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("enough line", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("enough line", ri.row.string)
         assertEquals(27, idx)
 
         ri = Text.tryGettingText(50f, idx, txt)
-                .match({it},
-                       {throw Exception("Failed test.")})
-        idx = ri.idx()
-        assertEquals("of text.", ri.row().string)
+        assertFalse(ri.foundCr)
+
+        idx = ri.idx
+        assertEquals("of text.", ri.row.string)
         assertEquals(36, idx)
     }
 
     @Test fun testSubstrNoLeadingSpaceUntilRet() {
         var ret = Text.substrNoLeadingSpaceUntilRet("Hello", 0)
-        assertEquals("Hello", ret.trimmedStr())
-        assertFalse(ret.foundCr())
-        assertEquals(5, ret.totalCharsConsumed())
+        assertEquals("Hello", ret.trimmedStr)
+        assertFalse(ret.foundCr)
+        assertEquals(5, ret.totalCharsConsumed)
 
         ret = Text.substrNoLeadingSpaceUntilRet(" Hello", 0)
-        assertEquals("Hello", ret.trimmedStr())
-        assertFalse(ret.foundCr())
-        assertEquals(6, ret.totalCharsConsumed())
+        assertEquals("Hello", ret.trimmedStr)
+        assertFalse(ret.foundCr)
+        assertEquals(6, ret.totalCharsConsumed)
 
         ret = Text.substrNoLeadingSpaceUntilRet(" Hello\n", 0)
-        assertEquals("Hello", ret.trimmedStr())
-        assertTrue(ret.foundCr())
-        assertEquals(7, ret.totalCharsConsumed())
+        assertEquals("Hello", ret.trimmedStr)
+        assertTrue(ret.foundCr)
+        assertEquals(7, ret.totalCharsConsumed)
 
         ret = Text.substrNoLeadingSpaceUntilRet("  Hello there\n world.", 7)
-        assertEquals("there", ret.trimmedStr())
-        assertTrue(ret.foundCr())
-        assertEquals(7, ret.totalCharsConsumed())
+        assertEquals("there", ret.trimmedStr)
+        assertTrue(ret.foundCr)
+        assertEquals(7, ret.totalCharsConsumed)
     }
 
     @Test fun testRenderator() {
@@ -111,7 +109,9 @@ class TextTest {
         val txt = Text.of(tStyle, "This is a long enough line of text.")
         val rend = txt.renderator()
         assertTrue(rend.hasMore())
-        val row = rend.getSomething(40f).match({it}, {it})
+        val ri:ContTerm = rend.getSomething(40f)
+        assertFalse(ri.foundCr)
+        val row = ri.item
         assertEquals(tStyle.ascent(), row.ascent())
         assertEquals(tStyle.descent() + tStyle.leading(),
                 row.descentAndLeading())

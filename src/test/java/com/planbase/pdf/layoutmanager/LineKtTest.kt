@@ -16,13 +16,13 @@ class LineKtTest {
         val txt3 = Text.of(tStyle1, "world!")
         val line = Line()
         println("txt1.style().lineHeight(): " + txt1.style().lineHeight())
-        txt1.renderator().getSomething(999f).match(line::append, line::append)
+        line.append(txt1.renderator().getSomething(999f).item)
         assertEquals(tStyle1.lineHeight(), line.height(), 0.000002f)
 
-        txt2.renderator().getSomething(999f).match(line::append, line::append)
+        line.append(txt2.renderator().getSomething(999f).item)
         assertEquals(tStyle2.lineHeight(), line.height(), 0.000002f)
 
-        txt3.renderator().getSomething(999f).match(line::append, line::append)
+        line.append(txt3.renderator().getSomething(999f).item)
         assertEquals(tStyle2.lineHeight(), line.height(), 0.000002f)
     }
 
