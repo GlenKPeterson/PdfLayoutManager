@@ -147,8 +147,8 @@ public class SinglePage implements RenderTarget {
         }
         @Override public void commit(PDPageContentStream stream) throws IOException {
             stream.beginText();
-            stream.setNonStrokingColor(style.textColor());
-            stream.setFont(style.font(), style.fontSize());
+            stream.setNonStrokingColor(style.getTextColor());
+            stream.setFont(style.getFont(), style.getFontSize());
             stream.newLineAtOffset(x, y);
             stream.showText(t);
             stream.endText();

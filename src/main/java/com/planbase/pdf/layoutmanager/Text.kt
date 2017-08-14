@@ -23,7 +23,7 @@ class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
     private val dims = HashMap<Float, WrappedBlock>()
     private val align = CellStyle.DEFAULT_ALIGN
 
-    internal class WrappedRow(val string: String, val rowDim: XyDim, val textStyle: TextStyle) : FixedItem {
+    internal data class WrappedRow(val string: String, val rowDim: XyDim, val textStyle: TextStyle) : FixedItem {
 
         override fun xyDim(): XyDim {
             return rowDim
@@ -56,7 +56,7 @@ class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
 
     fun style(): TextStyle = textStyle
 
-    fun avgCharsForWidth(width: Float): Int = (width * 1220 / textStyle.avgCharWidth()).toInt()
+    fun avgCharsForWidth(width: Float): Int = (width * 1220 / textStyle.avgCharWidth).toInt()
 
     fun maxWidth(): Float = textStyle.stringWidthInDocUnits(text.trim())
 
@@ -64,93 +64,106 @@ class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
         if (maxWidth < 0) {
             throw IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth)
         }
-        val wb = WrappedBlock()
-        val x = 0f
-        var y = 0f
-        var maxX = x
-        val txt = this
-        val row = txt.text() //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
+        throw Exception("calcDimForReal")
 
-        var text = substrNoLeadingWhitespace(row, 0)
-        val charWidthGuess = txt.avgCharsForWidth(maxWidth)
-
-        while (text.isNotEmpty()) {
-            val textLen = text.length
-            //            System.out.println("text=[" + text + "] len=" + textLen);
-            // Knowing the average width of a character lets us guess and generally be near
-            // the word where the line break will occur.  Since the font reports a narrow average,
-            // (possibly due to the predominance of spaces in text) we widen it a little for a
-            // better first guess.
-            var idx = charWidthGuess
-            if (idx > textLen) {
-                idx = textLen
-            }
-            var substr = text.substring(0, idx)
-            var strWidth = textStyle.stringWidthInDocUnits(substr)
-
-            //            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
-            // If too short - find shortest string that is too long.
-            // int idx = idx;
-            // int maxTooShortIdx = -1;
-            while (strWidth < maxWidth && idx < textLen) {
-                //                System.out.println("find shortest string that is too long");
-                // Consume any whitespace.
-                while (idx < textLen && Character.isWhitespace(text[idx])) {
-                    idx++
-                }
-                // Find last non-whitespace character
-                while (idx < textLen && !Character.isWhitespace(text[idx])) {
-                    idx++
-                }
-                // Test new width
-                substr = text.substring(0, idx)
-                strWidth = textStyle.stringWidthInDocUnits(substr)
-            }
-
-            idx--
-            //            System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
-            // Too long.  Find longest string that is short enough.
-            while (strWidth > maxWidth && idx > 0) {
-                //                System.out.println("find longest string that is short enough");
-                //logger.info("strWidth: " + strWidth + " cell.width: " + cell.width + " idx: " + idx);
-                // Find previous whitespace run
-                while (idx > -1 && !Character.isWhitespace(text[idx])) {
-                    idx--
-                }
-                // Find last non-whatespace character before whitespace run.
-                while (idx > -1 && Character.isWhitespace(text[idx])) {
-                    idx--
-                }
-                if (idx < 1) {
-                    break // no spaces - have to put whole thing in cell and let it run over.
-                }
-                // Test new width
-                substr = text.substring(0, idx + 1)
-                strWidth = textStyle.stringWidthInDocUnits(substr)
-            }
-
-            wb.rows.add(WrappedRow.of(substr, strWidth, textStyle))
-            //            System.out.println("added row");
-            y -= textStyle.lineHeight()
-            //            System.out.println("y=" + y);
-
-            // Chop off section of substring that we just wrote out.
-            text = substrNoLeadingWhitespace(text, substr.length)
-            if (strWidth > maxX) {
-                maxX = strWidth
-            }
-            //            System.out.println("maxX=" + maxX);
-        }
-        //        // Not sure what to do if passed "".  This used to mean to insert a blank line, but I'd
-        //        // really like to make that "\n" instead, but don't have the time.  *sigh*
-        //        if (y == 0) {
-        //            y -= textStyle.lineHeight();
-        //        }
-        wb.blockDim = XyDim.of(maxX, 0 - y)
-        dims.put(maxWidth, wb)
-        //        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
-        //        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
-        return wb.blockDim!!
+//        val wb = WrappedBlock()
+//        val x = 0f
+//        var y = 0f
+//        var maxX = x
+//        val txt = this
+//
+//        val rend = renderator()
+//        val line:Line = Line()
+//
+//        // TODO: This is fundamentally wrong - need to change how things are rendered.
+//        while (rend.hasMore()) {
+//
+//        }
+//
+//
+//
+//        val row = txt.text() //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
+//
+//        var text = substrNoLeadingWhitespace(row, 0)
+//        val charWidthGuess = txt.avgCharsForWidth(maxWidth)
+//
+//        while (text.isNotEmpty()) {
+//            val textLen = text.length
+//            //            System.out.println("text=[" + text + "] len=" + textLen);
+//            // Knowing the average width of a character lets us guess and generally be near
+//            // the word where the line break will occur.  Since the font reports a narrow average,
+//            // (possibly due to the predominance of spaces in text) we widen it a little for a
+//            // better first guess.
+//            var idx = charWidthGuess
+//            if (idx > textLen) {
+//                idx = textLen
+//            }
+//            var substr = text.substring(0, idx)
+//            var strWidth = textStyle.stringWidthInDocUnits(substr)
+//
+//            //            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
+//            // If too short - find shortest string that is too long.
+//            // int idx = idx;
+//            // int maxTooShortIdx = -1;
+//            while (strWidth < maxWidth && idx < textLen) {
+//                //                System.out.println("find shortest string that is too long");
+//                // Consume any whitespace.
+//                while (idx < textLen && Character.isWhitespace(text[idx])) {
+//                    idx++
+//                }
+//                // Find last non-whitespace character
+//                while (idx < textLen && !Character.isWhitespace(text[idx])) {
+//                    idx++
+//                }
+//                // Test new width
+//                substr = text.substring(0, idx)
+//                strWidth = textStyle.stringWidthInDocUnits(substr)
+//            }
+//
+//            idx--
+//            //            System.out.println("(strWidth=" + strWidth + " > maxWidth=" + maxWidth + ") && (idx=" + idx + " > 0)");
+//            // Too long.  Find longest string that is short enough.
+//            while (strWidth > maxWidth && idx > 0) {
+//                //                System.out.println("find longest string that is short enough");
+//                //logger.info("strWidth: " + strWidth + " cell.width: " + cell.width + " idx: " + idx);
+//                // Find previous whitespace run
+//                while (idx > -1 && !Character.isWhitespace(text[idx])) {
+//                    idx--
+//                }
+//                // Find last non-whatespace character before whitespace run.
+//                while (idx > -1 && Character.isWhitespace(text[idx])) {
+//                    idx--
+//                }
+//                if (idx < 1) {
+//                    break // no spaces - have to put whole thing in cell and let it run over.
+//                }
+//                // Test new width
+//                substr = text.substring(0, idx + 1)
+//                strWidth = textStyle.stringWidthInDocUnits(substr)
+//            }
+//
+//            wb.rows.add(WrappedRow.of(substr, strWidth, textStyle))
+//            //            System.out.println("added row");
+//            y -= textStyle.lineHeight()
+//            //            System.out.println("y=" + y);
+//
+//            // Chop off section of substring that we just wrote out.
+//            text = substrNoLeadingWhitespace(text, substr.length)
+//            if (strWidth > maxX) {
+//                maxX = strWidth
+//            }
+//            //            System.out.println("maxX=" + maxX);
+//        }
+//        //        // Not sure what to do if passed "".  This used to mean to insert a blank line, but I'd
+//        //        // really like to make that "\n" instead, but don't have the time.  *sigh*
+//        //        if (y == 0) {
+//        //            y -= textStyle.lineHeight();
+//        //        }
+//        wb.blockDim = XyDim.of(maxX, 0 - y)
+//        dims.put(maxWidth, wb)
+//        //        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
+//        //        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
+//        return wb.blockDim!!
     }
 
     private fun ensureWrappedBlock(maxWidth: Float): WrappedBlock {

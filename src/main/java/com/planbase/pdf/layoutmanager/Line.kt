@@ -85,6 +85,7 @@ class ContTermNone private constructor(c: FixedItem?, t: FixedItem?, n:Int)
     }
 }
 
+/** A mutable data structure to hold a line. */
 class Line {
     var width: Float = 0f
     var maxAscent: Float = 0f
@@ -109,6 +110,16 @@ class Line {
             x += item.xyDim().width()
         }
         return XyOffset.of(x, height())
+    }
+
+    override fun toString(): String {
+        return "Line(\n" +
+                "               width=$width\n" +
+                "           maxAscent=$maxAscent\n" +
+                "maxDescentAndLeading=$maxDescentAndLeading\n" +
+                "              height=${height()}\n" +
+                "               items=\n" +
+                "$items)\n"
     }
 }
 

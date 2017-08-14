@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 
 class TextTest {
     @Test fun testText() {
-        val tStyle = TextStyle.of(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
+        val tStyle = TextStyle(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
         val txt = Text.of(tStyle, "This is a long enough line of text.")
         var ri : RowIdx = Text.tryGettingText(50f, 0, txt)
         assertFalse(ri.foundCr)
@@ -47,7 +47,7 @@ class TextTest {
     }
 
     @Test fun testTextTerminal() {
-        val tStyle = TextStyle.of(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
+        val tStyle = TextStyle(PDType1Font.HELVETICA, 9f, Utils.CMYK_BLACK)
         val txt = Text.of(tStyle, "This is\na long enough line of text.")
         var ri = Text.tryGettingText(50f, 0, txt)
         assertFalse(ri.foundCr)
@@ -105,7 +105,7 @@ class TextTest {
     }
 
     @Test fun testRenderator() {
-        val tStyle = TextStyle.of(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
+        val tStyle = TextStyle(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
         val txt = Text.of(tStyle, "This is a long enough line of text.")
         val rend = txt.renderator()
         assertTrue(rend.hasMore())
@@ -125,4 +125,38 @@ class TextTest {
         assertNotNull(row3)
         assertEquals(14.816668f, row3.xyDim().width())
     }
+
+    @Test fun testRenderator2() {
+        val tStyle = TextStyle(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
+        val txt = Text.of(tStyle, "This is a long enough line of text.")
+        val rend = txt.renderator()
+        assertTrue(rend.hasMore())
+        val ri:ContTerm = rend.getSomething(40f)
+        assertFalse(ri.foundCr)
+        val row = ri.item
+        assertEquals(tStyle.ascent(), row.ascent())
+        assertEquals(tStyle.descent() + tStyle.leading(),
+                     row.descentAndLeading())
+        assertEquals(tStyle.lineHeight(), row.lineHeight())
+        assertEquals(tStyle.lineHeight(), row.xyDim().height())
+        assertEquals(28.250002f, row.xyDim().width())
+
+        assertTrue(rend.getIfFits(5f).isNone)
+
+        val row3 = rend.getIfFits(40f).match({it},{it},null)
+        assertNotNull(row3)
+        assertEquals(14.816668f, row3.xyDim().width())
+        assertEquals(tStyle.lineHeight(), row3.xyDim().height())
+    }
+
+    @Test fun testCalcDimensions() {
+        val tStyle = TextStyle(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
+        val txt = Text.of(tStyle, "This is a long enough line of text.")
+
+        val dim: XyDim = txt.calcDimensions(40f)
+        println(dim)
+        assertEquals(tStyle.lineHeight() * 2, dim.height())
+        assertEquals(28.250002f, dim.width())
+    }
+
 }
