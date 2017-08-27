@@ -15,9 +15,12 @@
 package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
+import org.apache.pdfbox.pdmodel.encryption.ProtectionPolicy;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColorSpace;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
@@ -28,6 +31,7 @@ import org.apache.pdfbox.util.Matrix;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -927,5 +931,17 @@ public class PdfLayoutMgr {
             sB.append(in.subSequence(idx, in.length()));
         }
         return sB.toString();
+    }
+    
+    public void protect(ProtectionPolicy policy) throws IOException {
+      doc.protect(policy);
+    }
+    
+    public PDEmbeddedFile addEmbeddedFile(InputStream str) throws IOException {
+      return new PDEmbeddedFile(doc,str);
+    }
+    
+    public PDDocumentCatalog getDocumentCatalog() {
+      return doc.getDocumentCatalog();
     }
 }
