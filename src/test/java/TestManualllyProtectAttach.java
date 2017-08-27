@@ -1,4 +1,4 @@
-// Copyright 2013-03-13 PlanBase Inc. & Glen Peterson
+// Copyright 2013-03-13 PlanBase Inc. & Glen Peterson & B. Shouse
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ import com.planbase.pdf.layoutmanager.CellStyle;
 import com.planbase.pdf.layoutmanager.LogicalPage;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.TextStyle;
-import com.planbase.pdf.layoutmanager.XyOffset;
 
 import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
@@ -40,12 +39,7 @@ import java.awt.Color;
 
 public class TestManualllyProtectAttach {
 
-//    public static void main(String... args) throws IOException, COSVisitorException {
-//        new TestManualllyPdfLayoutMgr().testPdf();
-//    }
-
-    @Test
-    public void testProtectAttach() throws IOException {
+    @Test public void testProtectAttach() throws IOException {
         // Nothing happens without a PdfLayoutMgr.
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
 
@@ -57,8 +51,14 @@ public class TestManualllyProtectAttach {
 
 
         // Include a simple description
-        Cell protectAttach = Cell.builder(CellStyle.DEFAULT, lp.pageWidth()-100f).textStyle(TextStyle.of(PDType1Font.HELVETICA, 12f, Color.BLACK)).addStrs("This document should be protected against writing","Check the document properties for Security.","It should be password protected with 40-bit encryption","There should also be a PNG image attached.").build();
-        XyOffset xya = lp.putCell(20f, lp.yPageTop(), protectAttach);
+        Cell protectAttach = Cell.builder(CellStyle.DEFAULT, lp.pageWidth()-100f)
+                                 .textStyle(TextStyle.of(PDType1Font.HELVETICA, 12f, Color.BLACK))
+                                 .addStrs("This document should be protected against writing",
+                                          "Check the document properties for Security.",
+                                          "It should be password protected with 40-bit encryption",
+                                          "There should also be a PNG image attached.")
+                                 .build();
+        lp.putCell(20f, lp.yPageTop(), protectAttach);
         
         lp.commit();
         
@@ -66,7 +66,7 @@ public class TestManualllyProtectAttach {
         AccessPermission ap = new AccessPermission();
         ap.setCanModify(false);
         
-        // Setup a protection policy
+        // Setup a protection policy with the password, "ownerPassword"
         StandardProtectionPolicy sp = new StandardProtectionPolicy("ownerPassword","",ap);
         
         // Apply protection
