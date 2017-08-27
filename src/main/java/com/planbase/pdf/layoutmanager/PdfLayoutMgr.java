@@ -15,7 +15,8 @@
 package com.planbase.pdf.layoutmanager;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
+import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -932,16 +933,32 @@ public class PdfLayoutMgr {
         }
         return sB.toString();
     }
-    
-    public void protect(ProtectionPolicy policy) throws IOException {
-      doc.protect(policy);
+
+    /**
+     Addes the embedded files tree to the underlying PDDOcumentNameDictionary in PDFBox.
+     Access to this is necessary in order to "protect" a PDF file.
+     See PDDocumentNameDictionary.setEmbeddedFiles() for most of the details.
+     @since 0.5.2
+     */
+    public void setEmbeddedFilesOnDict(PDEmbeddedFilesNameTreeNode efTree) {
+        PDDocumentNameDictionary dict = new PDDocumentNameDictionary(doc.getDocumentCatalog());
+        dict.setEmbeddedFiles(efTree);
+        doc.getDocumentCatalog().setNames(dict);
     }
-    
-    public PDEmbeddedFile addEmbeddedFile(InputStream str) throws IOException {
-      return new PDEmbeddedFile(doc,str);
-    }
-    
-    public PDDocumentCatalog getDocumentCatalog() {
-      return doc.getDocumentCatalog();
-    }
+
+    /**
+     Sets the protection policy on the underlying PDDocument.
+     This marks the document to be encrypted when it is saved.
+     See the same named method on apache PDFBox PDDocument for further details.
+     Note that this is not necessarily iron-clad protection, maybe more like a hint that the document is private.
+     @since 0.5.2
+     */
+    public void protect(ProtectionPolicy policy) throws IOException { doc.protect(policy); }
+
+    /**
+     Creates a new PDFBox PDEmbeddedFile from the underlying PDDocument and the supplied InputStream.
+     This is necessary in order to "protect" a PDF file.
+     @since 0.5.2
+     */
+    public PDEmbeddedFile addEmbeddedFile(InputStream str) throws IOException { return new PDEmbeddedFile(doc,str); }
 }

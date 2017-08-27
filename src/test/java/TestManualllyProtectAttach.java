@@ -17,8 +17,6 @@ import com.planbase.pdf.layoutmanager.CellStyle;
 import com.planbase.pdf.layoutmanager.LogicalPage;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.TextStyle;
-
-import org.apache.pdfbox.pdmodel.PDDocumentNameDictionary;
 import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification;
 import org.apache.pdfbox.pdmodel.common.filespecification.PDEmbeddedFile;
@@ -27,6 +25,7 @@ import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,7 +34,6 @@ import java.io.OutputStream;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.awt.Color;
 
 public class TestManualllyProtectAttach {
 
@@ -89,21 +87,9 @@ public class TestManualllyProtectAttach {
         pf.setEmbeddedFile(ef);
         efMap.put("Picture", pf);
         efTree.setNames(efMap);
-        PDDocumentNameDictionary dict = new PDDocumentNameDictionary(pageMgr.getDocumentCatalog());
-        dict.setEmbeddedFiles(efTree);
-        pageMgr.getDocumentCatalog().setNames(dict);
+        pageMgr.setEmbeddedFilesOnDict(efTree);
 
         // All done - write it out!
-
-        // In a web application, this could be:
-        //
-        // httpServletResponse.setContentType("application/pdf") // your server may do this for you.
-        // os = httpServletResponse.getOutputStream()            // you probably have to do this
-        //
-        // Also, in a web app, you probably want name your action something.pdf and put
-        // target="_blank" on your link to the PDF download action.
-
-        // We're just going to write to a file.
         OutputStream os = new FileOutputStream("testProtectAttach.pdf");
 
         // Commit it to the output stream!
