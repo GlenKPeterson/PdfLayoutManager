@@ -154,7 +154,7 @@ this directory like the following (you'll have to replace the question marks):
     		<groupId>org.bouncycastle</groupId>
 		    <artifactId>bcprov-jdk15on</artifactId>
 		    <version>1.58</version>
-    		<scope>test</scope>
+    		    <scope>test</scope>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
