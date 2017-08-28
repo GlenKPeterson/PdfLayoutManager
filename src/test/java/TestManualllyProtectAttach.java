@@ -57,7 +57,11 @@ public class TestManualllyProtectAttach {
 
 
         // Include a simple description
-        Cell protectAttach = Cell.builder(CellStyle.DEFAULT, lp.pageWidth()-100f).textStyle(TextStyle.of(PDType1Font.HELVETICA, 12f, Color.BLACK)).addStrs("This document should be protected against writing","Check the document properties for Security.","It should be password protected with 40-bit encryption","There should also be a PNG image attached.").build();
+        Cell protectAttach = Cell.builder(CellStyle.DEFAULT, lp.pageWidth() - 100f)
+            .textStyle(TextStyle.of(PDType1Font.HELVETICA, 12f, Color.BLACK))
+            .addStrs("This document should be protected against writing", "Check the document properties for Security.",
+                "It should be password protected with 40-bit encryption", "There should also be a PNG image attached.")
+            .build();
         XyOffset xya = lp.putCell(20f, lp.yPageTop(), protectAttach);
         
         lp.commit();
