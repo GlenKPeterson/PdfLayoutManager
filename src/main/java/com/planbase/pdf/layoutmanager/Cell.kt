@@ -1,6 +1,6 @@
 // Copyright 2013-03-03 PlanBase Inc.
 //
-// This file is part of PdfLayoutMgr
+// This file is part of PdfLayoutMgr2
 //
 // PdfLayoutMgr is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
