@@ -1,38 +1,34 @@
-PdfLayoutManager
-================
+# PdfLayoutManager
+
 A wrapper for PDFBox to add line-breaking, page-breaking, and tables.
 Uses a box-model (like HTML) for styles.
 Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 ![Sample Output](sampleScreenShot.png)
 
-Usage
-=====
+# NOTICE: No longer Apache!
+You can use this as free software under the [Affero GPL](https://www.gnu.org/licenses/agpl-3.0.en.html) or contact PlanBase about a commercial license.
+See the [FAQ](#faq) below
+
+## Usage
+
 Example: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMgr.java)
 
 [API Docs](https://glenkpeterson.github.io/PdfLayoutManager/apidocs/)
 
-# WARNING ABOUT VERSION 0.5.0 (as of 2017-05-29)
-PdfLayoutManager 0.5.0 is just released with PDFBox 2.0.6. Outside of character encoding things look like they are working correctly. But the character encoding is a bit of an unknown.
-
-I think the character encoding issues in an old (pre 2.0) version of PDFBox have been fixed. So I removed my Transliteration code for Russian which also converted any "High ANSI characters" to lower ANSI equivalents, or to bullets if no equivalent was available. If you get exceptions about character support, you now need to load a font that includes those characters, or trap them yourself. Here's how to load a font: https://pdfbox.apache.org/1.8/cookbook/workingwithfonts.html
-
-Here's how I used to trap them (incomplete and no longer working with the new version of PDFBox):
-https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L892
-
-Maven Dependency
-================
+# Maven Dependency
 ```xml
+    <!-- Now Affero GPL - no longer Apache -->
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.7.6-ALPHA</version>
+        <version>1.0.0-ALPHA</version>
     </dependency>
 ```
 
-Building from Source
-====================
-Requires Maven 3 and Java JDK 1.6 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
+# Building from Source
+
+Requires Maven 3, Java 8, and Kotlin 1.1.51 or greater.  Jar file ends up in the `target/` sub-folder.
 
 API documentation can be built with `mvn javadoc:javadoc` and is then found at `target/site/apidocs/index.html`
 
@@ -42,36 +38,31 @@ A jar file can be built with `mvn clean package` and ends up in the `target/` su
 
 FAQ
 ===
+***Q: Can I use this in closed-source software?***
+**A:** You can purchase a commercial license from [PlanBase Inc.](https://planbase.com)
+Otherwise, you must comply with all the terms of the [Affero GPL](https://www.gnu.org/licenses/agpl-3.0.en.html).
+Affero GPL software cannot be combined with closed-source software in the same JVM even if the AGPL software is used over a network or the Internet.
+
+***Q: Can I use this in non-AfferoGPL Open-Sourced software?***
+**A:** No.
+Any software that uses AfferoGPL code (in the same JVM) must be released under the AfferoGPL. 
+
+***Q: Why isn't this Apache-licensed any more?***
+**A:** The recent version required a near-total rewrite in order to accommodate inline images and style changes.
+PlanBase paid for that.  It was a significant investment and they deserve the chance to profit from it.
+You can still use the old PdfLayoutManager versions 0.x under the Apache license, but it lacks inline styles and images.
 
 ***Q: What languages/character sets does PdfLayoutManager support?***
-
 **A:** The PDF spec guarantees support for [WinAnsiEncoding AKA Windows Code Page 1252](http://en.wikipedia.org/wiki/Windows-1252) and maybe four PDType1Fonts fonts without any font embedding.  WinAnsi covers the following languages:
 
 Afrikaans (af), Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo), Finnish (fi), French (fr), Galician (gl), German (de), Icelandic (is), Irish (ga), Italian (it), Norwegian (no), Portuguese (pt), Scottish (gd), Spanish (es), and Swedish (sv)
 
-In addition, PdfLayoutManager uses Romanized substitutions for the Cyrillic characters of the modern Russian (ru) alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and 'Shch' for Щ.
-
-This character set is good enough for many purposes. If a character is not supported, it is converted to a bullet, so that the omission is politely, professionally visible.  See: [Transliteration Details](src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L841)
-
-
-***Q: I want different fonts and more characters!***
-
-**A:** Fonts that support a wide range of characters tend to be large (over one megabyte). Embedding such a font in every PDF file is unacceptable for most people who have to build PDF files on the fly for users to download, or to send in email. To avoid this, we would have to keep track of what characters are used, then embed an appropriate subset of a font in the resulting PDF.  Different fonts are already divided into subsets, but not necessarily the same subsets.  Almost no font has every character, and it would be your responsibility to provide fonts, and maybe fallback fonts that cover all the characters you might need.
-
-If we supported this, I don't know how much it would slow down PDF creation.  Maybe we'd have a separate project that just maps characters to font fragments.  You'd run that first, then pass the ideally formatted/partitioned output to PdfLayoutManger to use quickly on-the-fly.  Such a solution will require you to do some work and to understand some underlying character/font issues that our current character-set limitations allow us (and you) to ignore.
-
-Last I checked, PDFBox had hard-coded a character encoding that made it difficult for me to work with alternative character encodings. What they did might be correct, but I looked at it, got confused and frustrated, then gave up. Another volunteer started playing with this and gave up too.
-
-That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reasons they can charge money for their products is because this problem is so hard.
-
-**UPDATE 2016-01-20:** PDFBox (which this project is built on top of) 2.0 claims to have Unicode support, which previous versions did not have.  It's currently in Release-Candidate 3.  I haven't had a chance to try it yet.  Here's the fixed issue that I think should make what you want possible: https://issues.apache.org/jira/browse/PDFBOX-922
+If you embed fonts, you can use whatever characters are in that font.  PDFBox throws an exception if you request a character that's not covered by your font list.
 
 ***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
-
 **A:** PdfLayoutManager was intended to provide html-table-like flowing of text and resizing of cells to fit whatever you put in them, even across multiple pages.  If you don't need that, use PDFBox directly.  If you need other features of PdfLayoutManager, there is a minHeight() setting on table rows.  Combined with padding and alignment, that may get you what you need to layout things that will always fit in the box.
 
 ***Q: Will PdfLayoutManager ever support cropping the contents of a fixed-size box?***
-
 **A:** If individual letters or images have a dimension which is bigger than the same dimension of their bounding box, we either have to suppress their display, or crop them.  The PDF spec mentions something about a "clipping path" that might be usable for cropping overflow if you turn it on, render your object, then turn it off again.  I'm not currently aware of PDFBox support for this (if it's even possible).
 
 If the contents are all little things, we could just show as many little letters or images as completely fit, then no more (truncate the list of contents).  Showing none could make truncation work for big objects too, but I'm not in a rush to implement that since it's conceptually so different from the very reason for the existence of PdfLayoutManager.
@@ -79,7 +70,6 @@ If the contents are all little things, we could just show as many little letters
 Maybe some day I'll provide some sample code so you can do truncation yourself.  [TextStyle](src/main/java/com/planbase/pdf/layoutmanager/TextStyle.java) has lineHeight() and stringWidthInDocUnits() that you may find useful for writing your own compatible cropping algorithm.  If you do that (and it works well), I hope you'll consider contributing it back to PdfLayoutManager (at least to this doc) so that others can benefit!
 
 ***Q: Why doesn't PdfLayoutManager line-wrap my insanely long single-word test string properly?***
-
 **A:** For text wrapping to work, the text needs occasional whitespace.  In HTML, strings without whitespace do not wrap at all!  In PdfLayoutManager, a long enough string will wrap at some point wider than the cell.
 
 The text wrapping algorithm picks a slightly long starting guess for where to wrap the text, then steps backward looking for whitespace. If it doesn't find any whitspace, it splits the first line at it's original guess length and continues trying to wrap the rest of the text on the next line.

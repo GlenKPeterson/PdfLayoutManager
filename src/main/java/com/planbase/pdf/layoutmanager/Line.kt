@@ -1,39 +1,28 @@
+// Copyright 2017 PlanBase Inc.
+//
+// This file is part of PdfLayoutMgr
+//
+// PdfLayoutMgr is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// PdfLayoutMgr is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with PdfLayoutMgr.  If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+//
+// If you wish to use this code with proprietary software,
+// contact PlanBase Inc. <https://planbase.com> to purchase a commercial license.
+
 package com.planbase.pdf.layoutmanager
 
 import org.organicdesign.fp.StaticImports.mutableVec
 import org.organicdesign.fp.collections.ImList
-import org.organicdesign.fp.collections.MutableList
-import org.organicdesign.fp.oneOf.OneOf2OrNone
-
-/** Represents a fixed-size item  */
-
-interface FixedItem {
-    fun xyDim(): XyDim
-//    fun width(): Float = width
-//    fun totalHeight(): Float = heightAboveBase + depthBelowBase
-
-    fun ascent(): Float
-    fun descentAndLeading(): Float
-    fun lineHeight(): Float
-
-    fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset
-}
-
-data class FixedItemImpl(val item: Renderable,
-                         val width: Float,
-                         val ascent: Float,
-                         val descentAndLeading: Float,
-                         val lineHeight:Float) : FixedItem {
-    override fun ascent(): Float = ascent
-    override fun descentAndLeading(): Float = descentAndLeading
-    override fun lineHeight(): Float = lineHeight
-    override fun xyDim(): XyDim = XyDim.of(width, lineHeight)
-//    fun width(): Float = width
-//    fun totalHeight(): Float = heightAboveBase + depthBelowBase
-
-    override fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset =
-            item.render(lp, outerTopLeft.y(outerTopLeft.y() + ascent), xyDim())
-}
+import org.organicdesign.fp.collections.MutList
 
 /**
 Represents a continuing or terminal FixedItem where Continuing means there could be more on this
@@ -42,9 +31,9 @@ line (no hard line break) and Terminal means a hard-coded line-break was encount
 data class ContTerm(val item: FixedItem, val foundCr: Boolean) {
     fun toContTermNone() : ContTermNone =
             if (foundCr) {
-                ContTermNone.Companion.terminal(item)
+                Terminal(item)
             } else {
-                ContTermNone.Companion.continuing(item)
+                Continuing(item)
             }
     companion object {
         /** Construct a new Continuing from the given object.  */
@@ -55,61 +44,36 @@ data class ContTerm(val item: FixedItem, val foundCr: Boolean) {
     }
 }
 
-// TODO: This might be better as a data class than a oneOf
-class ContTermNone private constructor(c: FixedItem?, t: FixedItem?, n:Int)
-    : OneOf2OrNone<FixedItem,FixedItem>(c, t, n) {
-
-    override fun typeName(selIdx: Int): String = NAMES[selIdx - 1]
-
-//    /** Returns true if this is Continuing.  */
-//    val isContinuing: Boolean
-//        get() = sel == 1
-//    /** Returns true if this is Terminal.  */
-//    val isTerminal: Boolean
-//        get() = sel == 2
-
-    val isNone: Boolean
-        get() = sel == 3
-
-    companion object {
-        private val NAMES = arrayOf("Continuing", "Terminal", "None")
-
-        /** Construct a new Continuing from the given object.  */
-        fun continuing(continuing: FixedItem): ContTermNone = ContTermNone(continuing, null, 1)
-
-        /** Construct a new Terminal from the given object.  */
-        fun terminal(terminal: FixedItem): ContTermNone = ContTermNone(null, terminal, 2)
-
-        /** Construct a new None from the given object.  */
-        fun none(): ContTermNone = ContTermNone(null, null, 3)
-    }
-}
+sealed class ContTermNone
+data class Continuing(val item:FixedItem):ContTermNone()
+data class Terminal(val item:FixedItem):ContTermNone()
+object None:ContTermNone()
 
 /** A mutable data structure to hold a line. */
 class Line {
     var width: Float = 0f
     var maxAscent: Float = 0f
     var maxDescentAndLeading: Float = 0f
-    val items: MutableList<FixedItem> = mutableVec()
+    val items: MutList<FixedItem> = mutableVec()
 
     fun isEmpty() = items.isEmpty()
     fun append(fi : FixedItem):Line {
-        maxAscent = maxOf(maxAscent, fi.ascent())
-        maxDescentAndLeading = maxOf(maxDescentAndLeading, fi.descentAndLeading())
-        width += fi.xyDim().width()
+        maxAscent = maxOf(maxAscent, fi.ascent)
+        maxDescentAndLeading = maxOf(maxDescentAndLeading, fi.descentAndLeading)
+        width += fi.xyDim.width
         items.append(fi)
         return this
     }
     fun height(): Float = maxAscent + maxDescentAndLeading
 //    fun xyDim(): XyDim = XyDim.of(width, height())
     fun render(lp:RenderTarget, outerTopLeft:XyOffset):XyOffset {
-        var x:Float = outerTopLeft.x()
-        val y = outerTopLeft.y()
-        for (item:FixedItem in items) {
-            item.render(lp, XyOffset.of(x, y - item.ascent()))
-            x += item.xyDim().width()
+        var x:Float = outerTopLeft.x
+        val y = outerTopLeft.y
+        for (item: FixedItem in items) {
+            item.render(lp, XyOffset(x, y - item.ascent))
+            x += item.xyDim.width
         }
-        return XyOffset.of(x, height())
+        return XyOffset(x, height())
     }
 
     override fun toString(): String {
@@ -145,8 +109,8 @@ fun renderablesToLines(itemsInBlock: List<Renderable>, maxWidth: Float) : ImList
     if (maxWidth < 0) {
         throw IllegalArgumentException("maxWidth must be >= 0, not " + maxWidth)
     }
-    val lines: MutableList<Line> = mutableVec()
-    var line: Line = Line()
+    val lines: MutList<Line> = mutableVec()
+    var line = Line()
 
     for (item in itemsInBlock) {
         val rtor:Renderator = item.renderator()
@@ -158,17 +122,19 @@ fun renderablesToLines(itemsInBlock: List<Renderable>, maxWidth: Float) : ImList
                     line = Line()
                 }
             } else {
-                rtor.getIfFits(maxWidth - line.width)
-                        .match({ c -> line.append(c) },
-                                { t -> line.append(t)
-                                    line = Line()
-                                    line
-                                },
-                                {
-                                    lines.append(line)
-                                    line = Line()
-                                    line
-                                })
+                val ctn:ContTermNone = rtor.getIfFits(maxWidth - line.width)
+
+                when (ctn) {
+                    is Continuing ->
+                        line.append(ctn.item)
+                    is Terminal -> {
+                        line.append(ctn.item)
+                        line = Line()
+                    }
+                    None -> {
+                        lines.append(line)
+                        line = Line()
+                    }}
             }
         }
     }

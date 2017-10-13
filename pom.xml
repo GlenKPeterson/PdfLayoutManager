@@ -37,29 +37,31 @@ this directory like the following (you'll have to replace the question marks):
 
 -->
 	<groupId>com.planbase.pdf</groupId>
-	<artifactId>PdfLayoutManager</artifactId>
-	<version>0.7.6-ALPHA</version>
+	<artifactId>PdfLayoutManager2</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>PdfLayoutManager</name>
-	<description>A page-layout manager for PDFBox to do things like line-breaking, page-breaking, and tables. Uses a box-model for styles.</description>
+	<description>An AGPL page-layout manager for PDFBox with line-breaking, page-breaking, and tables. Uses a box-model for styles.</description>
+	<!-- TODO: Fix this for the PlanBase version. -->
 	<url>https://github.com/GlenKPeterson/PdfLayoutManager</url>
 
 	<licenses>
 		<license>
-			<name>The Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<name>GNU Affero General Public License (AGPL) version 3.0</name>
+			<url>https://www.gnu.org/licenses/agpl-3.0.en.html</url>
 		</license>
 	</licenses>
 	<developers>
 		<developer>
 			<name>Glen K. Peterson</name>
-			<email>glen@organicdesign.org</email>
+			<email>glen@organicdesign.com</email>
 			<organization>PlanBase Inc.</organization>
-			<organizationUrl>http://glenpeterson.blogspot.com/</organizationUrl>
+			<organizationUrl>https://planbase.com/</organizationUrl>
 		</developer>
 	</developers>
 	<scm>
+		<!-- TODO: Fix this for the PlanBase version. -->
 		<connection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</connection>
 		<developerConnection>scm:git:https://github.com/GlenKPeterson/PdfLayoutManager.git</developerConnection>
 		<url>https://github.com/GlenKPeterson/PdfLayoutManager.git</url>
@@ -120,47 +122,56 @@ this directory like the following (you'll have to replace the question marks):
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
+				<configuration>
+					<jvmTarget>1.8</jvmTarget>
+				</configuration>
 				<version>${kotlin.version}</version>
+
 				<executions>
 					<execution>
 						<id>compile</id>
-						<phase>process-sources</phase>
+						<phase>compile</phase>
+						<goals> <goal>compile</goal> </goals>
+						<configuration>
+							<jvmTarget>1.8</jvmTarget>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-compile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
+						<configuration>
+							<jvmTarget>1.8</jvmTarget>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>compile</phase>
 						<goals>
 							<goal>compile</goal>
 						</goals>
 					</execution>
 					<execution>
-						<id>test-compile</id>
-						<phase>process-test-sources</phase>
+						<id>default-testCompile</id>
+						<phase>none</phase>
+					</execution>
+					<execution>
+						<id>java-test-compile</id>
+						<phase>test-compile</phase>
 						<goals>
-							<goal>test-compile</goal>
+							<goal>testCompile</goal>
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<jvmTarget>1.8</jvmTarget>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>testCompile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -193,7 +204,7 @@ this directory like the following (you'll have to replace the question marks):
 		<dependency>
 			<groupId>org.organicdesign</groupId>
 			<artifactId>Paguro</artifactId>
-			<version>3.0.8-BETA</version>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -221,7 +232,7 @@ this directory like the following (you'll have to replace the question marks):
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <kotlin.version>1.1.3-2</kotlin.version>
+        <kotlin.version>1.1.51</kotlin.version>
     </properties>
 
 </project>

@@ -1,3 +1,23 @@
+// Copyright 2017 PlanBase Inc.
+//
+// This file is part of PdfLayoutMgr
+//
+// PdfLayoutMgr is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// PdfLayoutMgr is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with PdfLayoutMgr.  If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+//
+// If you wish to use this code with proprietary software,
+// contact PlanBase Inc. <https://planbase.com> to purchase a commercial license.
+
 package com.planbase.pdf.layoutmanager;
 
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation;
@@ -62,13 +82,13 @@ import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.Orientation.PORTRAIT;
 public class PageGrouping implements RenderTarget { // AKA Document Section
 
     private static final XyDim DEFAULT_DOUBLE_MARGIN_DIM =
-            XyDim.of(DEFAULT_MARGIN * 2, DEFAULT_MARGIN * 2);
+            new XyDim(DEFAULT_MARGIN * 2, DEFAULT_MARGIN * 2);
 
     private final PdfLayoutMgr mgr;
     private final boolean portrait;
     private final PDRectangle bodyRect;
     // borderItems apply to a logical section
-    private Set<PdfItem> borderItems = new TreeSet<PdfItem>();
+    private Set<PdfItem> borderItems = new TreeSet<>();
     private int borderOrd = 0;
     private boolean valid = true;
 
@@ -82,7 +102,8 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
      */
     private PageGrouping(PdfLayoutMgr m, boolean p, XyOffset bodyOff, XyDim bodyDim) {
         mgr = m; portrait = p;
-        bodyRect = new PDRectangle(bodyOff.x(), bodyOff.y(), bodyDim.width(), bodyDim.height());
+        bodyRect = new PDRectangle(bodyOff.getX(), bodyOff.getY(),
+                                   bodyDim.getWidth(), bodyDim.getHeight());
     }
 
     /**
@@ -107,7 +128,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
      */
     static PageGrouping of(PdfLayoutMgr m, Orientation orientation) {
 
-        return of(m, orientation, XyOffset.of(DEFAULT_MARGIN, DEFAULT_MARGIN),
+        return of(m, orientation, new XyOffset(DEFAULT_MARGIN, DEFAULT_MARGIN),
                   (orientation == PORTRAIT)
                   ? m.pageDim().minus(DEFAULT_DOUBLE_MARGIN_DIM)
                   : m.pageDim().swapWh().minus(DEFAULT_DOUBLE_MARGIN_DIM));
@@ -135,8 +156,8 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
      the long dimension for landscape.
      */
     public float pageWidth() {
-        return portrait ? mgr.pageDim().width()
-                        : mgr.pageDim().height();
+        return portrait ? mgr.pageDim().getWidth()
+                        : mgr.pageDim().getHeight();
     }
 
 //    /**
@@ -172,7 +193,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
     @Override public float drawJpeg(float x, float y, ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.dimensions().height());
+        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.getXyDim().getHeight());
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawJpeg(x, pby.y, sj);
         return y + pby.adj;
@@ -182,7 +203,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
     @Override public float drawPng(float x, float y, ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
-        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.dimensions().height());
+        PageBufferAndY pby = mgr.appropriatePage(this, y, sj.getXyDim().getHeight());
         // draw image based on baseline and decrement y appropriately for image.
         pby.pb.drawPng(x, pby.y, sj);
 
@@ -201,10 +222,10 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
-        final float left = outerTopLeft.x();
-        final float topY = outerTopLeft.y();
-        final float width = outerDimensions.width();
-        final float maxHeight = outerDimensions.height();
+        final float left = outerTopLeft.getX();
+        final float topY = outerTopLeft.getY();
+        final float width = outerDimensions.getWidth();
+        final float maxHeight = outerDimensions.getHeight();
         final float bottomY = topY - maxHeight;
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
@@ -212,9 +233,9 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         PageBufferAndY pby1 = mgr.appropriatePage(this, topY, 0);
         PageBufferAndY pby2 = mgr.appropriatePage(this, bottomY, 0);
         if (pby1.equals(pby2)) {
-            pby1.pb.fillRect(left, pby1.y, width, maxHeight, c, -1);
+            pby1.pb.fillRect(new XyOffset(left, pby1.y), new XyDim(width, maxHeight), c);
         } else {
-            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
+            final int totalPages = (pby2.pb.getPageNum() - pby1.pb.getPageNum()) + 1;
 
             SinglePage currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
@@ -222,7 +243,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
             float ya = topY, yb = 0;
 
             for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
-                if (pby1.pb.pageNum < currPage.pageNum) {
+                if (pby1.pb.getPageNum() < currPage.getPageNum()) {
                     // On all except the first page the first y will start at the top of the page.
                     ya = yBodyTop();
                 } else { // equals, because can never be greater than
@@ -237,13 +258,13 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
                     yb = yBodyBottom();
                 }
 
-                currPage.fillRect(left, yb, width, ya - yb, c, -1);
+                currPage.fillRect(new XyOffset(left, yb), new XyDim(width, ya - yb), c);
 
                 // pageNum is one-based while get is zero-based, so passing get the current
                 // pageNum actually gets the next page.  Don't get another one after we already
                 // processed the last page!
                 if (pageNum < totalPages) {
-                    currPage = mgr.pages().get(currPage.pageNum);
+                    currPage = mgr.pages().get(currPage.getPageNum());
                 }
             }
         }
@@ -264,7 +285,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         if (pby1.equals(pby2)) {
             pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
         } else {
-            final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
+            final int totalPages = (pby2.pb.getPageNum() - pby1.pb.getPageNum()) + 1;
             final float xDiff = x2 - x1;
             final float yDiff = y1 - y2;
             // totalY
@@ -281,7 +302,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
                     xa = xb;
                 }
 
-                if (pby1.pb.pageNum < currPage.pageNum) {
+                if (pby1.pb.getPageNum() < currPage.getPageNum()) {
                     // On all except the first page the first y will start at the top of the page.
                     ya = yBodyTop();
                 } else { // equals, because can never be greater than
@@ -313,7 +334,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
                 // pageNum actually gets the next page.  Don't get another one after we already
                 // processed the last page!
                 if (pageNum < totalPages) {
-                    currPage = mgr.pages().get(currPage.pageNum);
+                    currPage = mgr.pages().get(currPage.getPageNum());
                 }
             }
         }
@@ -328,15 +349,15 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
     public XyOffset drawCell(float x, float y, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
-        XyDim maxDim = XyDim.ZERO;
-        XyDim wh = cell.calcDimensions(cell.width());
-        maxDim = XyDim.of(wh.width() + maxDim.width(), Math.max(maxDim.height(), wh.height()));
-        float maxHeight = maxDim.height();
+        XyDim maxDim = XyDim.Companion.getZERO();
+        XyDim wh = cell.calcDimensions(cell.getWidth());
+        maxDim = new XyDim(wh.getWidth() + maxDim.getWidth(), Math.max(maxDim.getHeight(), wh.getHeight()));
+        float maxHeight = maxDim.getHeight();
 
         // render the row with that maxHeight.
-        cell.render(this, XyOffset.of(x, y), XyDim.of(cell.width(), maxHeight));
+        cell.render(this, new XyOffset(x, y), new XyDim(cell.getWidth(), maxHeight));
 
-        return XyOffset.of(x + wh.width(), y - wh.height());
+        return new XyOffset(x + wh.getWidth(), y - wh.getHeight());
     }
 
     /**
@@ -353,21 +374,21 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
-        XyDim maxDim = XyDim.ZERO;
+        XyDim maxDim = XyDim.Companion.getZERO();
         for (Cell cell : cells) {
-            XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.width() + maxDim.width(),
-                              Math.max(maxDim.height(), wh.height()));
+            XyDim wh = cell.calcDimensions(cell.getWidth());
+            maxDim = new XyDim(wh.getWidth() + maxDim.getWidth(),
+                               Math.max(maxDim.getHeight(), wh.getHeight()));
         }
-        float maxHeight = maxDim.height();
+        float maxHeight = maxDim.getHeight();
 
 //        System.out.println("putRow: maxHeight=" + maxHeight);
 
         // render the row with that maxHeight.
         float x = initialX;
         for (Cell cell : cells) {
-            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight));
-            x += cell.width();
+            cell.render(this, new XyOffset(x, origY), new XyDim(cell.getWidth(), maxHeight));
+            x += cell.getWidth();
         }
 
         return origY - maxHeight;
@@ -408,7 +429,7 @@ public class PageGrouping implements RenderTarget { // AKA Document Section
     void borderStyledText(float xCoord, float yCoord, String text, TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderItems.add(new SinglePage.Text(xCoord, yCoord, text, s, borderOrd++,
-                                            PdfItem.DEFAULT_Z_INDEX));
+                                            PdfItem.Companion.getDEFAULT_Z_INDEX()));
     }
 
     static class PageBufferAndY {

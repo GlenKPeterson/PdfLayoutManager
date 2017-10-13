@@ -1,51 +1,55 @@
-// Copyright 2013-08-08 PlanBase Inc. & Glen Peterson
+// Copyright 2017 PlanBase Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// This file is part of PdfLayoutMgr
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// PdfLayoutMgr is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// PdfLayoutMgr is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with PdfLayoutMgr.  If not, see <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+//
+// If you wish to use this code with proprietary software,
+// contact PlanBase Inc. <https://planbase.com> to purchase a commercial license.
 
 package com.planbase.pdf.layoutmanager
 
 /**
  * Represents styled text kind of like a #Text node in HTML.
  */
-class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
+data class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
     constructor(textStyle: TextStyle) : this(textStyle, "")
 
     private val dims = HashMap<Float, WrappedBlock>()
     private val align = CellStyle.DEFAULT_ALIGN
 
-    internal data class WrappedRow(val string: String, val rowDim: XyDim, val textStyle: TextStyle) : FixedItem {
+    internal data class WrappedRow(val string: String,
+                                   override val xyDim: XyDim,
+                                   val textStyle: TextStyle) : FixedItem {
+        //        float width() { return xyDim.width(); }
+        //        float totalHeight() { return xyDim.height(); }
 
-        override fun xyDim(): XyDim {
-            return rowDim
-        }
-        //        float width() { return rowDim.width(); }
-        //        float totalHeight() { return rowDim.height(); }
+        override val ascent: Float = textStyle.ascent()
+
+        override val descentAndLeading: Float = textStyle.descent() + textStyle.leading()
+
+        override val lineHeight: Float = textStyle.lineHeight()
 
         override fun render(lp: RenderTarget, outerTopLeft: XyOffset): XyOffset {
-            lp.drawStyledText(outerTopLeft.x(), outerTopLeft.y(), string, textStyle)
-            return XyOffset.of(outerTopLeft.x() + rowDim.width(),
-                               outerTopLeft.y() - rowDim.height() - textStyle.leading())
+            lp.drawStyledText(outerTopLeft.x, outerTopLeft.y, string, textStyle)
+            return XyOffset(outerTopLeft.x + xyDim.width,
+                            outerTopLeft.y - xyDim.height - textStyle.leading())
         }
-
-        override fun ascent(): Float = textStyle.ascent()
-
-        override fun descentAndLeading(): Float = textStyle.descent() + textStyle.leading()
-
-        override fun lineHeight(): Float = textStyle.lineHeight()
 
         companion object {
             fun of(s: String, x: Float, ts: TextStyle): WrappedRow {
-                return WrappedRow(s, XyDim.of(x, ts.lineHeight()), ts)
+                return WrappedRow(s, XyDim(x, ts.lineHeight()), ts)
             }
         }
     }
@@ -175,53 +179,53 @@ class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
         return wb!!
     }
 
-    override fun calcDimensions(maxWidth: Float): XyDim {
-        // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
-        //        if (maxWidth < 0) {
-        //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
-        //        }
-        return ensureWrappedBlock(maxWidth).blockDim!!
-    }
+//    override fun calcDimensions(maxWidth: Float): XyDim {
+//        // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
+//        //        if (maxWidth < 0) {
+//        //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
+//        //        }
+//        return ensureWrappedBlock(maxWidth).blockDim!!
+//    }
 
-    /** {@inheritDoc}  */
-    override fun render(lp: RenderTarget, outerTopLeft: XyOffset,
-                        outerDimensions: XyDim): XyOffset {
-
-        //        System.out.println("\tText.render(" + this.toString());
-        //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
-        //                           ", outerDimensions=" + outerDimensions);
-
-        val maxWidth = outerDimensions.width()
-        val wb = ensureWrappedBlock(maxWidth)
-
-        var x = outerTopLeft.x()
-        var y = outerTopLeft.y()
-        val innerPadding = align.calcPadding(outerDimensions, wb.blockDim)
-        //        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
-        if (innerPadding != null) {
-            x += innerPadding.left()
-            //y -= innerPadding.top();
-        }
-
-        for (wr in wb.rows) {
-            // Here we're done whether it fits or not.
-            //final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
-
-            y -= textStyle.ascent()
-            //            if (allPages) {
-            //                lp.borderStyledText(x, y, wr.string, textStyle);
-            //            } else {
-
-            // TODO: Probably want this!
-            //            wr.render(lp, XyOffset.of(x, y));
-            lp.drawStyledText(x, y, wr.string, textStyle)
-            //            }
-            y -= textStyle.descent()
-            y -= textStyle.leading()
-        }
-        return XyOffset.of(outerTopLeft.x() + wb.blockDim!!.width(),
-                           outerTopLeft.y() - wb.blockDim!!.height())
-    }
+//    /** {@inheritDoc}  */
+//    override fun render(lp: RenderTarget, outerTopLeft: XyOffset,
+//                        outerDimensions: XyDim): XyOffset {
+//
+//        //        System.out.println("\tText.render(" + this.toString());
+//        //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
+//        //                           ", outerDimensions=" + outerDimensions);
+//
+//        val maxWidth = outerDimensions.width()
+//        val wb = ensureWrappedBlock(maxWidth)
+//
+//        var x = outerTopLeft.x()
+//        var y = outerTopLeft.y()
+//        val innerPadding = align.calcPadding(outerDimensions, wb.blockDim)
+//        //        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
+//        if (innerPadding != null) {
+//            x += innerPadding.left()
+//            //y -= innerPadding.top();
+//        }
+//
+//        for (wr in wb.rows) {
+//            // Here we're done whether it fits or not.
+//            //final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.xyDim.x());
+//
+//            y -= textStyle.ascent()
+//            //            if (allPages) {
+//            //                lp.borderStyledText(x, y, wr.string, textStyle);
+//            //            } else {
+//
+//            // TODO: Probably want this!
+//            //            wr.render(lp, XyOffset.of(x, y));
+//            lp.drawStyledText(x, y, wr.string, textStyle)
+//            //            }
+//            y -= textStyle.descent()
+//            y -= textStyle.leading()
+//        }
+//        return XyOffset.of(outerTopLeft.x() + wb.blockDim!!.width(),
+//                           outerTopLeft.y() - wb.blockDim!!.height())
+//    }
 
     internal data class Thing(val trimmedStr: String,
                               val totalCharsConsumed: Int,
@@ -273,19 +277,19 @@ class Text(val textStyle: TextStyle, val text: String = "") : Renderable {
 
         override fun getIfFits(remainingWidth: Float): ContTermNone {
             if (remainingWidth <= 0) {
-                return ContTermNone.Companion.none()
+                return None
             }
             val ctri = tryGettingText(remainingWidth, idx, txt)
             val row = ctri.row
-            if (row.xyDim().width() <= remainingWidth) {
+            return if (row.xyDim.width <= remainingWidth) {
                 idx = ctri.idx
-                return if (ctri.foundCr) {
-                    ContTermNone.Companion.terminal(row)
+                if (ctri.foundCr) {
+                    Terminal(row)
                 } else {
-                    ContTermNone.Companion.continuing(row)
+                    Continuing(row)
                 }
             } else {
-                return ContTermNone.Companion.none()
+                None
             }
         }
     }

@@ -149,14 +149,14 @@ class TextTest {
         assertEquals(tStyle.lineHeight(), row3.xyDim().height())
     }
 
-    @Test fun testCalcDimensions() {
-        val tStyle = TextStyle(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
-        val txt = Text.of(tStyle, "This is a long enough line of text.")
-
-        val dim: XyDim = txt.calcDimensions(40f)
-        println(dim)
-        assertEquals(tStyle.lineHeight() * 2, dim.height())
-        assertEquals(28.250002f, dim.width())
-    }
+//    @Test fun testCalcDimensions() {
+//        val tStyle = TextStyle(PDType1Font.TIMES_ITALIC, 8f, Utils.CMYK_BLACK)
+//        val txt = Text.of(tStyle, "This is a long enough line of text.")
+//
+//        val dim: XyDim = txt.calcDimensions(40f)
+//        println(dim)
+//        assertEquals(tStyle.lineHeight() * 2, dim.height())
+//        assertEquals(28.250002f, dim.width())
+//    }
 
 }
