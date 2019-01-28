@@ -25,14 +25,14 @@ import java.awt.image.BufferedImage;
  document.
  */
 public class ScaledJpeg implements Renderable {
-    public static final float ASSUMED_IMAGE_DPI = 300f;
-    public static final float IMAGE_SCALE = 1f / ASSUMED_IMAGE_DPI * PdfLayoutMgr.DOC_UNITS_PER_INCH;
+    public static final double ASSUMED_IMAGE_DPI = 300;
+    public static final double IMAGE_SCALE = 1 / ASSUMED_IMAGE_DPI * PdfLayoutMgr.DOC_UNITS_PER_INCH;
 
     private final BufferedImage bufferedImage;
-    private final float width;
-    private final float height;
+    private final double width;
+    private final double height;
 
-    private ScaledJpeg(BufferedImage bi, float w, float h) {
+    private ScaledJpeg(BufferedImage bi, double w, double h) {
         if (w <= 0) { w = bi.getWidth() * IMAGE_SCALE; }
         if (h <= 0) { h = bi.getHeight() * IMAGE_SCALE; }
         bufferedImage = bi; width = w; height = h;
@@ -46,7 +46,7 @@ public class ScaledJpeg implements Renderable {
      @param h the width in document units
      @return a ScaledJpeg with the given width and height for that image.
      */
-    public static ScaledJpeg of(BufferedImage bi, float w, float h) {
+    public static ScaledJpeg of(BufferedImage bi, double w, double h) {
         return new ScaledJpeg(bi, w, h);
     }
 
@@ -64,11 +64,11 @@ public class ScaledJpeg implements Renderable {
 
     public XyDim dimensions() { return XyDim.of(width, height); }
 
-    public XyDim calcDimensions(float maxWidth) { return dimensions(); }
+    public XyDim calcDimensions(double maxWidth) { return dimensions(); }
 
     public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions, boolean allPages) {
         // use bottom of image for page-breaking calculation.
-        float y = outerTopLeft.y() - height;
+        double y = outerTopLeft.y() - height;
         lp.drawJpeg(outerTopLeft.x(), y, this);
         return XyOffset.of(outerTopLeft.x() + width, y);
     }

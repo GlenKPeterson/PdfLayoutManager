@@ -25,7 +25,7 @@ import java.util.List;
 public class TableBuilder implements Renderable {
     private final LogicalPage logicalPage;
     private final XyOffset topLeft;
-    private final List<Float> cellWidths = new ArrayList<Float>(1);
+    private final List<Double> cellWidths = new ArrayList<Double>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
@@ -39,13 +39,13 @@ public class TableBuilder implements Renderable {
 
     public XyOffset topLeft() { return topLeft; }
 
-    public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
-    public TableBuilder addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }
-    public TableBuilder addCellWidths(float... ws) {
-        for (float w : ws) { cellWidths.add(w); }
+    public List<Double> cellWidths() { return Collections.unmodifiableList(cellWidths); }
+    public TableBuilder addCellWidths(List<Double> x) { cellWidths.addAll(x); return this; }
+    public TableBuilder addCellWidths(double... ws) {
+        for (double w : ws) { cellWidths.add(w); }
         return this;
     }
-    public TableBuilder addCellWidth(Float x) { cellWidths.add(x); return this; }
+    public TableBuilder addCellWidth(Double x) { cellWidths.add(x); return this; }
 
     public CellStyle cellStyle() { return cellStyle; }
     public TableBuilder cellStyle(CellStyle x) { cellStyle = x; return this; }
@@ -59,7 +59,7 @@ public class TableBuilder implements Renderable {
 
     public XyOffset buildTable() { return logicalPage.addTable(this); }
 
-    public XyDim calcDimensions(float maxWidth) {
+    public XyDim calcDimensions(double maxWidth) {
         XyDim maxDim = XyDim.ZERO;
         for (TablePart part : parts) {
             XyDim wh = part.calcDimensions();

@@ -28,10 +28,10 @@ public class TableRowBuilder {
     private TextStyle textStyle;
     private CellStyle cellStyle;
     private final List<Cell> cells;
-    private float minRowHeight = 0;
+    private double minRowHeight = 0;
     private int nextCellIdx = 0;
 
-//    private TableRow(TablePart tp, float[] a, Cell[] b, CellStyle c, TextStyle d) {
+//    private TableRow(TablePart tp, double[] a, Cell[] b, CellStyle c, TextStyle d) {
 //        tablePart = tp; cellWidths = a; cells = b; cellStyle = c; textStyle = d;
 //    }
 
@@ -43,7 +43,7 @@ public class TableRowBuilder {
         minRowHeight = tp.minRowHeight();
     }
 
-    public float nextCellSize() {
+    public double nextCellSize() {
         if (tablePart.numCellWidths() <= nextCellIdx) {
             throw new IllegalStateException("Tried to add more cells than you set sizes for");
         }
@@ -111,7 +111,7 @@ public class TableRowBuilder {
         return this;
     }
 
-    public TableRowBuilder minRowHeight(float f) { minRowHeight = f; return this; }
+    public TableRowBuilder minRowHeight(double f) { minRowHeight = f; return this; }
 
     public RowCellBuilder cellBuilder() {
         RowCellBuilder cb = new RowCellBuilder(this);
@@ -146,9 +146,9 @@ public class TableRowBuilder {
             maxDim = XyDim.of(maxDim.x() + cell.width(),
                               Math.max(maxDim.y(), wh.y()));
         }
-        float maxHeight = maxDim.y();
+        double maxHeight = maxDim.y();
 
-        float x = outerTopLeft.x();
+        double x = outerTopLeft.x();
         for (Cell cell : cells) {
 //            System.out.println("\t\tAbout to render cell: " + cell);
             // TODO: Cache the duplicate cell.calcDimensions call!!!
@@ -169,7 +169,7 @@ public class TableRowBuilder {
     public class RowCellBuilder implements CellBuilder {
 
         private final TableRowBuilder tableRowBuilder;
-        private final float width; // Both require this.
+        private final double width; // Both require this.
         private CellStyle cellStyle; // Both require this.
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
@@ -182,7 +182,7 @@ public class TableRowBuilder {
 
         // I think setting the width after creation is a pretty bad idea for this class since so much
         // is put into getting the width and column correct.
-        // public TableRowCellBuilder width(float w) { width = w; return this; }
+        // public TableRowCellBuilder width(double w) { width = w; return this; }
 
         /** {@inheritDoc} */
         @Override public RowCellBuilder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
@@ -238,7 +238,7 @@ public class TableRowBuilder {
         }
 
         /** {@inheritDoc} */
-        @Override  public float width() { return width; }
+        @Override  public double width() { return width; }
 
         @Override public String toString() {
             return new StringBuilder("RowCellBuilder(").append(tableRowBuilder).append(" colIdx=")

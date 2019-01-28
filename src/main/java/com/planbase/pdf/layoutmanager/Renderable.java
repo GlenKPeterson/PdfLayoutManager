@@ -25,7 +25,7 @@ public interface Renderable {
     should be cached because render() will likely be called with the same width (or at least one
     previously given widths).
      */
-    public XyDim calcDimensions(float maxWidth);
+    public XyDim calcDimensions(double maxWidth);
 
     /**
      Only call this with a maxWidth that you have previously passed to calcDimensions.

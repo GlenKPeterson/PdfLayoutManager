@@ -25,8 +25,4 @@ final class Utils {
                 ((o1 != null) && o1.equals(o2));
     }
 
-    public static int floatHashCode(float value) {
-        return Float.floatToIntBits(value);
-    }
-
 }

@@ -36,5 +36,5 @@ public interface CellBuilder {
     CellBuilder add(TextStyle ts, Iterable<String> ls);
 
     /** Returns the width of the cell being built. */
-    float width();
+    double width();
 }

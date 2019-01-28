@@ -87,9 +87,33 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 Recent Changes
 ==============
 ### Version 0.5.2
+ - Changed all floats to doubles.
+ By page 120 in a multi-page PDF, the repeated addition of values to the y-coordinate can lead to small but significant rounding errors in floats.
+ Also, it just looks cleaner in your IDE (less to typewrite and to read).
+ The PDF spec and output still uses floats, but everything is now converted at the latest possible opportunity.
  - Updated PDFBox from 2.0.6 to 2.0.13 for security.
  - Updated minimum Java version from 1.6 to 1.8.
  - Updated TestUtils from 0.0.6 to 0.0.7.
+
+Upgrade Instructions
+```
+YOU MUST MANUALLY ACCEPT EACH CHANGE!
+Colors still use floats, hexidecimal numbers can end in f, and your code may use floats for other reasons!
+
+Replace Regex fix float literals with a decimal point:
+([0-9]+)[.]([0-9]+)f
+$1.$2
+
+Replace Regex to fix any float literals without a decimal point:
+([0-9]+)f
+$1.0
+OR (if you don't have any float varargs or float array creation)
+$1
+
+Replace Words:
+Float
+Double
+```
 
 ***Version 0.5.1***
  - Added `CellBuilder.width()`.

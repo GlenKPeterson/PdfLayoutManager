@@ -28,13 +28,13 @@ Represents items to be later drawn to the page of a PDF file.  The z-index allow
  */
 public abstract class PdfItem implements Comparable<PdfItem> {
 
-    public static final float DEFAULT_Z_INDEX = 0f;
+    public static final double DEFAULT_Z_INDEX = 0;
 
     private final long serialNumber;
-    private final float z;
+    private final double z;
 
-    PdfItem(final long ord, final float zIndex) { z = zIndex; serialNumber = ord; }
-//    public static PdfItem of(final long ord, final float zIndex) {
+    PdfItem(final long ord, final double zIndex) { z = zIndex; serialNumber = ord; }
+//    public static PdfItem of(final long ord, final double zIndex) {
 //        return new PdfItem(ord, zIndex);
 //    }
 
@@ -43,7 +43,7 @@ public abstract class PdfItem implements Comparable<PdfItem> {
     // @Override
     public int compareTo(PdfItem that) {
         // Ascending by Z (draw the lower-order background items first)
-        float zDiff = this.z - that.z;
+        double zDiff = this.z - that.z;
         if (zDiff > 0) { return 1; } else if (zDiff < 0) { return -1; }
         // Ascending by creation order
         long oDiff = this.serialNumber - that.serialNumber;

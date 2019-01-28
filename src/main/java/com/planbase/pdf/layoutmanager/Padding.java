@@ -22,27 +22,27 @@ public class Padding {
     /**
      Default padding of 1.5, 1.5, 2. 1.5 (top, right, bottom, left)
      */
-    public static final Padding DEFAULT_TEXT_PADDING = new Padding(1.5f, 1.5f, 2f, 1.5f);
-    public static final Padding NO_PADDING = new Padding(0f, 0f, 0f, 0f);
+    public static final Padding DEFAULT_TEXT_PADDING = new Padding(1.5, 1.5, 2, 1.5);
+    public static final Padding NO_PADDING = new Padding(0, 0, 0, 0);
 
-    private final float top;
-    private final float right;
-    private final float bottom;
-    private final float left;
-    private Padding(final float t, final float r, final float b, final float l) {
+    private final double top;
+    private final double right;
+    private final double bottom;
+    private final double left;
+    private Padding(final double t, final double r, final double b, final double l) {
         top = t; right = r; bottom = b; left = l;
     }
     /** Like HTML it's top, right, bottom, left */
-    public static Padding of(float t, float r, float b, float l) {
-        if ((t == 0f) && (r == 0f) && (b == 0f) && (l == 0f)) { return NO_PADDING; }
-        if ((t == 1.5f) && (r == 1.5f) && (b == 2f) && (l == 1.5f)) {
+    public static Padding of(double t, double r, double b, double l) {
+        if ((t == 0) && (r == 0) && (b == 0) && (l == 0)) { return NO_PADDING; }
+        if ((t == 1.5) && (r == 1.5) && (b == 2) && (l == 1.5)) {
             return DEFAULT_TEXT_PADDING;
         }
         return new Padding(t, r, b, l);
     }
     /** Sets all padding values equally */
-    public static Padding of(float a) {
-        if (a == 0f) { return NO_PADDING; }
+    public static Padding of(double a) {
+        if (a == 0) { return NO_PADDING; }
         return new Padding(a,a,a,a);
     }
 
@@ -95,8 +95,8 @@ public class Padding {
         return "Padding(t=" + top + ", r=" + right + ", b=" + bottom + ", l=" + left + ")";
     }
 
-    public float top() { return top; }
-    public float right() { return right; }
-    public float bottom() { return bottom; }
-    public float left() { return left; }
+    public double top() { return top; }
+    public double right() { return right; }
+    public double bottom() { return bottom; }
+    public double left() { return left; }
 }

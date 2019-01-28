@@ -102,7 +102,7 @@ public class PdfLayoutMgr {
      Document-Units Per Inch.  This makes one pixel on an average desktop monitor correspond to
      roughly one document unit.  This is a useful constant for page layout math.
      */
-    public static final float DOC_UNITS_PER_INCH = 72f;
+    public static final double DOC_UNITS_PER_INCH = 72;
 
 // TODO: add Sensible defaults, such as textStyle?
 //    private TextStyle textStyle;
@@ -121,7 +121,7 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawJpeg, and DrawJpeg
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<BufferedImage,PDImageXObject>();
+    private final Map<BufferedImage,PDImageXObject> jpegMap = new HashMap<>();
 
     private PDImageXObject ensureCached(final ScaledJpeg sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
@@ -144,7 +144,7 @@ public class PdfLayoutMgr {
     // CRITICAL: This means that the the set of jpgs must be thrown out and created anew for each
     // document!  Thus, a private final field on the PdfLayoutMgr instead of DrawPng, and DrawPng
     // must be an inner class (or this would have to be package scoped).
-    private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<BufferedImage,PDImageXObject>();
+    private final Map<BufferedImage,PDImageXObject> pngMap = new HashMap<>();
 
     private PDImageXObject ensureCached(final ScaledPng sj) {
         BufferedImage bufferedImage = sj.bufferedImage();
@@ -169,51 +169,51 @@ public class PdfLayoutMgr {
     static class PageBuffer {
         public final int pageNum;
         private long lastOrd = 0;
-        private final Set<PdfItem> items = new TreeSet<PdfItem>();
+        private final Set<PdfItem> items = new TreeSet<>();
 
         private PageBuffer(int pn) {
             pageNum = pn;
         }
 
-        void fillRect(final float xVal, final float yVal, final float w, final float h,
-                             final Color c, final float z) {
+        void fillRect(final double xVal, final double yVal, final double w, final double h,
+                             final Color c, final double z) {
             items.add(FillRect.of(xVal, yVal, w, h, c, lastOrd++, z));
         }
 
-//        public void fillRect(final float xVal, final float yVal, final float w, final Color c,
-//                             final float h) {
+//        public void fillRect(final double xVal, final double yVal, final double w, final Color c,
+//                             final double h) {
 //            fillRect(xVal, yVal, w, h, c, PdfItem.DEFAULT_Z_INDEX);
 //        }
 //
-//        public void drawJpeg(final float xVal, final float yVal, final BufferedImage bi,
-//                             final PdfLayoutMgr mgr, final float z) {
+//        public void drawJpeg(final double xVal, final double yVal, final BufferedImage bi,
+//                             final PdfLayoutMgr mgr, final double z) {
 //            items.add(DrawJpeg.of(xVal, yVal, bi, mgr, lastOrd++, z));
 //        }
 
-        void drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
+        void drawJpeg(final double xVal, final double yVal, final ScaledJpeg sj,
                       final PdfLayoutMgr mgr) {
             items.add(DrawJpeg.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
-        void drawPng(final float xVal, final float yVal, final ScaledPng sj,
+        void drawPng(final double xVal, final double yVal, final ScaledPng sj,
                       final PdfLayoutMgr mgr) {
             items.add(DrawPng.of(xVal, yVal, sj, mgr, lastOrd++, PdfItem.DEFAULT_Z_INDEX));
         }
 
-        private void drawLine(final float xa, final float ya, final float xb,
-                              final float yb, final LineStyle ls, final float z) {
+        private void drawLine(final double xa, final double ya, final double xb,
+                              final double yb, final LineStyle ls, final double z) {
             items.add(DrawLine.of(xa, ya, xb, yb, ls, lastOrd++, z));
         }
-        void drawLine(final float xa, final float ya, final float xb, final float yb,
+        void drawLine(final double xa, final double ya, final double xb, final double yb,
                               final LineStyle ls) {
             drawLine(xa, ya, xb, yb, ls, PdfItem.DEFAULT_Z_INDEX);
         }
 
-        private void drawStyledText(final float xCoord, final float yCoord, final String text,
-                                   TextStyle s, final float z) {
+        private void drawStyledText(final double xCoord, final double yCoord, final String text,
+                                   TextStyle s, final double z) {
             items.add(Text.of(xCoord, yCoord, text, s, lastOrd++, z));
         }
-        void drawStyledText(final float xCoord, final float yCoord, final String text,
+        void drawStyledText(final double xCoord, final double yCoord, final String text,
                                    TextStyle s) {
             drawStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
         }
@@ -225,131 +225,131 @@ public class PdfLayoutMgr {
         }
 
         private static class DrawLine extends PdfItem {
-            private final float x1, y1, x2, y2;
+            private final double x1, y1, x2, y2;
             private final LineStyle style;
-            private DrawLine(final float xa, final float ya, final float xb, final float yb,
+            private DrawLine(final double xa, final double ya, final double xb, final double yb,
                              LineStyle s,
-                             final long ord, final float z) {
+                             final long ord, final double z) {
                 super(ord, z);
                 x1 = xa; y1 = ya; x2 = xb; y2 = yb; style = s;
             }
-            public static DrawLine of(final float xa, final float ya, final float xb,
-                                      final float yb, LineStyle s,
-                                      final long ord, final float z) {
+            public static DrawLine of(final double xa, final double ya, final double xb,
+                                      final double yb, LineStyle s,
+                                      final long ord, final double z) {
                 return new DrawLine(xa, ya, xb, yb, s, ord, z);
             }
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 stream.setStrokingColor(style.color());
-                stream.setLineWidth(style.width());
-                stream.moveTo(x1, y1);
-                stream.lineTo(x2, y2);
+                stream.setLineWidth(toFloat(style.width()));
+                stream.moveTo(toFloat(x1), toFloat(y1));
+                stream.lineTo(toFloat(x2), toFloat(y2));
                 stream.stroke();
             }
         }
 
         private static class FillRect extends PdfItem {
-            private final float x, y, width, height;
+            private final double x, y, width, height;
             private final Color color;
-            private FillRect(final float xVal, final float yVal, final float w, final float h,
-                             final Color c, final long ord, final float z) {
+            private FillRect(final double xVal, final double yVal, final double w, final double h,
+                             final Color c, final long ord, final double z) {
                 super(ord, z);
                 x = xVal; y = yVal; width = w; height = h; color = c;
             }
-            public static FillRect of(final float xVal, final float yVal, final float w,
-                                      final float h, final Color c, final long ord, final float z) {
+            public static FillRect of(final double xVal, final double yVal, final double w,
+                                      final double h, final Color c, final long ord, final double z) {
                 return new FillRect(xVal, yVal, w, h, c, ord, z);
             }
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 stream.setNonStrokingColor(color);
-                stream.addRect(x, y, width, height);
+                stream.addRect(toFloat(x), toFloat(y), toFloat(width), toFloat(height));
                 stream.fill();
             }
         }
 
         static class Text extends PdfItem {
-            public final float x, y;
+            public final double x, y;
             public final String t;
             public final TextStyle style;
-            private Text(final float xCoord, final float yCoord, final String text,
-                         TextStyle s, final long ord, final float z) {
+            private Text(final double xCoord, final double yCoord, final String text,
+                         TextStyle s, final long ord, final double z) {
                 super(ord, z);
                 x = xCoord; y = yCoord; t = text; style = s;
             }
-            public static Text of(final float xCoord, final float yCoord, final String text,
-                                  TextStyle s, final long ord, final float z) {
+            public static Text of(final double xCoord, final double yCoord, final String text,
+                                  TextStyle s, final long ord, final double z) {
                 return new Text(xCoord, yCoord, text, s, ord, z);
             }
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 stream.beginText();
                 stream.setNonStrokingColor(style.textColor());
-                stream.setFont(style.font(), style.fontSize());
-                stream.newLineAtOffset(x, y);
+                stream.setFont(style.font(), toFloat(style.fontSize()));
+                stream.newLineAtOffset(toFloat(x), toFloat(y));
                 stream.showText(t);
                 stream.endText();
             }
         }
 
         private static class DrawPng extends PdfItem {
-            private final float x, y;
+            private final double x, y;
             private final PDImageXObject png;
             private final ScaledPng scaledPng;
 
             // private Log logger = LogFactory.getLog(DrawPng.class);
 
-            private DrawPng(final float xVal, final float yVal, final ScaledPng sj,
+            private DrawPng(final double xVal, final double yVal, final ScaledPng sj,
                              final PdfLayoutMgr mgr,
-                             final long ord, final float z) {
+                             final long ord, final double z) {
                 super(ord, z);
                 x = xVal; y = yVal;
                 png = mgr.ensureCached(sj);
                 scaledPng = sj;
             }
-            public static DrawPng of(final float xVal, final float yVal, final ScaledPng sj,
+            public static DrawPng of(final double xVal, final double yVal, final ScaledPng sj,
                                       final PdfLayoutMgr mgr,
-                                      final long ord, final float z) {
+                                      final long ord, final double z) {
                 return new DrawPng(xVal, yVal, sj, mgr, ord, z);
             }
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(png, x, y);
                 XyDim dim = scaledPng.dimensions();
-                stream.drawImage(png, x, y, dim.x(), dim.y());
+                stream.drawImage(png, toFloat(x), toFloat(y), toFloat(dim.x()), toFloat(dim.y()));
             }
         }
 
         private static class DrawJpeg extends PdfItem {
-            private final float x, y;
+            private final double x, y;
             private final PDImageXObject jpeg;
             private final ScaledJpeg scaledJpeg;
 
             // private Log logger = LogFactory.getLog(DrawJpeg.class);
 
-            private DrawJpeg(final float xVal, final float yVal, final ScaledJpeg sj,
+            private DrawJpeg(final double xVal, final double yVal, final ScaledJpeg sj,
                              final PdfLayoutMgr mgr,
-                             final long ord, final float z) {
+                             final long ord, final double z) {
                 super(ord, z);
                 x = xVal; y = yVal;
                 jpeg = mgr.ensureCached(sj);
                 scaledJpeg = sj;
             }
-            public static DrawJpeg of(final float xVal, final float yVal, final ScaledJpeg sj,
+            public static DrawJpeg of(final double xVal, final double yVal, final ScaledJpeg sj,
                                       final PdfLayoutMgr mgr,
-                                      final long ord, final float z) {
+                                      final long ord, final double z) {
                 return new DrawJpeg(xVal, yVal, sj, mgr, ord, z);
             }
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(jpeg, x, y);
                 XyDim dim = scaledJpeg.dimensions();
-                stream.drawImage(jpeg, x, y, dim.x(), dim.y());
+                stream.drawImage(jpeg, toFloat(x), toFloat(y), toFloat(dim.x()), toFloat(dim.y()));
             }
         }
     }
 
-    private final List<PageBuffer> pages = new ArrayList<PageBuffer>();
+    private final List<PageBuffer> pages = new ArrayList<>();
     private final PDDocument doc;
 
     // pages.size() counts the first page as 1, so 0 is the appropriate sentinel value
@@ -360,7 +360,7 @@ public class PdfLayoutMgr {
 
     List<PageBuffer> pages() { return Collections.unmodifiableList(pages); }
 
-    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) throws IOException {
+    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb) {
         doc = new PDDocument();
         colorSpace = cs;
         pageSize = (mb == null) ? PDRectangle.LETTER
@@ -371,9 +371,8 @@ public class PdfLayoutMgr {
      Returns a new PdfLayoutMgr with the given color space.
      @param cs the color-space.
      @return a new PdfLayoutMgr
-     @throws IOException
      */
-    public static PdfLayoutMgr of(PDColorSpace cs) throws IOException {
+    public static PdfLayoutMgr of(PDColorSpace cs) {
         return new PdfLayoutMgr(cs, null);
     }
 
@@ -383,27 +382,25 @@ public class PdfLayoutMgr {
      @param pageSize the page size.  There are a bunch of presets in
      org.apache.pdfbox.pdmodel.PDPage like PAGE_SIZE_LETTER, PAGE_SIZE_A1, and PAGE_SIZE_A4.
      @return a new PdfLayoutMgr
-     @throws IOException
      */
-    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) throws IOException {
+    public static PdfLayoutMgr of(PDColorSpace cs, PDRectangle pageSize) {
         return new PdfLayoutMgr(cs, pageSize);
     }
 
     /**
      Creates a new PdfLayoutMgr with the PDDeviceRGB color space.
      @return a new Page Manager with an RGB color space
-     @throws IOException
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public static PdfLayoutMgr newRgbPageMgr() throws IOException {
+    public static PdfLayoutMgr newRgbPageMgr() {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null);
     }
 
     /** Returns the page width given the defined PDRectangle pageSize */
-    public float pageWidth() { return pageSize.getWidth(); }
+    public double pageWidth() { return pageSize.getWidth(); }
 
     /** Returns the page height given the defined PDRectangle pageSize */
-    public float pageHeight() { return pageSize.getHeight(); }
+    public double pageHeight() { return pageSize.getHeight(); }
 
     /**
      Returns the correct page for the given value of y.  This lets the user use any Y value and
@@ -411,7 +408,7 @@ public class PdfLayoutMgr {
      @param y the un-adjusted y value.
      @return the proper page and adjusted y value for that page.
      */
-    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, float y) {
+    LogicalPage.PageBufferAndY appropriatePage(LogicalPage lp, double y) {
         if (pages.size() < 1) {
             throw new IllegalStateException("Cannot work with the any pages until one has been created by calling newPage().");
         }
@@ -485,7 +482,7 @@ public class PdfLayoutMgr {
                 doc.addPage(pdPage);
 
                 if (lp.orientation() == LogicalPage.Orientation.LANDSCAPE) {
-                    stream.transform(new Matrix(0, 1, -1, 0, lp.pageWidth(), 0));
+                    stream.transform(new Matrix(0f, 1f, -1f, 0f, toFloat(lp.pageWidth()), 0f));
                 }
                 stream.setStrokingColor(colorSpace.getInitialColor());
                 stream.setNonStrokingColor(colorSpace.getInitialColor());
@@ -538,7 +535,7 @@ public class PdfLayoutMgr {
 //     @param cell the cell containing the styling and text to render.
 //     @return the bottom Y-value (logical-page) of the rendered cell.
 //     */
-//    public float putCell(final float x, float origY, final Cell cell) {
+//    public double putCell(final double x, double origY, final Cell cell) {
 //        return cell.processRows(x, origY, false, this);
 //    }
 
@@ -554,7 +551,7 @@ public class PdfLayoutMgr {
     // the Euro symbol.
     private static final Map<String,String> utf16ToWinAnsi;
     static {
-        Map<String,String> tempMap = new HashMap<String,String>();
+        Map<String,String> tempMap = new HashMap<>();
 
         try {
             // 129, 141, 143, 144, and 157 are undefined in WinAnsi.
@@ -927,5 +924,9 @@ public class PdfLayoutMgr {
             sB.append(in.subSequence(idx, in.length()));
         }
         return sB.toString();
+    }
+
+    public static float toFloat(double d) {
+        return Double.valueOf(d).floatValue();
     }
 }

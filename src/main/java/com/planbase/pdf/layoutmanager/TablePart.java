@@ -23,10 +23,10 @@ import java.util.List;
  */
 public class TablePart {
     private final TableBuilder tableBuilder;
-    private List<Float> cellWidths = new ArrayList<Float>();
+    private List<Double> cellWidths = new ArrayList<Double>();
     private CellStyle cellStyle;
     private TextStyle textStyle;
-    private float minRowHeight = 0;
+    private double minRowHeight = 0;
     private final List<TableRowBuilder> rows = new ArrayList<TableRowBuilder>(1);
 
     private TablePart(TableBuilder t) {
@@ -36,28 +36,28 @@ public class TablePart {
 
     public static TablePart of(TableBuilder t) { return new TablePart(t); }
 
-//    private TablePart(Table t, float[] a, CellStyle b, TextStyle c) {
+//    private TablePart(Table t, double[] a, CellStyle b, TextStyle c) {
 //        table = t; cellWidths = a; cellStyle = b; textStyle = c;
 //    }
 
-//    public static TablePart of(float[] cellWidths, CellStyle cellStyle, TextStyle textStyle) {
+//    public static TablePart of(double[] cellWidths, CellStyle cellStyle, TextStyle textStyle) {
 //        return new TablePart(cellWidths, cellStyle, textStyle);
 //    }
 
-    public List<Float> cellWidths() { return Collections.unmodifiableList(cellWidths); }
-    public float cellWidth(int i) { return cellWidths.get(i); }
+    public List<Double> cellWidths() { return Collections.unmodifiableList(cellWidths); }
+    public double cellWidth(int i) { return cellWidths.get(i); }
 
-//    public TablePart replaceAllCellWidths(List<Float> x) { cellWidths = x; return this; }
-//    public TablePart addCellWidths(List<Float> x) { cellWidths.addAll(x); return this; }
-    public TablePart addCellWidths(float... ws) {
-        for (float w : ws) { cellWidths.add(w); }
+//    public TablePart replaceAllCellWidths(List<Double> x) { cellWidths = x; return this; }
+//    public TablePart addCellWidths(List<Double> x) { cellWidths.addAll(x); return this; }
+    public TablePart addCellWidths(double... ws) {
+        for (double w : ws) { cellWidths.add(w); }
         return this;
     }
-    public TablePart addCellWidth(Float x) { cellWidths.add(x); return this; }
+    public TablePart addCellWidth(Double x) { cellWidths.add(x); return this; }
 
     public int numCellWidths() { return cellWidths.size(); }
 
-//    public TablePart cellWidths(float[] x) { return new Builder().cellWidths(cellWidths).build(); }
+//    public TablePart cellWidths(double[] x) { return new Builder().cellWidths(cellWidths).build(); }
 
     public CellStyle cellStyle() { return cellStyle; }
     public TablePart cellStyle(CellStyle x) { cellStyle = x; return this; }
@@ -68,8 +68,8 @@ public class TablePart {
     public TextStyle textStyle() { return textStyle; }
     public TablePart textStyle(TextStyle x) { textStyle = x; return this; }
 
-    public float minRowHeight() { return minRowHeight; }
-    public TablePart minRowHeight(float f) { minRowHeight = f; return this; }
+    public double minRowHeight() { return minRowHeight; }
+    public TablePart minRowHeight(double f) { minRowHeight = f; return this; }
 
     public TableRowBuilder rowBuilder() { return TableRowBuilder.of(this); }
 
@@ -110,13 +110,13 @@ public class TablePart {
 //
 //    public static class Builder {
 //        private final TableBuilder tableBuilder;
-//        private float[] cellWidths;
+//        private double[] cellWidths;
 //        private CellStyle cellStyle;
 //        private TextStyle textStyle;
 //
 //        private Builder(TableBuilder t) { tableBuilder = t; }
 //
-//        public Builder cellWidths(float[] x) { cellWidths = x; return this; }
+//        public Builder cellWidths(double[] x) { cellWidths = x; return this; }
 //        public Builder cellStyle(CellStyle x) { cellStyle = x; return this; }
 //        public Builder textStyle(TextStyle x) { textStyle = x; return this; }
 //

@@ -27,16 +27,16 @@ public class TextStyle {
 
     private final PDType1Font font;
     private final Color textColor;
-    private final float fontSize;
+    private final double fontSize;
 
-    private final float avgCharWidth;
-    private final float factor;
+    private final double avgCharWidth;
+    private final double factor;
     // Java FontMetrics says getHeight() = getAscent() + getDescent() + getLeading().
-    private final float ascent;
-    private final float descent;
-    private final float leading;
+    private final double ascent;
+    private final double descent;
+    private final double leading;
 
-    private TextStyle(PDType1Font f, float sz, Color tc, float leadingFactor) {
+    private TextStyle(PDType1Font f, double sz, Color tc, double leadingFactor) {
         if (f == null) { throw new IllegalArgumentException("Font must not be null"); }
         if (tc == null) { tc = Color.BLACK; }
 
@@ -45,10 +45,10 @@ public class TextStyle {
         // PDType1Font.HELVETICA and PDType1Font.HELVETICA_BOLD from size 5-200 show that 960x is
         // pretty darn good.
         // TODO: Fix font-size for other fonts.
-        factor = fontSize / 960f;
+        factor = fontSize / 960;
         PDFontDescriptor fontDescriptor = font.getFontDescriptor();
-        float rawAscent = fontDescriptor.getAscent();
-        float rawDescent = fontDescriptor.getDescent();
+        double rawAscent = fontDescriptor.getAscent();
+        double rawDescent = fontDescriptor.getDescent();
         // Characters look best with the descent size both above and below.  Also acts as a good
         // default leading.
         ascent = rawAscent * factor;
@@ -56,7 +56,7 @@ public class TextStyle {
         leading = descent * leadingFactor;
         // height = ascent + descent + leading;
 
-        float avgFontWidth = 500;
+        double avgFontWidth = 500;
         try {
             avgFontWidth = font.getAverageFontWidth();
         } catch (Exception ioe) {
@@ -67,8 +67,8 @@ public class TextStyle {
     }
 
     /** Creates a TextStyle with the given font, size, color, and a leadingFactor of 0.5. */
-    public static TextStyle of(PDType1Font f, float sz, Color tc) {
-        return new TextStyle(f, sz, tc, 0.5f);
+    public static TextStyle of(PDType1Font f, double sz, Color tc) {
+        return new TextStyle(f, sz, tc, 0.5);
     }
 
     /**
@@ -78,7 +78,7 @@ public class TextStyle {
      A leadingFactor of 1 will result of a leading equal to the descent, while a leadingFactor
      of 2 will result of a leading equal to twice the descent etc...
      */
-    public static TextStyle of(PDType1Font f, float sz, Color tc, float leadingFactor) {
+    public static TextStyle of(PDType1Font f, double sz, Color tc, double leadingFactor) {
         return new TextStyle(f, sz, tc, leadingFactor);
     }
 
@@ -87,7 +87,7 @@ public class TextStyle {
      @param text ISO_8859_1 encoded text
      @return the width of this text rendered in this font.
      */
-    public float stringWidthInDocUnits(String text) {
+    public double stringWidthInDocUnits(String text) {
         try {
             return font.getStringWidth(text) * factor;
         } catch (IOException ioe) {
@@ -98,7 +98,7 @@ public class TextStyle {
     }
 
     public PDType1Font font() { return font; }
-    public float fontSize() { return fontSize; }
+    public double fontSize() { return fontSize; }
 
     public Color textColor() { return textColor; }
     public TextStyle textColor(Color c) { return TextStyle.of(font, fontSize, c); }
@@ -106,13 +106,13 @@ public class TextStyle {
      Average character width (for this font, or maybe guessed) as a positive number in document
      units
      */
-    public float avgCharWidth() { return avgCharWidth; }
+    public double avgCharWidth() { return avgCharWidth; }
     /** Ascent as a positive number in document units */
-    public float ascent() { return ascent; }
+    public double ascent() { return ascent; }
     /** Descent as a positive number in document units */
-    public float descent() { return descent; }
+    public double descent() { return descent; }
     /** Leading as a positive number in document units */
-    public float leading() { return leading; }
+    public double leading() { return leading; }
 
-    public float lineHeight() { return ascent + descent + leading; }
+    public double lineHeight() { return ascent + descent + leading; }
 }

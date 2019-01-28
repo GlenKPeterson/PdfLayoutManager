@@ -29,12 +29,12 @@ public class Cell implements Renderable {
 
     // These are limits of the cell, not the contents.
     private final CellStyle cellStyle;
-    private final float width;
+    private final double width;
 
     // A list of the contents.  It's pretty limiting to have one item per row.
     private final List<Renderable> rows;
 
-    private final Map<Float,PreCalcRows> preCalcRows = new HashMap<Float,PreCalcRows>(0);
+    private final Map<Double,PreCalcRows> preCalcRows = new HashMap<Double,PreCalcRows>(0);
 
     private static class PreCalcRow {
         Renderable row;
@@ -49,7 +49,7 @@ public class Cell implements Renderable {
         XyDim blockDim;
     }
 
-    private Cell(CellStyle cs, float w, List<Renderable> rs) {
+    private Cell(CellStyle cs, double w, List<Renderable> rs) {
         if (w < 0) {
             throw new IllegalArgumentException("A cell cannot have a negative width");
         }
@@ -69,44 +69,44 @@ public class Cell implements Renderable {
      @param cs the cell style
      @return a cell suitable for rendering.
      */
-    public static Cell of(CellStyle cs, float w) { //, final Object... r) {
+    public static Cell of(CellStyle cs, double w) { //, final Object... r) {
         return new Cell(cs, w, Collections.<Renderable>emptyList());
 //                        (r == null) ? Collections.emptyList()
 //                                    : Arrays.asList(r));
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, TextStyle ts, String s) {
+    public static Cell of(CellStyle cs, double w, TextStyle ts, String s) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(Text.of(ts, s));
         return new Cell(cs, w, ls);
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, Text t) {
+    public static Cell of(CellStyle cs, double w, Text t) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(t);
         return new Cell(cs, w, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, ScaledJpeg j) {
+    public static Cell of(CellStyle cs, double w, ScaledJpeg j) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(j);
         return new Cell(cs, w, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, Renderable r) {
+    public static Cell of(CellStyle cs, double w, Renderable r) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(r);
         return new Cell(cs, w, ls);
     }
 
-    public static Cell of(CellStyle cs, float w, List<Renderable> ls) {
+    public static Cell of(CellStyle cs, double w, List<Renderable> ls) {
         return new Cell(cs, w, ls);
     }
 
     // Simple case of a single styled String
-    public static Cell of(CellStyle cs, float w, Cell c) {
+    public static Cell of(CellStyle cs, double w, Cell c) {
         List<Renderable> ls = new ArrayList<Renderable>(1);
         ls.add(c);
         return new Cell(cs, w, ls);
@@ -114,13 +114,13 @@ public class Cell implements Renderable {
 
     public CellStyle cellStyle() { return cellStyle; }
     // public BorderStyle border() { return borderStyle; }
-    public float width() { return width; }
+    public double width() { return width; }
 
-    private void calcDimensionsForReal(final float maxWidth) {
+    private void calcDimensionsForReal(final double maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
         XyDim blockDim = XyDim.ZERO;
         Padding padding = cellStyle.padding();
-        float innerWidth = maxWidth;
+        double innerWidth = maxWidth;
         if (padding != null) {
             innerWidth -= (padding.left() + padding.right());
         }
@@ -137,7 +137,7 @@ public class Cell implements Renderable {
         preCalcRows.put(maxWidth, pcrs);
     }
 
-    private PreCalcRows ensurePreCalcRows(final float maxWidth) {
+    private PreCalcRows ensurePreCalcRows(final double maxWidth) {
         PreCalcRows pcr = preCalcRows.get(maxWidth);
         if (pcr == null) {
             calcDimensionsForReal(maxWidth);
@@ -147,7 +147,7 @@ public class Cell implements Renderable {
     }
 
     /** {@inheritDoc} */
-    @Override public XyDim calcDimensions(final float maxWidth) {
+    @Override public XyDim calcDimensions(final double maxWidth) {
         // I think zero or negative width cells might be OK to ignore.  I'd like to try to make
         // Text.calcDimensionsForReal() handle this situation before throwing an error here.
 //        if (maxWidth < 0) {
@@ -170,7 +170,7 @@ public class Cell implements Renderable {
 //        System.out.println("Cell.render(" + this.toString());
 //        new Exception().printStackTrace();
 
-        float maxWidth = outerDimensions.x();
+        double maxWidth = outerDimensions.x();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
         final Padding padding = cellStyle.padding();
         // XyDim outerDimensions = padding.addTo(pcrs.blockDim);
@@ -214,7 +214,7 @@ public class Cell implements Renderable {
                 continue;
             }
             PreCalcRow pcr = pcrs.rows.get(i);
-            float rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
+            double rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
             outerLowerRight = row.render(lp,
                                          innerTopLeft.x(innerTopLeft.x() + rowXOffset),
                                          pcr.blockDim, allPages);
@@ -224,10 +224,10 @@ public class Cell implements Renderable {
         // Draw border last to cover anything that touches it?
         BorderStyle border = cellStyle.borderStyle();
         if (border != null) {
-            float origX = outerTopLeft.x();
-            float origY = outerTopLeft.y();
-            float rightX = outerTopLeft.x() + outerDimensions.x();
-            float bottomY = outerTopLeft.y() - outerDimensions.y();
+            double origX = outerTopLeft.x();
+            double origY = outerTopLeft.y();
+            double rightX = outerTopLeft.x() + outerDimensions.x();
+            double bottomY = outerTopLeft.y() - outerDimensions.y();
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
                 lp.putLine(origX, origY, rightX, origY, border.top());
@@ -246,7 +246,7 @@ public class Cell implements Renderable {
         return outerLowerRight;
     }
 
-    public static Builder builder(CellStyle cellStyle, float width) {
+    public static Builder builder(CellStyle cellStyle, double width) {
         return new Builder(cellStyle, width);
     }
 
@@ -269,15 +269,15 @@ public class Cell implements Renderable {
      * A mutable Builder for somewhat less mutable cells.
      */
     public static class Builder implements CellBuilder {
-        private final float width;
+        private final double width;
         private CellStyle cellStyle;
         private final List<Renderable> rows = new ArrayList<Renderable>();
         private TextStyle textStyle;
 
-        private Builder(CellStyle cs, float w) { width = w; cellStyle = cs; }
+        private Builder(CellStyle cs, double w) { width = w; cellStyle = cs; }
 
         // Is this necessary?
-//        public Builder width(float w) { width = w; return this; }
+//        public Builder width(double w) { width = w; return this; }
 
         /** {@inheritDoc} */
         @Override public Builder cellStyle(CellStyle cs) { cellStyle = cs; return this;}
@@ -325,7 +325,7 @@ public class Cell implements Renderable {
         public Cell build() { return new Cell(cellStyle, width, rows); }
 
         /** {@inheritDoc} */
-        @Override  public float width() { return width; }
+        @Override  public double width() { return width; }
 
 // Replaced with TableRow.CellBuilder.buildCell()
 //        public TableRowBuilder buildCell() {

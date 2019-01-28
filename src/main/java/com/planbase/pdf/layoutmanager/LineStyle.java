@@ -21,12 +21,12 @@ import java.awt.Color;
  added later.  Immutable.
  */
 public class LineStyle {
-    public static final float DEFAULT_WIDTH = 1;
+    public static final double DEFAULT_WIDTH = 1;
 
     private final Color color;
-    private final float width;
+    private final double width;
 
-    private LineStyle(Color c, float w) {
+    private LineStyle(Color c, double w) {
         if (c == null) { throw new IllegalArgumentException("Line Style must have a color."); }
         if (w <= 0) {
             throw new IllegalArgumentException("Line Style must have a positive width.");
@@ -34,12 +34,12 @@ public class LineStyle {
         color = c; width = w;
     }
     /** Factory method */
-    public static LineStyle of(Color c, float w) { return new LineStyle(c, w); }
+    public static LineStyle of(Color c, double w) { return new LineStyle(c, w); }
 
     public static LineStyle of(Color c) { return new LineStyle(c, DEFAULT_WIDTH); }
 
     public Color color() { return color; }
-    public float width() { return width; }
+    public double width() { return width; }
 
     @Override
     public int hashCode() {

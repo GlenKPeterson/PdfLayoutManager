@@ -25,18 +25,18 @@ public class LogicalPage { // AKA Document Section
     // TODO: This has an assumed margin.  Probably want to return mgr.pageHeight() but that's a breaking change.
     /** The Y-value for the top margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageTop() { return mgr.pageHeight() - 37; }
+    public double yPageTop() { return mgr.pageHeight() - 37; }
 
     /** The Y-value for the bottom margin of the page (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float yPageBottom() { return portrait ? 0 : 230; }
+    public double yPageBottom() { return portrait ? 0 : 230; }
 
     /** Height of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float printAreaHeight() { return yPageTop() - yPageBottom(); }
+    public double printAreaHeight() { return yPageTop() - yPageBottom(); }
     /** Width of the printable area (in document units) */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float pageWidth() {
+    public double pageWidth() {
         return portrait ? mgr.pageWidth()
                         : mgr.pageHeight();
     }
@@ -63,14 +63,14 @@ public class LogicalPage { // AKA Document Section
         return mgr;
     }
 
-    LogicalPage drawStyledText(float x, float y, String s, TextStyle textStyle) {
+    LogicalPage drawStyledText(double x, double y, String s, TextStyle textStyle) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         PageBufferAndY pby = mgr.appropriatePage(this, y);
         pby.pb.drawStyledText(x, pby.y, s, textStyle);
         return this;
     }
 
-    LogicalPage drawJpeg(final float xVal, final float yVal, final ScaledJpeg sj) {
+    LogicalPage drawJpeg(final double xVal, final double yVal, final ScaledJpeg sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
         PageBufferAndY pby = mgr.appropriatePage(this, yVal);
@@ -79,7 +79,7 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    LogicalPage drawPng(final float xVal, final float yVal, final ScaledPng sj) {
+    LogicalPage drawPng(final double xVal, final double yVal, final ScaledPng sj) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Calculate what page image should start on
         PageBufferAndY pby = mgr.appropriatePage(this, yVal);
@@ -92,11 +92,11 @@ public class LogicalPage { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
-        final float left = outerTopLeft.x();
-        final float topY = outerTopLeft.y();
-        final float width = outerDimensions.x();
-        final float maxHeight = outerDimensions.y();
-        final float bottomY = topY - maxHeight;
+        final double left = outerTopLeft.x();
+        final double topY = outerTopLeft.y();
+        final double width = outerDimensions.x();
+        final double maxHeight = outerDimensions.y();
+        final double bottomY = topY - maxHeight;
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
         // logger.info("About to put line: (" + x1 + "," + y1 + "), (" + x2 + "," + y2 + ")");
@@ -110,7 +110,7 @@ public class LogicalPage { // AKA Document Section
             PdfLayoutMgr.PageBuffer currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
-            float ya = topY, yb = 0;
+            double ya = topY, yb = 0;
 
             for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
                 if (pby1.pb.pageNum < currPage.pageNum) {
@@ -150,7 +150,7 @@ public class LogicalPage { // AKA Document Section
      @param x2 second x-value
      @param y2 second (lower or same) y-value
      */
-    public LogicalPage putLine(final float x1, final float y1, final float x2, final float y2, final LineStyle ls) {
+    public LogicalPage putLine(final double x1, final double y1, final double x2, final double y2, final LineStyle ls) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        mgr.putLine(x1, y1, x2, y2, ls);
 
@@ -162,14 +162,14 @@ public class LogicalPage { // AKA Document Section
             pby1.pb.drawLine(x1, pby1.y, x2, pby2.y, ls);
         } else {
             final int totalPages = (pby2.pb.pageNum - pby1.pb.pageNum) + 1;
-            final float xDiff = x2 - x1;
-            final float yDiff = y1 - y2;
+            final double xDiff = x2 - x1;
+            final double yDiff = y1 - y2;
             // totalY
 
             PdfLayoutMgr.PageBuffer currPage = pby1.pb;
             // The first x and y are correct for the first page.  The second x and y will need to
             // be adjusted below.
-            float xa = x1, ya = y1, xb = 0, yb = 0;
+            double xa = x1, ya = y1, xb = 0, yb = 0;
 
             for (int pageNum = 1; pageNum <= totalPages; pageNum++) {
                 if (pageNum > 1) {
@@ -219,13 +219,13 @@ public class LogicalPage { // AKA Document Section
     }
 
     /** You can draw a cell without a table (for a heading, or paragraph of same-format text, or whatever). */
-    public XyOffset putCell(final float topLeftX, final float topLeftY, Cell cell) {
+    public XyOffset putCell(final double topLeftX, final double topLeftY, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
         XyDim maxDim = XyDim.ZERO;
         XyDim wh = cell.calcDimensions(cell.width());
         maxDim = XyDim.of(wh.x() + maxDim.x(), Math.max(maxDim.y(), wh.y()));
-        float maxHeight = maxDim.y();
+        double maxHeight = maxDim.y();
 
         // render the row with that maxHeight.
         cell.render(this, XyOffset.of(topLeftX, topLeftY), XyDim.of(cell.width(), maxHeight), false);
@@ -248,7 +248,7 @@ public class LogicalPage { // AKA Document Section
      @return the final y-value
      @throws IOException if there is an error writing to the underlying stream.
      */
-    public float putRow(final float initialX, final float origY, final Cell... cells)
+    public double putRow(final double initialX, final double origY, final Cell... cells)
             throws IOException {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 
@@ -259,12 +259,12 @@ public class LogicalPage { // AKA Document Section
             maxDim = XyDim.of(wh.x() + maxDim.x(),
                               Math.max(maxDim.y(), wh.y()));
         }
-        float maxHeight = maxDim.y();
+        double maxHeight = maxDim.y();
 
 //        System.out.println("putRow: maxHeight=" + maxHeight);
 
         // render the row with that maxHeight.
-        float x = initialX;
+        double x = initialX;
         for (Cell cell : cells) {
             cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight), false);
             x += cell.width();
@@ -281,9 +281,9 @@ public class LogicalPage { // AKA Document Section
      @return the bottom Y-value of the rendered cell (on all pages).
      */
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-    public float putCellAsHeaderFooter(final float x, float origY, final Cell cell) {
+    public double putCellAsHeaderFooter(final double x, double origY, final Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
-        float outerWidth = cell.width();
+        double outerWidth = cell.width();
         XyDim innerDim = cell.calcDimensions(outerWidth);
         return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
     }
@@ -295,8 +295,8 @@ public class LogicalPage { // AKA Document Section
         for (PdfItem item : borderItems) { item.commit(stream); }
     }
 
-    private void borderStyledText(final float xCoord, final float yCoord, final String text,
-                               TextStyle s, final float z) {
+    private void borderStyledText(final double xCoord, final double yCoord, final String text,
+                               TextStyle s, final double z) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderItems.add(PdfLayoutMgr.PageBuffer.Text.of(xCoord, yCoord, text, s, borderOrd++, z));
     }
@@ -306,7 +306,7 @@ public class LogicalPage { // AKA Document Section
      has package scope so that Cell can access it for one thing.  It may become private in the
      future.
       */
-    void borderStyledText(final float xCoord, final float yCoord, final String text,
+    void borderStyledText(final double xCoord, final double yCoord, final String text,
                                TextStyle s) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         borderStyledText(xCoord, yCoord, text, s, PdfItem.DEFAULT_Z_INDEX);
@@ -314,7 +314,7 @@ public class LogicalPage { // AKA Document Section
 
     static class PageBufferAndY {
         public final PdfLayoutMgr.PageBuffer pb;
-        public final float y;
-        public PageBufferAndY(PdfLayoutMgr.PageBuffer p, float theY) { pb = p; y = theY; }
+        public final double y;
+        public PageBufferAndY(PdfLayoutMgr.PageBuffer p, double theY) { pb = p; y = theY; }
     }
 }

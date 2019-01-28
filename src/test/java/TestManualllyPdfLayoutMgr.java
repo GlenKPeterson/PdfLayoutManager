@@ -55,7 +55,7 @@ public class TestManualllyPdfLayoutMgr {
         // printers. A typical monitor has 72 dots per inch, so you can think of these as pixels
         // even though they aren't.  Things can be aligned right, center, top, or anywhere within
         // a "pixel".
-        final float pMargin = 40;
+        final double pMargin = 40;
 
         // A LogicalPage is a group of pages with the same settings.  When your contents scroll off
         // the bottom of a page, a new page is automatically created for you with the settings taken
@@ -64,15 +64,15 @@ public class TestManualllyPdfLayoutMgr {
         LogicalPage lp = pageMgr.logicalPageStart();
 
         // Set up some useful constants for later.
-        final float tableWidth = lp.pageWidth() - (2 * pMargin);
-        final float pageRMargin = pMargin + tableWidth;
-        final float colWidth = tableWidth/4f;
-        final float[] colWidths = new float[] { colWidth + 10, colWidth + 10,
+        final double tableWidth = lp.pageWidth() - (2 * pMargin);
+        final double pageRMargin = pMargin + tableWidth;
+        final double colWidth = tableWidth/4;
+        final double[] colWidths = new double[] { colWidth + 10, colWidth + 10,
                                                 colWidth + 10, colWidth - 30 };
-        final Padding textCellPadding = Padding.of(2f);
+        final Padding textCellPadding = Padding.of(2);
 
         // Set up some useful styles for later
-        final TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5f, WHITE);
+        final TextStyle heading = TextStyle.of(PDType1Font.HELVETICA_BOLD, 9.5, WHITE);
         final CellStyle headingCell =
                 CellStyle.of(BOTTOM_CENTER, textCellPadding, BLUE,
                              BorderStyle.builder()
@@ -86,7 +86,7 @@ public class TestManualllyPdfLayoutMgr {
                                         .right(LineStyle.of(BLACK))
                                         .build());
 
-        final TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5f, BLACK);
+        final TextStyle regular = TextStyle.of(PDType1Font.HELVETICA, 9.5, BLACK);
         final CellStyle regularCell = CellStyle.of(TOP_LEFT, textCellPadding, null,
                                                    BorderStyle.builder()
                                                               .left(LineStyle.of(BLACK))
@@ -99,9 +99,9 @@ public class TestManualllyPdfLayoutMgr {
         // Draw the first table with lots of extra room to show off the vertical and horizontal
         // alignment.
         XyOffset xya =
-                lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
-                  .addCellWidths(vec(120f, 120f, 120f))
-                  .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
+                lp.tableBuilder(XyOffset.of(40.0, lp.yPageTop()))
+                  .addCellWidths(vec(120.0, 120.0, 120.0))
+                  .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
                                                         decode("#3366cc"), BorderStyle.of(BLACK)))
                   .rowBuilder().addTextCells("First", "Second", "Third").buildRow()
@@ -109,8 +109,8 @@ public class TestManualllyPdfLayoutMgr {
                   .partBuilder().cellStyle(CellStyle.of(MIDDLE_CENTER, Padding.of(2),
                                                         decode("#ccffcc"),
                                                         BorderStyle.of(DARK_GRAY)))
-                  .minRowHeight(120f)
-                  .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, BLACK))
+                  .minRowHeight(120)
+                  .textStyle(TextStyle.of(PDType1Font.COURIER, 12, BLACK))
                   .rowBuilder()
                   .cellBuilder().align(TOP_LEFT).addStrs("Line 1", "Line two", "Line three").buildCell()
                   .cellBuilder().align(TOP_CENTER).addStrs("Line 1", "Line two", "Line three").buildCell()
@@ -133,8 +133,8 @@ public class TestManualllyPdfLayoutMgr {
         // right of the first.
         XyOffset xyb =
                 lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yPageTop()))
-                  .addCellWidths(vec(100f, 100f, 100f))
-                  .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
+                  .addCellWidths(vec(100.0, 100.0, 100.0))
+                  .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
                                                         decode("#3366cc"), BorderStyle.of(BLACK)))
                   .rowBuilder().addTextCells("First", "Second", "Third").buildRow()
@@ -142,8 +142,8 @@ public class TestManualllyPdfLayoutMgr {
                   .partBuilder().cellStyle(CellStyle.of(MIDDLE_CENTER, Padding.of(2),
                                                         decode("#ccffcc"),
                                                         BorderStyle.of(DARK_GRAY)))
-                  .minRowHeight(100f)
-                  .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, BLACK))
+                  .minRowHeight(100)
+                  .textStyle(TextStyle.of(PDType1Font.COURIER, 12, BLACK))
                   .rowBuilder()
                   .cellBuilder().align(BOTTOM_RIGHT).addStrs("Line 1", "Line two", "Line three").buildCell()
                   .cellBuilder().align(BOTTOM_CENTER).addStrs("Line 1", "Line two", "Line three").buildCell()
@@ -166,8 +166,8 @@ public class TestManualllyPdfLayoutMgr {
         // right of the first and below the second.  Negative Y is down.  This third table showcases
         // the way cells extend vertically (but not horizontally) to fit the text you put in them.
         lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
-          .addCellWidths(vec(100f, 100f, 100f))
-          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
+          .addCellWidths(vec(100.0, 100.0, 100.0))
+          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12,
                                   YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
                                                 decode("#3366cc"),
@@ -177,7 +177,7 @@ public class TestManualllyPdfLayoutMgr {
           .partBuilder().cellStyle(CellStyle.of(MIDDLE_CENTER, Padding.of(2),
                                                 decode("#ccffcc"),
                                                 BorderStyle.of(DARK_GRAY)))
-          .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, BLACK))
+          .textStyle(TextStyle.of(PDType1Font.COURIER, 12, BLACK))
           .rowBuilder().cellBuilder().align(BOTTOM_RIGHT).addStrs("Line 1").buildCell()
           .cellBuilder().align(BOTTOM_CENTER).addStrs("Line 1", "Line two").buildCell()
           .cellBuilder().align(BOTTOM_LEFT)
@@ -196,16 +196,16 @@ public class TestManualllyPdfLayoutMgr {
 
         // Let's do a portrait page now.  I just copied this from the previous page.
         lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
-        lp.tableBuilder(XyOffset.of(40f, lp.yPageTop()))
-          .addCellWidths(vec(120f, 120f, 120f))
-          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f, YELLOW.brighter()))
+        lp.tableBuilder(XyOffset.of(40, lp.yPageTop()))
+          .addCellWidths(vec(120.0, 120.0, 120.0))
+          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2), decode("#3366cc"),
                                                 BorderStyle.of(BLACK)))
           .rowBuilder().addTextCells("First", "Second", "Third").buildRow()
           .buildPart()
           .partBuilder().cellStyle(CellStyle.of(MIDDLE_CENTER, Padding.of(2), decode("#ccffcc"),
-                                                BorderStyle.of(DARK_GRAY))).minRowHeight(120f)
-          .textStyle(TextStyle.of(PDType1Font.COURIER, 12f, BLACK))
+                                                BorderStyle.of(DARK_GRAY))).minRowHeight(120)
+          .textStyle(TextStyle.of(PDType1Font.COURIER, 12, BLACK))
           .rowBuilder()
           .cellBuilder().align(TOP_LEFT).addStrs("Line 1", "Line two", "Line three").buildCell()
           .cellBuilder().align(TOP_CENTER).addStrs("Line 1", "Line two", "Line three").buildCell()
@@ -227,8 +227,8 @@ public class TestManualllyPdfLayoutMgr {
         // Where's the lower-right-hand corner?  Put a cell there.
         lp.tableBuilder(XyOffset.of(lp.pageWidth() - (100 + pMargin),
                                     lp.yPageBottom() + 15 + pMargin))
-          .addCellWidths(vec(100f))
-          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12f,
+          .addCellWidths(vec(100.0))
+          .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12,
                                   YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(MIDDLE_CENTER, Padding.of(2),
                                                 decode("#3366cc"),
@@ -241,17 +241,17 @@ public class TestManualllyPdfLayoutMgr {
 
         // More landscape pages
         lp = pageMgr.logicalPageStart();
-        TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7f, BLACK);
+        TextStyle pageHeadTextStyle = TextStyle.of(PDType1Font.HELVETICA, 7, BLACK);
         CellStyle pageHeadCellStyle = CellStyle.of(TOP_CENTER, null, null, null);
 
         lp.putCellAsHeaderFooter(pMargin, lp.yPageTop() + 10,
                                  Cell.of(pageHeadCellStyle, tableWidth, pageHeadTextStyle,
                                          "Test Logical Page Three"));
 
-//        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100f,100f), Color.BLUE).y();
+//        y = pageMgr.putRect(XyPair.of(pMargin, y), XyPair.of(100,100), Color.BLUE).y();
 
         // We're going to reset and reuse this y variable.
-        float y = lp.yPageTop();
+        double y = lp.yPageTop();
 
         y = lp.putRow(pMargin, y,
                       Cell.of(headingCell, colWidths[0], heading,

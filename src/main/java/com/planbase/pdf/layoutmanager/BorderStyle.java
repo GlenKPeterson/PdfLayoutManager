@@ -93,7 +93,7 @@ public class BorderStyle {
         }
 //        /** Sets top, right, bottom, and left width */
 //        @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
-//        public Builder width(float w) {
+//        public Builder width(double w) {
 //            tWidth = w; rWidth = w; bWidth = w; lWidth = w;
 //            return this;
 //        }
@@ -116,7 +116,7 @@ public class BorderStyle {
         left = b.left;
     }
 
-    private BorderStyle(Color c, float w) {
+    private BorderStyle(Color c, double w) {
         LineStyle style = LineStyle.of(c, w);
         top = style;
         right = style;
@@ -130,7 +130,7 @@ public class BorderStyle {
      @param w the width of the border.
      @return a new immutable border object
      */
-    public static BorderStyle of(Color c, float w) {
+    public static BorderStyle of(Color c, double w) {
         return new BorderStyle(c, w);
     }
 

@@ -25,13 +25,13 @@ import java.util.Map;
 public class Text implements Renderable {
     private final TextStyle textStyle;
     private final String text;
-    private final Map<Float,WrappedBlock> dims = new HashMap<Float,WrappedBlock>();
+    private final Map<Double,WrappedBlock> dims = new HashMap<Double,WrappedBlock>();
     private final CellStyle.Align align = CellStyle.DEFAULT_ALIGN;
 
     private static class WrappedRow {
         String string;
         XyDim rowDim;
-        public static WrappedRow of(String s, float x, float y) {
+        public static WrappedRow of(String s, double x, double y) {
             WrappedRow wr = new WrappedRow();
             wr.string = s;
             wr.rowDim = XyDim.of(x, y);
@@ -60,21 +60,21 @@ public class Text implements Renderable {
 
     public String text() { return text; };
     public TextStyle style() { return textStyle; }
-    public int avgCharsForWidth(float width) {
+    public int avgCharsForWidth(double width) {
         return (int) ((width * 1220) / textStyle.avgCharWidth());
     }
 
-    public float maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
+    public double maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
-    private XyDim calcDimensionsForReal(final float maxWidth) {
+    private XyDim calcDimensionsForReal(final double maxWidth) {
         // TODO: Make this show text even if the width is zero or less, just show one word per line.
         if (maxWidth < 0) {
             throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
         }
         WrappedBlock wb = new WrappedBlock();
-        float x = 0;
-        float y = 0;
-        float maxX = x;
+        double x = 0;
+        double y = 0;
+        double maxX = x;
         Text txt = this;
         String row = txt.text(); //PdfLayoutMgr.convertJavaStringToWinAnsi(txt.text());
 
@@ -91,7 +91,7 @@ public class Text implements Renderable {
             int idx = charWidthGuess;
             if (idx > textLen) { idx = textLen; }
             String substr = text.substring(0, idx);
-            float strWidth = textStyle.stringWidthInDocUnits(substr);
+            double strWidth = textStyle.stringWidthInDocUnits(substr);
 
 //            System.out.println("(strWidth=" + strWidth + " < maxWidth=" + maxWidth + ") && (idx=" + idx + " < textLen=" + textLen + ")");
             // If too short - find shortest string that is too long.
@@ -158,7 +158,7 @@ public class Text implements Renderable {
         return wb.blockDim;
     }
 
-    private WrappedBlock ensureWrappedBlock(final float maxWidth) {
+    private WrappedBlock ensureWrappedBlock(final double maxWidth) {
         WrappedBlock wb = dims.get(maxWidth);
         if (wb == null) {
             calcDimensionsForReal(maxWidth);
@@ -167,7 +167,7 @@ public class Text implements Renderable {
         return wb;
     }
 
-    public XyDim calcDimensions(final float maxWidth) {
+    public XyDim calcDimensions(final double maxWidth) {
         // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
@@ -182,11 +182,11 @@ public class Text implements Renderable {
 //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
 //                           ", outerDimensions=" + outerDimensions);
 
-        float maxWidth = outerDimensions.x();
+        double maxWidth = outerDimensions.x();
         WrappedBlock wb = ensureWrappedBlock(maxWidth);
 
-        float x = outerTopLeft.x();
-        float y = outerTopLeft.y();
+        double x = outerTopLeft.x();
+        double y = outerTopLeft.y();
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
 //        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
         if (innerPadding != null) {
@@ -196,7 +196,7 @@ public class Text implements Renderable {
 
         for (WrappedRow wr : wb.rows) {
             // Here we're done whether it fits or not.
-            //final float xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
+            //final double xVal = x + align.leftOffset(wb.blockDim.x(), wr.rowDim.x());
 
             y -= textStyle.ascent();
             if (allPages) {

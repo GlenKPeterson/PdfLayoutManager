@@ -20,25 +20,25 @@ package com.planbase.pdf.layoutmanager;
  negative y is down from the upper left-hand corner.
  */
 public class XyDim {
-    public static final XyDim ZERO = new XyDim(0f, 0f) {
+    public static final XyDim ZERO = new XyDim(0, 0) {
         @Override public int hashCode() { return 0; }
     };
-    private final float x;
-    private final float y;
-    private XyDim(float xCoord, float yCoord) {
+    private final double x;
+    private final double y;
+    private XyDim(double xCoord, double yCoord) {
         if ( (xCoord < 0) || (yCoord < 0) ) {
             throw new IllegalArgumentException("Dimensions must be positive");
         }
         x = xCoord; y = yCoord;
     }
-    public static XyDim of(float x, float y) {
-        if ((x == 0f) && (y == 0f)) { return ZERO; }
+    public static XyDim of(double x, double y) {
+        if ((x == 0) && (y == 0)) { return ZERO; }
         return new XyDim(x, y);
     }
-    public float x() { return x; }
-    public float y() { return y; }
-    public XyDim x(float newX) { return of(newX, y); }
-    public XyDim y(float newY) { return of(x, newY); }
+    public double x() { return x; }
+    public double y() { return y; }
+    public XyDim x(double newX) { return of(newX, y); }
+    public XyDim y(double newY) { return of(x, newY); }
 
     public XyDim minus(XyDim that) { return of(this.x - that.x(), this.y - that.y()); }
     public XyDim plus(XyDim that) { return of(this.x + that.x(), this.y + that.y()); }
@@ -63,7 +63,7 @@ public class XyDim {
 
     @Override public String toString() { return "XyDim(" + x + " " + y + ")"; }
 
-    @Override public int hashCode() { return Utils.floatHashCode(x) ^ Utils.floatHashCode(y); }
+    @Override public int hashCode() { return Double.hashCode(x) ^ Double.hashCode(y); }
 
     @Override public boolean equals(Object other) {
         // Cheapest operation first...
