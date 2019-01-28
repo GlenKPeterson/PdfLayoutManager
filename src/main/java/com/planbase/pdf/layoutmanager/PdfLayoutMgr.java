@@ -886,7 +886,7 @@ public class PdfLayoutMgr {
      @param in a string in the standard Java UTF-16 encoding
      @return a string in Windows-1252 (informally called ISO-8859-1 or WinAnsi)
      */
-    public static String convertJavaStringToWinAnsi(String in) {
+    public static String toWinAnsi(String in) {
 //        ByteBuffer bb = StandardCharsets.UTF_16.encode(CharBuffer.wrap(in));
 //        // then decode those bytes as US-ASCII
 //        return StandardCharsets.ISO_8859_1.decode(bb).toString();

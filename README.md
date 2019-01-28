@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.2</version>
+        <version>0.5.3</version>
     </dependency>
 ```
 
@@ -86,7 +86,10 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
-### Version 0.5.2
+### 2019-01-28 Version 0.5.3
+ - Renamed static function PdfLayoutMgr.convertJavaStringToWinAnsi() to just .toWinAnsi().
+
+### 2019-01-28 Version 0.5.2
  - Changed all floats to doubles.
  By page 120 in a multi-page PDF, the repeated addition of values to the y-coordinate can lead to small but significant rounding errors in floats.
  Also, it just looks cleaner in your IDE (less to typewrite and to read).
