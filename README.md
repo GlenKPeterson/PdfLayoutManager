@@ -26,7 +26,7 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.1</version>
+        <version>0.5.2</version>
     </dependency>
 ```
 
@@ -86,6 +86,11 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+### Version 0.5.2
+ - Updated PDFBox from 2.0.6 to 2.0.13 for security.
+ - Updated minimum Java version from 1.6 to 1.8.
+ - Updated TestUtils from 0.0.6 to 0.0.7.
+
 ***Version 0.5.1***
  - Added `CellBuilder.width()`.
  - Made some changes to comply with Bloch's Item 41, "never export two overloadings with the same number of parameters"
