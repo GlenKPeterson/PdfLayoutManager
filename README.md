@@ -86,8 +86,8 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
-### 2019-01-28 Version 0.5.3
- - Renamed static function PdfLayoutMgr.convertJavaStringToWinAnsi() to just .toWinAnsi().
+### 2019-01-30 Version 0.5.3
+ - Renamed static function PdfLayoutMgr.convertJavaStringToWinAnsi() to just .toWinAnsi() and made some changes to it.
 
 ### 2019-01-28 Version 0.5.2
  - Changed all floats to doubles.

@@ -548,12 +548,55 @@ public class PdfLayoutMgr {
     // Windows Code Page 1252.
     // http://en.wikipedia.org/wiki/Windows-1252
     // It has a lot in common with ISO-8859-1, but it defines some additional characters such as
-    // the Euro symbol.
+    // the Euro symbol.  Unfortunately, just because the PDF Spec has a euro symbol in this encoding
+    // does *not* mean that the built-in fonts support it!  So really this code is not about converting to
+    // WinAnsi as the name implies, but making every character printable in the built-in PDF fonts.
     private static final Map<String,String> utf16ToWinAnsi;
     static {
         Map<String,String> tempMap = new HashMap<>();
 
         try {
+            // These are the low ASCII control codes.  Most of which are non-printing characters and
+            // meaningless for our purposes, so can be replaced with an empty string.
+            tempMap.put("\u0000", ""); // null
+            tempMap.put("\u0001", ""); // Start of Heading
+            tempMap.put("\u0002", ""); // Start of Text
+            tempMap.put("\u0003", ""); // End of Text
+            tempMap.put("\u0004", ""); // End of Transmission
+            tempMap.put("\u0005", ""); // Enquiry
+            tempMap.put("\u0006", ""); // Acknowledgement
+            tempMap.put("\u0007", ""); // Bell
+            tempMap.put("\u0008", ""); // Backspace
+
+            // Let these fall through for now.
+//            tempMap.put("\u0009", ""); // Tab
+//            tempMap.put("\n", ""); // Line Feed
+
+            tempMap.put("\u000b", ""); // Vertical tab
+            tempMap.put("\u000c", "\n"); // Form Feed
+            tempMap.put("\r", "\n"); // Carriage Return
+            tempMap.put("\u000e", ""); // Shift out
+            tempMap.put("\u000f", ""); // Shift in
+            tempMap.put("\u0010", ""); // Data Link Escape
+            tempMap.put("\u0011", ""); // Device Control 1
+            tempMap.put("\u0012", ""); // DC2
+            tempMap.put("\u0013", ""); // DC3
+            tempMap.put("\u0014", ""); // DC4
+            tempMap.put("\u0015", ""); // Negative Acknowledgement
+            tempMap.put("\u0016", ""); // Synchronous Idle
+            tempMap.put("\u0017", ""); // End of Transmission Block
+            tempMap.put("\u0018", ""); // Cancel
+            tempMap.put("\u0019", ""); // End of Medium
+            tempMap.put("\u001a", ""); // Substitute
+            tempMap.put("\u001b", ""); // Escape
+            tempMap.put("\u001c", ""); // File Separator
+            tempMap.put("\u001d", ""); // Group Separator
+            tempMap.put("\u001e", ""); // Record Separator
+            tempMap.put("\u001f", ""); // Unit Separator
+
+            // ASCII of course has one high control code.
+            tempMap.put("\u007f", ""); // Delete
+
             // 129, 141, 143, 144, and 157 are undefined in WinAnsi.
             // I had mapped A0-FF to 160-255 without noticing that that maps each character to
             // itself, meaning that Unicode and WinAnsii are the same in that range.
@@ -834,19 +877,32 @@ public class PdfLayoutMgr {
             tempMap.put("\u2013", new String(new byte[]{0,(byte)150},ISO_8859_1)); // En-dash
             tempMap.put("\u2014", new String(new byte[]{0,(byte)151},ISO_8859_1)); // Em-dash
             tempMap.put("\u2018", new String(new byte[]{0,(byte)145},ISO_8859_1)); // Curved single open quote
-            tempMap.put("\u2019", new String(new byte[]{0,(byte)146},ISO_8859_1)); // Curved single close-quote
+//            tempMap.put("\u2019", new String(new byte[]{0,(byte)146},ISO_8859_1)); // Curved single close-quote
+            tempMap.put("\u2019", "'"); // Curved single close-quote
             tempMap.put("\u201A", new String(new byte[]{0,(byte)130},ISO_8859_1)); // Low single curved-quote
             tempMap.put("\u201C", new String(new byte[]{0,(byte)147},ISO_8859_1)); // Curved double open quote
             tempMap.put("\u201D", new String(new byte[]{0,(byte)148},ISO_8859_1)); // Curved double close-quote
             tempMap.put("\u201E", new String(new byte[]{0,(byte)132},ISO_8859_1)); // Low right double quote.
             tempMap.put("\u2020", new String(new byte[]{0,(byte)134},ISO_8859_1)); // Dagger
             tempMap.put("\u2021", new String(new byte[]{0,(byte)135},ISO_8859_1)); // Double dagger
+            // 3. In WinAnsiEncoding, all unused codes greater than 40 map to the bullet character. However, only
+            // code 225 octal (149 decimal) shall be specifically assigned to the bullet character; other codes
+            // are subject to future reassignment.
             tempMap.put(UNICODE_BULLET, new String(new byte[]{0,(byte)149},ISO_8859_1)); // Bullet - use this as replacement character.
             tempMap.put("\u2026", new String(new byte[]{0,(byte)133},ISO_8859_1)); // Ellipsis
             tempMap.put("\u2030", new String(new byte[]{0,(byte)137},ISO_8859_1)); // Permille
             tempMap.put("\u2039", new String(new byte[]{0,(byte)139},ISO_8859_1)); // Left angle-quote
             tempMap.put("\u203A", new String(new byte[]{0,(byte)155},ISO_8859_1)); // Right angle-quote
-            tempMap.put("\u20ac", new String(new byte[]{0,(byte)128},ISO_8859_1)); // Euro symbol
+            // NO - if this is true, then the font does not support it!
+            // 1. In PDF 1.3, the euro character was added to the Adobe standard Latin character set. It shall be
+            // encoded as 200 octal (128 decimal) in WinAnsiEncoding and 240 in PDFDocEncoding, assigning codes
+            // that were previously unused. Apple changed the Mac OS Latin-text encoding for code 333 from the
+            // currency character to the euro character. However, this incompatible change has not been reflected
+            // in PDF’s MacRomanEncoding, which shall continue to map code 333 to currency. If the euro character is
+            // desired, an encoding dictionary may be used to specify this single difference from
+            // MacRomanEncoding.
+//            tempMap.put("\u20ac", new String(new byte[]{0,(byte)128},ISO_8859_1)); // Euro symbol
+            tempMap.put("\u20ac", "EUR"); // Euro symbol is missing in the font, so use the 3-letter currency code instead.
             tempMap.put("\u2122", new String(new byte[]{0,(byte)153},ISO_8859_1)); // Trademark symbol
 
         } catch (UnsupportedEncodingException uee) {
@@ -862,13 +918,18 @@ public class PdfLayoutMgr {
     private static final Pattern nonAsciiPattern = Pattern.compile("[^\u0000-\u00ff]");
 
     /**
+     <p>Converts UTF-16 Java Strings to safe WinAnsi characters that the built-in
+     "Standard Type 1 Fonts (Standard 14 Fonts)" mentioned in section 9.6.2.2 of the PDF spec actually support,
+     substituting bullets for characters that have no reasonable substitutes.
+     Well, ZapfDingbats does not appear to be built-in, so it's more like the "Standard 13".
+     Though "€" is supported in the encoding and in the spec, it's not supported by the fonts, so it's encoded as "EUR".
+     Not sure if this method works around any PDFBox limitations/transliteration,
+     or if it's all PDF spec and implementations.</p>
+
      <p>PDF files are limited to the 217 characters of Windows-1252 which the PDF spec calls WinAnsi
      and Java calls ISO-8859-1.  This method transliterates the standard Java UTF-16 character
-     representations to their Windows-1252 equivalents where such translation is possible.  Any
-     character (e.g. Kanji) which does not have an appropriate substitute in Windows-1252 will be
-     mapped to the bullet character (a round dot).</p>
-     
-     <p>This transliteration covers the modern alphabets of the following languages:<br>
+     representations to their Windows-1252 equivalents where such translation is possible. This transliteration
+     covers the modern alphabets of the following languages:<br>
      
      Afrikaans (af),
      Albanian (sq), Basque (eu), Catalan (ca), Danish (da), Dutch (nl), English (en), Faroese (fo),
@@ -878,10 +939,6 @@ public class PdfLayoutMgr {
      <p>Romanized substitutions are used for the Cyrillic characters of the modern Russian (ru)
      alphabet according to ISO 9:1995 with the following phonetic substitutions: 'Ch' for Ч and
      'Shch' for Щ.</p>
-     
-     <p>The PdfLayoutMgr calls this method internally whenever it renders text (transliteration has
-     to happen before line breaking), but is available externally in case you wish to use it
-     directly with PDFBox.</p>
 
      @param in a string in the standard Java UTF-16 encoding
      @return a string in Windows-1252 (informally called ISO-8859-1 or WinAnsi)
@@ -891,6 +948,13 @@ public class PdfLayoutMgr {
 //        // then decode those bytes as US-ASCII
 //        return StandardCharsets.ISO_8859_1.decode(bb).toString();
         // return java.nio.charset.StandardCharsets.ISO_8859_1.encode(in);
+
+        // Got to replace two-character return sequences (Windows Line Feeds) with one character.
+        in = in.replace("\r\n", "\n");
+
+        // TODO: Add combining diacritical marks such as converting n~ to ñ
+        // TODO: For speed, this could all be loaded into one big Trie.  That would be an interesting project
+        // TODO: Create a meaningful unit test.
 
         Matcher m = nonAsciiPattern.matcher(in);
 
