@@ -127,36 +127,36 @@ public class TableRowBuilder {
         return tablePart.addRow(this);
     }
 
-    public XyDim calcDimensions() {
-        XyDim maxDim = XyDim.ZERO;
+    public Dim calcDimensions() {
+        Dim maxDim = Dim.ZERO;
         // Similar to PdfLayoutMgr.putRow().  Should be combined?
         for (Cell cell : cells) {
-            XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Math.max(maxDim.y(), wh.y()));
+            Dim wh = cell.calcDimensions(cell.width());
+            maxDim = Dim.of(wh.getWidth() + maxDim.getWidth(),
+                            Math.max(maxDim.getHeight(), wh.getHeight()));
         }
         return maxDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
-                           boolean allPages) {
-        XyDim maxDim = XyDim.ZERO.y(minRowHeight);
+    public Coord render(LogicalPage lp, Coord outerTopLeft,
+                        boolean allPages) {
+        Dim maxDim = Dim.ZERO.withHeight(minRowHeight);
         for (Cell cell : cells) {
-            XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(maxDim.x() + cell.width(),
-                              Math.max(maxDim.y(), wh.y()));
+            Dim wh = cell.calcDimensions(cell.width());
+            maxDim = Dim.of(maxDim.getWidth() + cell.width(),
+                            Math.max(maxDim.getHeight(), wh.getHeight()));
         }
-        double maxHeight = maxDim.y();
+        double maxHeight = maxDim.getHeight();
 
-        double x = outerTopLeft.x();
+        double x = outerTopLeft.getX();
         for (Cell cell : cells) {
 //            System.out.println("\t\tAbout to render cell: " + cell);
             // TODO: Cache the duplicate cell.calcDimensions call!!!
-            cell.render(lp, XyOffset.of(x, outerTopLeft.y()),
-                        XyDim.of(cell.width(), maxHeight), allPages);
+            cell.render(lp, Coord.of(x, outerTopLeft.getY()),
+                        Dim.of(cell.width(), maxHeight), allPages);
             x += cell.width();
         }
-        return XyOffset.of(x, outerTopLeft.y() - maxHeight);
+        return Coord.of(x, outerTopLeft.getY() - maxHeight);
     }
 
     @Override

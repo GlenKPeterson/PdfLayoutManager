@@ -21,7 +21,7 @@ import com.planbase.pdf.layoutmanager.Padding;
 import com.planbase.pdf.layoutmanager.PdfLayoutMgr;
 import com.planbase.pdf.layoutmanager.ScaledJpeg;
 import com.planbase.pdf.layoutmanager.TextStyle;
-import com.planbase.pdf.layoutmanager.XyOffset;
+import com.planbase.pdf.layoutmanager.Coord;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.Test;
 
@@ -98,8 +98,8 @@ public class TestManualllyPdfLayoutMgr {
 
         // Draw the first table with lots of extra room to show off the vertical and horizontal
         // alignment.
-        XyOffset xya =
-                lp.tableBuilder(XyOffset.of(40.0, lp.yPageTop()))
+        Coord xya =
+                lp.tableBuilder(Coord.of(40.0, lp.yPageTop()))
                   .addCellWidths(vec(120.0, 120.0, 120.0))
                   .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
@@ -131,8 +131,8 @@ public class TestManualllyPdfLayoutMgr {
 
         // The second table uses the x and y offsets from the previous table to position it to the
         // right of the first.
-        XyOffset xyb =
-                lp.tableBuilder(XyOffset.of(xya.x() + 10, lp.yPageTop()))
+        Coord xyb =
+                lp.tableBuilder(Coord.of(xya.getX() + 10, lp.yPageTop()))
                   .addCellWidths(vec(100.0, 100.0, 100.0))
                   .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
                   .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2),
@@ -165,7 +165,7 @@ public class TestManualllyPdfLayoutMgr {
         // The third table uses the x and y offsets from the previous tables to position it to the
         // right of the first and below the second.  Negative Y is down.  This third table showcases
         // the way cells extend vertically (but not horizontally) to fit the text you put in them.
-        lp.tableBuilder(XyOffset.of(xya.x() + 10, xyb.y() - 10))
+        lp.tableBuilder(Coord.of(xya.getX() + 10, xyb.getY() - 10))
           .addCellWidths(vec(100.0, 100.0, 100.0))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12,
                                   YELLOW.brighter()))
@@ -196,7 +196,7 @@ public class TestManualllyPdfLayoutMgr {
 
         // Let's do a portrait page now.  I just copied this from the previous page.
         lp = pageMgr.logicalPageStart(LogicalPage.Orientation.PORTRAIT);
-        lp.tableBuilder(XyOffset.of(40, lp.yPageTop()))
+        lp.tableBuilder(Coord.of(40, lp.yPageTop()))
           .addCellWidths(vec(120.0, 120.0, 120.0))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12, YELLOW.brighter()))
           .partBuilder().cellStyle(CellStyle.of(BOTTOM_CENTER, Padding.of(2), decode("#3366cc"),
@@ -225,7 +225,7 @@ public class TestManualllyPdfLayoutMgr {
           .buildTable();
 
         // Where's the lower-right-hand corner?  Put a cell there.
-        lp.tableBuilder(XyOffset.of(lp.pageWidth() - (100 + pMargin),
+        lp.tableBuilder(Coord.of(lp.pageWidth() - (100 + pMargin),
                                     lp.yPageBottom() + 15 + pMargin))
           .addCellWidths(vec(100.0))
           .textStyle(TextStyle.of(PDType1Font.COURIER_BOLD_OBLIQUE, 12,

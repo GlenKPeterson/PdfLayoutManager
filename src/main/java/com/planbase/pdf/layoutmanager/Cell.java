@@ -38,15 +38,15 @@ public class Cell implements Renderable {
 
     private static class PreCalcRow {
         Renderable row;
-        XyDim blockDim;
-        public static PreCalcRow of(Renderable r, XyDim d) {
+        Dim blockDim;
+        public static PreCalcRow of(Renderable r, Dim d) {
             PreCalcRow pcr = new PreCalcRow(); pcr.row = r; pcr.blockDim = d; return pcr;
         }
     }
 
     private static class PreCalcRows {
         List<PreCalcRow> rows = new ArrayList<PreCalcRow>(1);
-        XyDim blockDim;
+        Dim blockDim;
     }
 
     private Cell(CellStyle cs, double w, List<Renderable> rs) {
@@ -118,16 +118,16 @@ public class Cell implements Renderable {
 
     private void calcDimensionsForReal(final double maxWidth) {
         PreCalcRows pcrs = new PreCalcRows();
-        XyDim blockDim = XyDim.ZERO;
+        Dim blockDim = Dim.ZERO;
         Padding padding = cellStyle.padding();
         double innerWidth = maxWidth;
         if (padding != null) {
             innerWidth -= (padding.left() + padding.right());
         }
         for (Renderable row : rows) {
-            XyDim rowDim = (row == null) ? XyDim.ZERO : row.calcDimensions(innerWidth);
-            blockDim = XyDim.of(Math.max(blockDim.x(), rowDim.x()),
-                                blockDim.y() + rowDim.y());
+            Dim rowDim = (row == null) ? Dim.ZERO : row.calcDimensions(innerWidth);
+            blockDim = Dim.of(Math.max(blockDim.getWidth(), rowDim.getWidth()),
+                              blockDim.getHeight() + rowDim.getHeight());
 //            System.out.println("\trow = " + row);
 //            System.out.println("\trowDim = " + rowDim);
 //            System.out.println("\tactualDim = " + actualDim);
@@ -147,13 +147,13 @@ public class Cell implements Renderable {
     }
 
     /** {@inheritDoc} */
-    @Override public XyDim calcDimensions(final double maxWidth) {
+    @Override public Dim calcDimensions(final double maxWidth) {
         // I think zero or negative width cells might be OK to ignore.  I'd like to try to make
         // Text.calcDimensionsForReal() handle this situation before throwing an error here.
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
 //        }
-        XyDim blockDim = ensurePreCalcRows(maxWidth).blockDim;
+        Dim blockDim = ensurePreCalcRows(maxWidth).blockDim;
         return ((cellStyle.padding() == null) ? blockDim : cellStyle.padding().addTo(blockDim));
 //        System.out.println("Cell.calcDimensions(" + maxWidth + ") blockDim=" + blockDim +
 //                           " returns " + ret);
@@ -165,12 +165,12 @@ public class Cell implements Renderable {
 
     {@inheritDoc}
     */
-    @Override public XyOffset render(LogicalPage lp, XyOffset outerTopLeft,
-                                     final XyDim outerDimensions, boolean allPages) {
+    @Override public Coord render(LogicalPage lp, Coord outerTopLeft,
+                                  final Dim outerDimensions, boolean allPages) {
 //        System.out.println("Cell.render(" + this.toString());
 //        new Exception().printStackTrace();
 
-        double maxWidth = outerDimensions.x();
+        double maxWidth = outerDimensions.getWidth();
         PreCalcRows pcrs = ensurePreCalcRows(maxWidth);
         final Padding padding = cellStyle.padding();
         // XyDim outerDimensions = padding.addTo(pcrs.blockDim);
@@ -183,8 +183,8 @@ public class Cell implements Renderable {
         }
 
         // Draw contents over background, but under border
-        XyOffset innerTopLeft;
-        final XyDim innerDimensions;
+        Coord innerTopLeft;
+        final Dim innerDimensions;
         if (padding == null) {
             innerTopLeft = outerTopLeft;
             innerDimensions = outerDimensions;
@@ -194,7 +194,7 @@ public class Cell implements Renderable {
 //            System.out.println("\tCell.render innerTopLeft after padding=" + innerTopLeft);
             innerDimensions = padding.subtractFrom(outerDimensions);
         }
-        XyDim wrappedBlockDim = pcrs.blockDim;
+        Dim wrappedBlockDim = pcrs.blockDim;
 //        System.out.println("\tCell.render cellStyle.align()=" + cellStyle.align());
 //        System.out.println("\tCell.render outerDimensions=" + outerDimensions);
 //        System.out.println("\tCell.render padding=" + padding);
@@ -203,31 +203,31 @@ public class Cell implements Renderable {
         Padding alignPad = cellStyle.align().calcPadding(innerDimensions, wrappedBlockDim);
 //        System.out.println("\tCell.render alignPad=" + alignPad);
         if (alignPad != null) {
-            innerTopLeft = XyOffset.of(innerTopLeft.x() + alignPad.left(),
-                                       innerTopLeft.y() - alignPad.top());
+            innerTopLeft = Coord.of(innerTopLeft.getX() + alignPad.left(),
+                                    innerTopLeft.getY() - alignPad.top());
         }
 
-        XyOffset outerLowerRight = innerTopLeft;
+        Coord outerLowerRight = innerTopLeft;
         for (int i = 0; i < rows.size(); i++) {
             Renderable row = rows.get(i);
             if (row == null) {
                 continue;
             }
             PreCalcRow pcr = pcrs.rows.get(i);
-            double rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.x(), pcr.blockDim.x());
+            double rowXOffset = cellStyle.align().leftOffset(wrappedBlockDim.getWidth(), pcr.blockDim.getWidth());
             outerLowerRight = row.render(lp,
-                                         innerTopLeft.x(innerTopLeft.x() + rowXOffset),
+                                         innerTopLeft.withX(innerTopLeft.getX() + rowXOffset),
                                          pcr.blockDim, allPages);
-            innerTopLeft = outerLowerRight.x(innerTopLeft.x());
+            innerTopLeft = outerLowerRight.withX(innerTopLeft.getX());
         }
 
         // Draw border last to cover anything that touches it?
         BorderStyle border = cellStyle.borderStyle();
         if (border != null) {
-            double origX = outerTopLeft.x();
-            double origY = outerTopLeft.y();
-            double rightX = outerTopLeft.x() + outerDimensions.x();
-            double bottomY = outerTopLeft.y() - outerDimensions.y();
+            double origX = outerTopLeft.getX();
+            double origY = outerTopLeft.getY();
+            double rightX = outerTopLeft.getX() + outerDimensions.getWidth();
+            double bottomY = outerTopLeft.getY() - outerDimensions.getHeight();
             // Like CSS it's listed Top, Right, Bottom, left
             if (border.top() != null) {
                 lp.putLine(origX, origY, rightX, origY, border.top());

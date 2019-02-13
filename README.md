@@ -1,7 +1,14 @@
 PdfLayoutManager
 ================
-A wrapper for PDFBox to add line-breaking, page-breaking, and tables.
-Uses a box-model (like HTML) for styles.
+This project is the precursor to [PdfLayoutMgr2](https://github.com/PlanBase/PdfLayoutMgr2)
+which adds inline styles, justified text, font loading/caching, and other improvements.
+LayoutManager1 may still be updated to ease users transition to LayoutMgr2 by copying the API of similar classes. 
+Significant new features will only be supported by LayoutMgr2.
+
+---
+
+LayoutManager1 is a wrapper for PDFBox to add line-breaking, page-breaking, and tables.
+It uses a box-model (like HTML) for styles.
 Requires PDFBox which in turn requires Log4J or apache commons Logging.
 
 ![Sample Output](sampleScreenShot.png)
@@ -10,10 +17,7 @@ Usage
 =====
 Example: [TestManualllyPdfLayoutMgr.java](src/test/java/TestManualllyPdfLayoutMgr.java)
 
-[API Docs](https://glenkpeterson.github.io/PdfLayoutManager/apidocs/)
-
-# WARNING ABOUT VERSION 0.5.0 (as of 2017-05-29)
-PdfLayoutManager 0.5.0 is just released with PDFBox 2.0.6. Outside of character encoding things look like they are working correctly. But the character encoding is a bit of an unknown.
+API Docs are available from maven central.
 
 I think the character encoding issues in an old (pre 2.0) version of PDFBox have been fixed. So I removed my Transliteration code for Russian which also converted any "High ANSI characters" to lower ANSI equivalents, or to bullets if no equivalent was available. If you get exceptions about character support, you now need to load a font that includes those characters, or trap them yourself. Here's how to load a font: https://pdfbox.apache.org/1.8/cookbook/workingwithfonts.html
 
@@ -26,13 +30,13 @@ Maven Dependency
     <dependency>
         <groupId>com.planbase.pdf</groupId>
         <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.3</version>
+        <version>0.5.4</version>
     </dependency>
 ```
 
 Building from Source
 ====================
-Requires Maven 3 and Java JDK 1.6 or greater (earliest verified JDK is: 1.6.0_45).  Jar file ends up in the `target/` sub-folder.
+Requires Maven 3 and Java JDK 1.8+.  Jar file ends up in the `target/` sub-folder.
 
 API documentation can be built with `mvn javadoc:javadoc` and is then found at `target/site/apidocs/index.html`
 
@@ -64,7 +68,7 @@ Last I checked, PDFBox had hard-coded a character encoding that made it difficul
 
 That said, this is definitely a solvable problem. There is a broad spectrum of for-profit PDF-producing software. One of the main reasons they can charge money for their products is because this problem is so hard.
 
-**UPDATE 2016-01-20:** PDFBox (which this project is built on top of) 2.0 claims to have Unicode support, which previous versions did not have.  It's currently in Release-Candidate 3.  I haven't had a chance to try it yet.  Here's the fixed issue that I think should make what you want possible: https://issues.apache.org/jira/browse/PDFBOX-922
+**UPDATE 2016-01-20:** PDFBox (which this project is built on top of) 2.0 has Unicode support, which previous versions did not have.  It's currently in Release-Candidate 3.  I haven't had a chance to try it yet.  Here's the fixed issue that I think should make what you want possible: https://issues.apache.org/jira/browse/PDFBOX-922
 
 ***Q: I don't want text wrapping.  I just want to set the size of a cell and let it chop off whatever I put in there.***
 
@@ -86,6 +90,22 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+### 2019-02-13 Version 0.5.4
+ - Renamed for clarity, to conform with Java conventions, and to better match LayoutMgr2:
+    - XyDim to Dim (still immutable)
+        - .x() to .getWidth()
+        - .y() to .getHeight()
+        - .x(newX) to .withWidth(newX) (returns new immutable Dim)
+        - .y(newY) to .withHeight(newY) (returns new immutable Dim)
+        - Made constructor public
+    - XyOffset to Coord (still immutable)
+        - .x() to .getX()
+        - .y() to .getY()
+        - .x(newX) to .withX(newX) (returns new immutable Coord)
+        - .y(newY) to .withY(newY) (returns new immutable Coord)
+        - Made constructor public
+ - Deleted javadoc from source control.  Should never have put it there.  
+
 ### 2019-01-30 Version 0.5.3
  - Renamed static function PdfLayoutMgr.convertJavaStringToWinAnsi() to just .toWinAnsi() and made some changes to it.
 

@@ -77,24 +77,24 @@ public class TablePart {
 
     public TableBuilder buildPart() { return tableBuilder.addPart(this); }
 
-    public XyDim calcDimensions() {
-        XyDim maxDim = XyDim.ZERO;
+    public Dim calcDimensions() {
+        Dim maxDim = Dim.ZERO;
         for (TableRowBuilder row : rows) {
-            XyDim wh = row.calcDimensions();
-            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
-                              maxDim.y() + wh.y());
+            Dim wh = row.calcDimensions();
+            maxDim = Dim.of(Math.max(wh.getWidth(), maxDim.getWidth()),
+                            maxDim.getHeight() + wh.getHeight());
         }
         return maxDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, boolean allPages) {
-        XyOffset rightmostLowest = outerTopLeft;
+    public Coord render(LogicalPage lp, Coord outerTopLeft, boolean allPages) {
+        Coord rightmostLowest = outerTopLeft;
         for (TableRowBuilder row : rows) {
 //            System.out.println("\tAbout to render row: " + row);
-            XyOffset rl = row.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
-                                     allPages);
-            rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
-                                          Math.min(rl.y(), rightmostLowest.y()));
+            Coord rl = row.render(lp, Coord.of(outerTopLeft.getX(), rightmostLowest.getY()),
+                                  allPages);
+            rightmostLowest = Coord.of(Math.max(rl.getX(), rightmostLowest.getX()),
+                                       Math.min(rl.getY(), rightmostLowest.getY()));
         }
         return rightmostLowest;
     }

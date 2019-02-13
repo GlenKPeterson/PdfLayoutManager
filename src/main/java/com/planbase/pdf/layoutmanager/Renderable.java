@@ -25,13 +25,13 @@ public interface Renderable {
     should be cached because render() will likely be called with the same width (or at least one
     previously given widths).
      */
-    public XyDim calcDimensions(double maxWidth);
+    public Dim calcDimensions(double maxWidth);
 
     /**
      Only call this with a maxWidth that you have previously passed to calcDimensions.
      Renders item and all child-items with given width and returns the x-y pair of the
      lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
-                           boolean allPages);
+    public Coord render(LogicalPage lp, Coord outerTopLeft, Dim outerDimensions,
+                        boolean allPages);
 }

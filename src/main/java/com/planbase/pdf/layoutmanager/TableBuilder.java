@@ -24,20 +24,20 @@ import java.util.List;
  */
 public class TableBuilder implements Renderable {
     private final LogicalPage logicalPage;
-    private final XyOffset topLeft;
+    private final Coord topLeft;
     private final List<Double> cellWidths = new ArrayList<Double>(1);
     private CellStyle cellStyle;
     private TextStyle textStyle;
     private final List<TablePart> parts = new ArrayList<TablePart>(2);
 
-    private TableBuilder(LogicalPage lp, XyOffset tl) {
+    private TableBuilder(LogicalPage lp, Coord tl) {
         logicalPage = lp; topLeft = tl;
     }
-    public static TableBuilder of(LogicalPage lp, XyOffset tl) {
+    public static TableBuilder of(LogicalPage lp, Coord tl) {
         return new TableBuilder(lp, tl);
     }
 
-    public XyOffset topLeft() { return topLeft; }
+    public Coord topLeft() { return topLeft; }
 
     public List<Double> cellWidths() { return Collections.unmodifiableList(cellWidths); }
     public TableBuilder addCellWidths(List<Double> x) { cellWidths.addAll(x); return this; }
@@ -57,14 +57,14 @@ public class TableBuilder implements Renderable {
 
     public TablePart partBuilder() { return TablePart.of(this); }
 
-    public XyOffset buildTable() { return logicalPage.addTable(this); }
+    public Coord buildTable() { return logicalPage.addTable(this); }
 
-    public XyDim calcDimensions(double maxWidth) {
-        XyDim maxDim = XyDim.ZERO;
+    public Dim calcDimensions(double maxWidth) {
+        Dim maxDim = Dim.ZERO;
         for (TablePart part : parts) {
-            XyDim wh = part.calcDimensions();
-            maxDim = XyDim.of(Math.max(wh.x(), maxDim.x()),
-                              maxDim.y() + wh.y());
+            Dim wh = part.calcDimensions();
+            maxDim = Dim.of(Math.max(wh.getWidth(), maxDim.getWidth()),
+                            maxDim.getHeight() + wh.getHeight());
         }
         return maxDim;
     }
@@ -73,15 +73,15 @@ public class TableBuilder implements Renderable {
     Renders item and all child-items with given width and returns the x-y pair of the
     lower-right-hand corner of the last line (e.g. of text).
     */
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
-                           boolean allPages) {
-        XyOffset rightmostLowest = outerTopLeft;
+    public Coord render(LogicalPage lp, Coord outerTopLeft, Dim outerDimensions,
+                        boolean allPages) {
+        Coord rightmostLowest = outerTopLeft;
         for (TablePart part : parts) {
 //            System.out.println("About to render part: " + part);
-            XyOffset rl = part.render(lp, XyOffset.of(outerTopLeft.x(), rightmostLowest.y()),
-                                      allPages);
-            rightmostLowest = XyOffset.of(Math.max(rl.x(), rightmostLowest.x()),
-                                          Math.min(rl.y(), rightmostLowest.y()));
+            Coord rl = part.render(lp, Coord.of(outerTopLeft.getX(), rightmostLowest.getY()),
+                                   allPages);
+            rightmostLowest = Coord.of(Math.max(rl.getX(), rightmostLowest.getX()),
+                                       Math.min(rl.getY(), rightmostLowest.getY()));
         }
         return rightmostLowest;
     }

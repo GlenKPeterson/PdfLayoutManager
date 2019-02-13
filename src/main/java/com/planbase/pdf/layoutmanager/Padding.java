@@ -46,21 +46,21 @@ public class Padding {
         return new Padding(a,a,a,a);
     }
 
-    public XyDim topLeftPadDim() { return XyDim.of(left, top); }
-    public XyDim botRightPadDim() { return XyDim.of(right, bottom); }
+    public Dim topLeftPadDim() { return Dim.of(left, top); }
+    public Dim botRightPadDim() { return Dim.of(right, bottom); }
 
-    public XyDim subtractFrom(XyDim outer) {
-        return XyDim.of(outer.x() - (left + right),
-                        outer.y() - (top + bottom));
+    public Dim subtractFrom(Dim outer) {
+        return Dim.of(outer.getWidth() - (left + right),
+                      outer.getHeight() - (top + bottom));
     }
 
-    public XyDim addTo(XyDim outer) {
-        return XyDim.of(outer.x() + (left + right),
-                        outer.y() + (top + bottom));
+    public Dim addTo(Dim outer) {
+        return Dim.of(outer.getWidth() + (left + right),
+                      outer.getHeight() + (top + bottom));
     }
 
-    public XyOffset applyTopLeft(XyOffset orig) {
-        return XyOffset.of(orig.x() + left, orig.y() - top);
+    public Coord applyTopLeft(Coord orig) {
+        return Coord.of(orig.getX() + left, orig.getY() - top);
     }
 
 //    public XyOffset topLeftPadOffset() { return XyOffset.of(left, -top); }

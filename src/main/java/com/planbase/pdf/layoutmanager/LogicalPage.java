@@ -51,7 +51,7 @@ public class LogicalPage { // AKA Document Section
     /** The orientation of this logical page grouping */
     public Orientation orientation() { return portrait ? Orientation.PORTRAIT : Orientation.LANDSCAPE; }
 
-    public TableBuilder tableBuilder(XyOffset tl) {
+    public TableBuilder tableBuilder(Coord tl) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         return TableBuilder.of(this, tl);
     }
@@ -88,14 +88,14 @@ public class LogicalPage { // AKA Document Section
         return this;
     }
 
-    public LogicalPage putRect(XyOffset outerTopLeft, XyDim outerDimensions, final Color c) {
+    public LogicalPage putRect(Coord outerTopLeft, Dim outerDimensions, final Color c) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 //        System.out.println("putRect(" + outerTopLeft + " " + outerDimensions + " " +
 //                           Utils.toString(c) + ")");
-        final double left = outerTopLeft.x();
-        final double topY = outerTopLeft.y();
-        final double width = outerDimensions.x();
-        final double maxHeight = outerDimensions.y();
+        final double left = outerTopLeft.getX();
+        final double topY = outerTopLeft.getY();
+        final double width = outerDimensions.getWidth();
+        final double maxHeight = outerDimensions.getHeight();
         final double bottomY = topY - maxHeight;
 
         if (topY < bottomY) { throw new IllegalStateException("height must be positive"); }
@@ -219,22 +219,22 @@ public class LogicalPage { // AKA Document Section
     }
 
     /** You can draw a cell without a table (for a heading, or paragraph of same-format text, or whatever). */
-    public XyOffset putCell(final double topLeftX, final double topLeftY, Cell cell) {
+    public Coord putCell(final double topLeftX, final double topLeftY, Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
-        XyDim maxDim = XyDim.ZERO;
-        XyDim wh = cell.calcDimensions(cell.width());
-        maxDim = XyDim.of(wh.x() + maxDim.x(), Math.max(maxDim.y(), wh.y()));
-        double maxHeight = maxDim.y();
+        Dim maxDim = Dim.ZERO;
+        Dim wh = cell.calcDimensions(cell.width());
+        maxDim = Dim.of(wh.getWidth() + maxDim.getWidth(), Math.max(maxDim.getHeight(), wh.getHeight()));
+        double maxHeight = maxDim.getHeight();
 
         // render the row with that maxHeight.
-        cell.render(this, XyOffset.of(topLeftX, topLeftY), XyDim.of(cell.width(), maxHeight), false);
+        cell.render(this, Coord.of(topLeftX, topLeftY), Dim.of(cell.width(), maxHeight), false);
 
-        return XyOffset.of(topLeftX + wh.x(), topLeftY - wh.y());
+        return Coord.of(topLeftX + wh.getWidth(), topLeftY - wh.getHeight());
     }
 
 
-    public XyOffset addTable(TableBuilder tb) {
+    public Coord addTable(TableBuilder tb) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         return tb.render(this, tb.topLeft(), null, false);
     }
@@ -253,20 +253,20 @@ public class LogicalPage { // AKA Document Section
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
 
         // Similar to TableBuilder and TableRowBuilder.calcDimensions().  Should be combined?
-        XyDim maxDim = XyDim.ZERO;
+        Dim maxDim = Dim.ZERO;
         for (Cell cell : cells) {
-            XyDim wh = cell.calcDimensions(cell.width());
-            maxDim = XyDim.of(wh.x() + maxDim.x(),
-                              Math.max(maxDim.y(), wh.y()));
+            Dim wh = cell.calcDimensions(cell.width());
+            maxDim = Dim.of(wh.getWidth() + maxDim.getWidth(),
+                            Math.max(maxDim.getHeight(), wh.getHeight()));
         }
-        double maxHeight = maxDim.y();
+        double maxHeight = maxDim.getHeight();
 
 //        System.out.println("putRow: maxHeight=" + maxHeight);
 
         // render the row with that maxHeight.
         double x = initialX;
         for (Cell cell : cells) {
-            cell.render(this, XyOffset.of(x, origY), XyDim.of(cell.width(), maxHeight), false);
+            cell.render(this, Coord.of(x, origY), Dim.of(cell.width(), maxHeight), false);
             x += cell.width();
         }
 
@@ -284,8 +284,8 @@ public class LogicalPage { // AKA Document Section
     public double putCellAsHeaderFooter(final double x, double origY, final Cell cell) {
         if (!valid) { throw new IllegalStateException("Logical page accessed after commit"); }
         double outerWidth = cell.width();
-        XyDim innerDim = cell.calcDimensions(outerWidth);
-        return cell.render(this, XyOffset.of(x, origY), innerDim.x(outerWidth), true).y();
+        Dim innerDim = cell.calcDimensions(outerWidth);
+        return cell.render(this, Coord.of(x, origY), innerDim.withWidth(outerWidth), true).getY();
     }
 
     void commitBorderItems(PDPageContentStream stream) throws IOException {

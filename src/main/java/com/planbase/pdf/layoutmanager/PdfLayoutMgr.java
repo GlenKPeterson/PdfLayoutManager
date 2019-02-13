@@ -315,8 +315,8 @@ public class PdfLayoutMgr {
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(png, x, y);
-                XyDim dim = scaledPng.dimensions();
-                stream.drawImage(png, toFloat(x), toFloat(y), toFloat(dim.x()), toFloat(dim.y()));
+                Dim dim = scaledPng.dimensions();
+                stream.drawImage(png, toFloat(x), toFloat(y), toFloat(dim.getWidth()), toFloat(dim.getHeight()));
             }
         }
 
@@ -343,8 +343,8 @@ public class PdfLayoutMgr {
             @Override
             public void commit(PDPageContentStream stream) throws IOException {
                 // stream.drawImage(jpeg, x, y);
-                XyDim dim = scaledJpeg.dimensions();
-                stream.drawImage(jpeg, toFloat(x), toFloat(y), toFloat(dim.x()), toFloat(dim.y()));
+                Dim dim = scaledJpeg.dimensions();
+                stream.drawImage(jpeg, toFloat(x), toFloat(y), toFloat(dim.getWidth()), toFloat(dim.getHeight()));
             }
         }
     }

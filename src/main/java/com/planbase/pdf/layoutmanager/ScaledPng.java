@@ -62,14 +62,14 @@ public class ScaledPng implements Renderable {
     /** @return the underlying buffered image */
     public BufferedImage bufferedImage() { return bufferedImage; }
 
-    public XyDim dimensions() { return XyDim.of(width, height); }
+    public Dim dimensions() { return Dim.of(width, height); }
 
-    public XyDim calcDimensions(double maxWidth) { return dimensions(); }
+    public Dim calcDimensions(double maxWidth) { return dimensions(); }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions, boolean allPages) {
+    public Coord render(LogicalPage lp, Coord outerTopLeft, Dim outerDimensions, boolean allPages) {
         // use bottom of image for page-breaking calculation.
-        double y = outerTopLeft.y() - height;
-        lp.drawPng(outerTopLeft.x(), y, this);
-        return XyOffset.of(outerTopLeft.x() + width, y);
+        double y = outerTopLeft.getY() - height;
+        lp.drawPng(outerTopLeft.getX(), y, this);
+        return Coord.of(outerTopLeft.getX() + width, y);
     }
 }

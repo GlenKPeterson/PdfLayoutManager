@@ -29,44 +29,44 @@ public class CellStyle {
     /** Horizontal and vertical alignment options for cell contents */
     public enum Align {
         TOP_LEFT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                return Padding.of(0, outer.x() - inner.x(), outer.y() - inner.y(), 0);
+                return Padding.of(0, outer.getWidth() - inner.getWidth(), outer.getHeight() - inner.getHeight(), 0);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) { return 0; }
         },
         TOP_CENTER {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                double dx = (outer.x() - inner.x()) / 2;
-                return Padding.of(0, dx, outer.y() - inner.y(), dx);
+                double dx = (outer.getWidth() - inner.getWidth()) / 2;
+                return Padding.of(0, dx, outer.getHeight() - inner.getHeight(), dx);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
                 return (innerWidth >= outerWidth) ? 0 : (outerWidth - innerWidth) / 2;
             }
         },
         TOP_RIGHT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                return Padding.of(0, 0, outer.y() - inner.y(), outer.x() - inner.x());
+                return Padding.of(0, 0, outer.getHeight() - inner.getHeight(), outer.getWidth() - inner.getWidth());
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
                 return (innerWidth >= outerWidth) ? 0 : (outerWidth - innerWidth);
             }
         },
         MIDDLE_LEFT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                double dy = (outer.y() - inner.y()) / 2;
-                return Padding.of(dy, outer.x() - inner.x(), dy, 0);
+                double dy = (outer.getHeight() - inner.getHeight()) / 2;
+                return Padding.of(dy, outer.getWidth() - inner.getWidth(), dy, 0);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) { return 0; }
         },
         MIDDLE_CENTER {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                double dx = (outer.x() - inner.x()) / 2;
-                double dy = (outer.y() - inner.y()) / 2;
+                double dx = (outer.getWidth() - inner.getWidth()) / 2;
+                double dy = (outer.getHeight() - inner.getHeight()) / 2;
                 return Padding.of(dy, dx, dy, dx);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
@@ -74,40 +74,40 @@ public class CellStyle {
             }
         },
         MIDDLE_RIGHT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                double dy = (outer.y() - inner.y()) / 2;
-                return Padding.of(dy, 0, dy, outer.x() - inner.x());
+                double dy = (outer.getHeight() - inner.getHeight()) / 2;
+                return Padding.of(dy, 0, dy, outer.getWidth() - inner.getWidth());
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
                 return (innerWidth >= outerWidth) ? 0 : (outerWidth - innerWidth);
             }
         },
         BOTTOM_LEFT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                return Padding.of(outer.y() - inner.y(), outer.x() - inner.x(), 0, 0);
+                return Padding.of(outer.getHeight() - inner.getHeight(), outer.getWidth() - inner.getWidth(), 0, 0);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) { return 0; }
         },
         BOTTOM_CENTER {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
 //                System.out.println("\t\t\tcalcPadding(o=" + outer + " i=" + inner + ")");
                 if (outer.lte(inner)) { return null; }
-                double dx = (outer.x() - inner.x()) / 2;
+                double dx = (outer.getWidth() - inner.getWidth()) / 2;
 //                System.out.println("\t\t\tcalcPadding() dx=" + dx);
                 // Like HTML it's top, right, bottom, left
 //                System.out.println("\t\t\tcalcPadding() outer.y() - inner.y()=" + (outer.y() - inner.y()));
-                return Padding.of(outer.y() - inner.y(), dx, 0, dx);
+                return Padding.of(outer.getHeight() - inner.getHeight(), dx, 0, dx);
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
                 return (innerWidth >= outerWidth) ? 0 : (outerWidth - innerWidth) / 2;
             }
         },
         BOTTOM_RIGHT {
-            @Override public Padding calcPadding(XyDim outer, XyDim inner) {
+            @Override public Padding calcPadding(Dim outer, Dim inner) {
                 if (outer.lte(inner)) { return null; }
-                return Padding.of(outer.y() - inner.y(), 0, 0, outer.x() - inner.x());
+                return Padding.of(outer.getHeight() - inner.getHeight(), 0, 0, outer.getWidth() - inner.getWidth());
             }
             @Override public double leftOffset(double outerWidth, double innerWidth) {
                 return (innerWidth >= outerWidth) ? 0 : (outerWidth - innerWidth);
@@ -118,7 +118,7 @@ public class CellStyle {
         Given outer dimensions (make sure to add padding as necessary), and inner dimensions,
         calculates additional padding to apply.
         */
-        public abstract Padding calcPadding(XyDim outer, XyDim inner);
+        public abstract Padding calcPadding(Dim outer, Dim inner);
         public abstract double leftOffset(double outerWidth, double innerWidth);
     }
 

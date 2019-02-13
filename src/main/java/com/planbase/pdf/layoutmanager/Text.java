@@ -30,18 +30,18 @@ public class Text implements Renderable {
 
     private static class WrappedRow {
         String string;
-        XyDim rowDim;
+        Dim rowDim;
         public static WrappedRow of(String s, double x, double y) {
             WrappedRow wr = new WrappedRow();
             wr.string = s;
-            wr.rowDim = XyDim.of(x, y);
+            wr.rowDim = Dim.of(x, y);
             return wr;
         }
     }
 
     private static class WrappedBlock {
         List<WrappedRow> rows = new ArrayList<WrappedRow>();
-        XyDim blockDim;
+        Dim blockDim;
     }
 
     public static final Text DEFAULT = new Text(null, "");
@@ -66,7 +66,7 @@ public class Text implements Renderable {
 
     public double maxWidth() { return textStyle.stringWidthInDocUnits(text.trim()); }
 
-    private XyDim calcDimensionsForReal(final double maxWidth) {
+    private Dim calcDimensionsForReal(final double maxWidth) {
         // TODO: Make this show text even if the width is zero or less, just show one word per line.
         if (maxWidth < 0) {
             throw new IllegalArgumentException("Can't meaningfully wrap text with a negative width: " + maxWidth);
@@ -151,7 +151,7 @@ public class Text implements Renderable {
 //        if (y == 0) {
 //            y -= textStyle.lineHeight();
 //        }
-        wb.blockDim = XyDim.of(maxX, 0 - y);
+        wb.blockDim = Dim.of(maxX, 0 - y);
         dims.put(maxWidth, wb);
 //        System.out.println("\tcalcWidth(" + maxWidth + ") on " + this.toString());
 //        System.out.println("\t\ttext calcDim() blockDim=" + wb.blockDim);
@@ -167,7 +167,7 @@ public class Text implements Renderable {
         return wb;
     }
 
-    public XyDim calcDimensions(final double maxWidth) {
+    public Dim calcDimensions(final double maxWidth) {
         // I'd like to try to make calcDimensionsForReal() handle this situation before throwing an exception here.
 //        if (maxWidth < 0) {
 //            throw new IllegalArgumentException("maxWidth must be positive, not " + maxWidth);
@@ -175,18 +175,18 @@ public class Text implements Renderable {
         return ensureWrappedBlock(maxWidth).blockDim;
     }
 
-    public XyOffset render(LogicalPage lp, XyOffset outerTopLeft, XyDim outerDimensions,
-                           boolean allPages) {
+    public Coord render(LogicalPage lp, Coord outerTopLeft, Dim outerDimensions,
+                        boolean allPages) {
 
 //        System.out.println("\tText.render(" + this.toString());
 //        System.out.println("\t\ttext.render(outerTopLeft=" + outerTopLeft +
 //                           ", outerDimensions=" + outerDimensions);
 
-        double maxWidth = outerDimensions.x();
+        double maxWidth = outerDimensions.getWidth();
         WrappedBlock wb = ensureWrappedBlock(maxWidth);
 
-        double x = outerTopLeft.x();
-        double y = outerTopLeft.y();
+        double x = outerTopLeft.getX();
+        double y = outerTopLeft.getY();
         Padding innerPadding = align.calcPadding(outerDimensions, wb.blockDim);
 //        System.out.println("\t\ttext align.calcPadding() returns: " + innerPadding);
         if (innerPadding != null) {
@@ -207,8 +207,8 @@ public class Text implements Renderable {
             y -= textStyle.descent();
             y -= textStyle.leading();
         }
-        return XyOffset.of(outerTopLeft.x() + wb.blockDim.x(),
-                           outerTopLeft.y() - wb.blockDim.y());
+        return Coord.of(outerTopLeft.getX() + wb.blockDim.getWidth(),
+                        outerTopLeft.getY() - wb.blockDim.getHeight());
     }
 
     private static String substrNoLeadingWhitespace(final String text, int startIdx) {
