@@ -24,15 +24,8 @@ I think the character encoding issues in an old (pre 2.0) version of PDFBox have
 Here's how I used to trap them (incomplete and no longer working with the new version of PDFBox):
 https://github.com/GlenKPeterson/PdfLayoutManager/blob/master/src/main/java/com/planbase/pdf/layoutmanager/PdfLayoutMgr.java#L892
 
-Maven Dependency
-================
-```xml
-    <dependency>
-        <groupId>com.planbase.pdf</groupId>
-        <artifactId>PdfLayoutManager</artifactId>
-        <version>0.5.4</version>
-    </dependency>
-```
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.planbase.pdf/PdfLayoutManager/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.planbase.pdf/PdfLayoutManager)
+[![javadoc](https://javadoc.io/badge2/com.planbase.pdf/PdfLayoutManager/javadoc.svg)](https://javadoc.io/doc/com.planbase.pdf/PdfLayoutManager)
 
 Building from Source
 ====================
@@ -90,6 +83,11 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+### 2020-04-20 Version 1.0.0
+ - Bumped version number to make it "win" over the old alpha which will now never be released.
+ - Now built for JDK 11 instead of 8.
+ - Updated all dependencies
+
 ### 2019-02-13 Version 0.5.4
  - Renamed for clarity, to conform with Java conventions, and to better match LayoutMgr2:
     - XyDim to Dim (still immutable)

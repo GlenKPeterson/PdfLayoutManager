@@ -2,7 +2,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<prerequisites>
-		<maven>3.6.0</maven>
+		<maven>3.6.3</maven>
 	</prerequisites>
 
 	<!--
@@ -42,7 +42,7 @@ this directory like the following (you'll have to replace the question marks):
 -->
 	<groupId>com.planbase.pdf</groupId>
 	<artifactId>PdfLayoutManager</artifactId>
-	<version>0.5.4</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>PdfLayoutManager</name>
@@ -75,8 +75,8 @@ this directory like the following (you'll have to replace the question marks):
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>11</source>
+					<target>11</target>
 					<compilerArgs>
 						<arg>-Xlint</arg>
 					</compilerArgs>
@@ -140,18 +140,18 @@ this directory like the following (you'll have to replace the question marks):
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>2.0.13</version>
+			<version>2.0.19</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.organicdesign.testUtils</groupId>
 			<artifactId>TestUtils</artifactId>
-			<version>0.0.7</version>
+			<version>0.0.14</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

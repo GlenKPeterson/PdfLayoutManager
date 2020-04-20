@@ -14,17 +14,14 @@
 
 package com.planbase.pdf.layoutmanager;
 
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.Test;
 
-import java.io.IOException;
-
+import static com.planbase.pdf.layoutmanager.PdfLayoutMgr.toWinAnsi;
 import static org.junit.Assert.assertEquals;
 
-// TODO: This is LogicalPage test and should be renamed to that.
-public class PdfLayoutMgrTest {
-    @Test public void testBasics() throws IOException {
+public class LogicalPageTest {
+    @Test public void testBasics() {
         PdfLayoutMgr pageMgr = PdfLayoutMgr.newRgbPageMgr();
         LogicalPage lp = pageMgr.logicalPageStart();
 
@@ -40,4 +37,10 @@ public class PdfLayoutMgrTest {
         assertEquals(0.0, lp.yPageBottom(), 0.000000001);
         assertEquals(PDRectangle.LETTER.getWidth(), lp.pageWidth(), 0.000000001);
     }
+
+//    // TODO: Make this pass
+//    @Test public void testToWinAnsii() {
+//        assertEquals("100% Math & Science will be rated \"Commendable\" or higher",
+//                     toWinAnsi("100% Math & Science will be rated “Commendable” or higher"));
+//    }
 }
