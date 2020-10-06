@@ -83,6 +83,9 @@ The text wrapping algorithm picks a slightly long starting guess for where to wr
 
 Recent Changes
 ==============
+### 2020-10-06 Version 1.0.1
+ - Bumped dependencies
+
 ### 2020-04-20 Version 1.0.0
  - Bumped version number to make it "win" over the old alpha which will now never be released.
  - Now built for JDK 11 instead of 8.
