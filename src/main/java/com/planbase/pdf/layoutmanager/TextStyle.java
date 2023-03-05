@@ -17,15 +17,15 @@ package com.planbase.pdf.layoutmanager;
 import java.awt.Color;
 import java.io.IOException;
 
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDFontDescriptor;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 /**
 Specifies font, font-size, color, and padding.  Immutable.
  */
 public class TextStyle {
 
-    private final PDType1Font font;
+    private final PDFont font;
     private final Color textColor;
     private final double fontSize;
 
@@ -36,7 +36,7 @@ public class TextStyle {
     private final double descent;
     private final double leading;
 
-    private TextStyle(PDType1Font f, double sz, Color tc, double leadingFactor) {
+    private TextStyle(PDFont f, double sz, Color tc, double leadingFactor) {
         if (f == null) { throw new IllegalArgumentException("Font must not be null"); }
         if (tc == null) { tc = Color.BLACK; }
 
@@ -67,7 +67,7 @@ public class TextStyle {
     }
 
     /** Creates a TextStyle with the given font, size, color, and a leadingFactor of 0.5. */
-    public static TextStyle of(PDType1Font f, double sz, Color tc) {
+    public static TextStyle of(PDFont f, double sz, Color tc) {
         return new TextStyle(f, sz, tc, 0.5);
     }
 
@@ -78,7 +78,7 @@ public class TextStyle {
      A leadingFactor of 1 will result of a leading equal to the descent, while a leadingFactor
      of 2 will result of a leading equal to twice the descent etc...
      */
-    public static TextStyle of(PDType1Font f, double sz, Color tc, double leadingFactor) {
+    public static TextStyle of(PDFont f, double sz, Color tc, double leadingFactor) {
         return new TextStyle(f, sz, tc, leadingFactor);
     }
 
@@ -97,7 +97,7 @@ public class TextStyle {
         }
     }
 
-    public PDType1Font font() { return font; }
+    public PDFont font() { return font; }
     public double fontSize() { return fontSize; }
 
     public Color textColor() { return textColor; }

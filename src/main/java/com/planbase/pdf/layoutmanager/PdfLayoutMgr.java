@@ -367,6 +367,13 @@ public class PdfLayoutMgr {
                                 : mb;
     }
 
+    private PdfLayoutMgr(PDColorSpace cs, PDRectangle mb, PDDocument document) {
+        doc = document;
+        colorSpace = cs;
+        pageSize = (mb == null) ? PDRectangle.LETTER
+                : mb;
+    }
+
     /**
      Returns a new PdfLayoutMgr with the given color space.
      @param cs the color-space.
@@ -394,6 +401,11 @@ public class PdfLayoutMgr {
     @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
     public static PdfLayoutMgr newRgbPageMgr() {
         return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null);
+    }
+
+    @SuppressWarnings("UnusedDeclaration") // Part of end-user public interface
+    public static PdfLayoutMgr newRgbPageMgr(PDDocument document) {
+        return new PdfLayoutMgr(PDDeviceRGB.INSTANCE, null, document);
     }
 
     /** Returns the page width given the defined PDRectangle pageSize */
